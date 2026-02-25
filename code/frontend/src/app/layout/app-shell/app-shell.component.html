@@ -1,0 +1,19 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="logo-block">
+      <span class="logo-icon" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+      </span>
+      <h1 class="logo">ELVIR</h1>
+    </div>
+    <app-sidebar></app-sidebar>
+  </aside>
+  <main class="main">
+    <app-topbar></app-topbar>
+    <div class="content">
+      <div class="content-inner">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </main>
+</div>

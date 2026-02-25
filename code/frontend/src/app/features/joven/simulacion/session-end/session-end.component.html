@@ -1,0 +1,46 @@
+@if (status) {
+  <div class="session-end" [class]="'session-end--' + variant">
+    <div class="session-end-header">
+      <h3>{{ title }}</h3>
+      <div class="session-end-actions">
+        @if (isJoven && status === 'COMPLETADA') {
+          <a routerLink="/joven/material" (click)="sessionEndService.clear()" class="btn-primary">Ver material de apoyo</a>
+          <a routerLink="/joven/historial" (click)="sessionEndService.clear()" class="btn-secondary">Ver mi historial</a>
+        }
+        @if (isProfesional && youthId && status === 'COMPLETADA') {
+          <a [routerLink]="['/profesional/jovenes', youthId]" (click)="sessionEndService.clear()" class="btn-primary">Ir al perfil del joven</a>
+        }
+        <button type="button" class="btn-secondary" (click)="onVolver()">Volver al dashboard</button>
+      </div>
+    </div>
+    @if (status === 'ERROR' && motivo) {
+      <p class="session-end-detail">{{ motivo }}</p>
+    }
+    @if (status === 'COMPLETADA' && isJoven) {
+      @if (sessionSummary && (sessionSummary.duration_seconds || sessionSummary.jobRoleName || sessionSummary.caseName)) {
+        <div class="session-summary">
+          <p class="session-summary-intro">¡Bien hecho! Completaste la simulación.</p>
+          <ul class="session-summary-list">
+            @if (sessionSummary.jobRoleName || sessionSummary.caseName) {
+              <li>
+                <strong>Practicaste:</strong>
+                {{ sessionSummary.jobRoleName && sessionSummary.caseName
+                  ? sessionSummary.jobRoleName + ' – ' + sessionSummary.caseName
+                  : sessionSummary.jobRoleName || sessionSummary.caseName }}
+              </li>
+            }
+            @if (sessionSummary.duration_seconds) {
+              <li><strong>Duración:</strong> {{ formatDuration(sessionSummary.duration_seconds) }}</li>
+            }
+          </ul>
+          <p class="session-summary-note">Tu profesional puede revisar esta sesión y preparar un resumen con feedback. Revisa tu historial más adelante o el material de apoyo sugerido.</p>
+        </div>
+      } @else {
+        <p class="session-end-hint">Revisa el material de apoyo sugerido para seguir preparándote.</p>
+      }
+    }
+    @if (status === 'COMPLETADA' && isProfesional && youthId) {
+      <p class="session-end-hint">Puedes registrar un resumen y revisar el perfil del joven.</p>
+    }
+  </div>
+}

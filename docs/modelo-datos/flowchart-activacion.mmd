@@ -1,0 +1,19 @@
+%% Flujo de activación de cuenta – YOUTH_INVITATIONS
+%% Profesional crea joven con login_enabled → entrega enlace → joven activa.
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5f4', 'primaryTextColor': '#1a1a2e', 'primaryBorderColor': '#1b7f79', 'lineColor': '#1b7f79'}}}%%
+flowchart TD
+    A[Profesional crea joven] --> B{¿Login habilitado?}
+    B -->|No| C[Joven sin cuenta propia]
+    B -->|Sí| D[Profesional ingresa email]
+    D --> E[Backend crea YOUTH + YOUTH_INVITATIONS]
+    E --> F[Backend devuelve activation_url]
+    F --> G[Profesional entrega enlace al joven]
+    G --> H[Joven abre /activar?token=xxx]
+    H --> I[GET /auth/activate/validate]
+    I --> J{¿Token válido?}
+    J -->|No| K[Mensaje: expirado / usado / no encontrado]
+    J -->|Sí| L[Joven define contraseña]
+    L --> M[POST /auth/activate]
+    M --> N[Backend crea USERS, vincula YOUTH]
+    N --> O[Invalida invitación used_at]
+    O --> P[Joven puede hacer login]

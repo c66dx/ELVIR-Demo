@@ -1,0 +1,49 @@
+%% Flujo del Profesional – ELVIR
+%% Crear joven: asignación automática. Checklist perfil. Confirmación antes de desactivar.
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5f4', 'primaryTextColor': '#1a1a2e', 'primaryBorderColor': '#1b7f79', 'lineColor': '#1b7f79'}}}%%
+flowchart TD
+    A((Inicio)) --> B[Login Profesional]
+    B --> C{Credenciales válidas?}
+    C -->|No| D[Error de login]
+    D --> B
+    C -->|Sí| E[Dashboard: tabla de jóvenes]
+    
+    E --> F[Crear joven]
+    E --> G[Ver perfil joven]
+    E --> H[Crear material propio]
+    E --> I[Buscar/filtrar]
+    I --> E
+    
+    F --> F1[Formulario: datos básicos]
+    F1 --> F2[Checklist perfil postulante]
+    F2 --> F3{¿Login habilitado?}
+    F3 -->|No| F4[Guardar sin credenciales]
+    F3 -->|Sí| F5[Ingresar email]
+    F5 --> F6[Backend crea YOUTH + invitación]
+    F6 --> F7[Entregar enlace activación al joven]
+    F4 --> E
+    F7 --> E
+    
+    G --> G1[Historial de sesiones]
+    G --> G2[Iniciar sesión supervisada]
+    G --> G3[Escribir resumen]
+    G --> G4[Sugerir material]
+    G --> G5[Editar joven]
+    G --> G6[Desactivar joven]
+    
+    G1 --> G
+    G2 --> G2a[Seleccionar cargo y caso]
+    G2a --> G2b[Sesión supervisada en curso]
+    G2b --> G
+    G3 --> G
+    G4 --> G
+    G5 --> G
+    
+    G6 --> G6a{¿Confirmar desactivar?}
+    G6a -->|Sí| G6b[Desactivar]
+    G6a -->|No| G
+    G6b --> E
+    
+    H --> H1[Formulario: título, tipo, URL]
+    H1 --> H2[Guardar material propio]
+    H2 --> E

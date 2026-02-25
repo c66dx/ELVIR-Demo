@@ -1,0 +1,226 @@
+@if (loading()) {
+  <p>Cargando...</p>
+} @else {
+  @let y = youth();
+  @if (y) {
+    <div class="header page-header">
+      <a routerLink="/profesional/jovenes" class="back-link">← Volver a Jóvenes</a>
+      <h2>Perfil: {{ y.display_name }}</h2>
+      <div class="header-actions">
+        <button type="button" class="btn-suggest" (click)="openSuggestMaterialPanel()">Sugerir material</button>
+        <a [routerLink]="['/profesional/jovenes', youthId, 'supervisada', 'nueva']" class="btn-supervisada">Iniciar simulación supervisada</a>
+        <a [routerLink]="['/profesional/jovenes', youthId, 'editar']" class="btn-primary">Editar</a>
+      </div>
+    </div>
+
+    <section class="profile-section">
+      <h3>Datos del joven</h3>
+      <dl class="profile-dl">
+        <dt>Nombre</dt>
+        <dd>{{ y.display_name }}</dd>
+        <dt>Identificador</dt>
+        <dd>{{ y.identifier ?? '-' }}</dd>
+        <dt>Teléfono</dt>
+        <dd>{{ y.phone ?? '-' }}</dd>
+        <dt>Año de nacimiento</dt>
+        <dd>{{ y.year_of_birth ?? '-' }}</dd>
+        <dt>Diagnóstico</dt>
+        <dd>{{ y.diagnosis ?? '-' }}</dd>
+        <dt>Login habilitado</dt>
+        <dd>{{ y.login_enabled ? 'Sí' : 'No' }}</dd>
+        <dt>Activo</dt>
+        <dd>{{ y.is_active ? 'Sí' : 'No' }}</dd>
+        <dt>Notas generales</dt>
+        <dd>{{ y.general_notes ?? '-' }}</dd>
+        @let checklistLabels = getChecklistLabels(y);
+        @if (checklistLabels.length > 0) {
+          <dt>Perfil postulante</dt>
+          <dd>
+            <div class="profile-checklist-tags">
+              @for (label of checklistLabels; track label) {
+                <span class="tag">{{ label }}</span>
+              }
+            </div>
+          </dd>
+        }
+      </dl>
+    </section>
+
+    @let metrics = metricsSummary();
+    @if (metrics && metrics.total > 0) {
+      <section class="metrics-section">
+        <h3>Métricas de desempeño</h3>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-value">{{ metrics.total }}</span>
+            <span class="metric-label">Total sesiones</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value">{{ metrics.completed }}</span>
+            <span class="metric-label">Completadas</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value">{{ metrics.completionRate }}%</span>
+            <span class="metric-label">Tasa de completación</span>
+          </div>
+          @if (metrics.cancelled > 0) {
+            <div class="metric-card metric-card-muted">
+              <span class="metric-value">{{ metrics.cancelled }}</span>
+              <span class="metric-label">Canceladas</span>
+            </div>
+          }
+          @if (metrics.error > 0) {
+            <div class="metric-card metric-card-muted">
+              <span class="metric-value">{{ metrics.error }}</span>
+              <span class="metric-label">Con error</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    @let chart = chartData();
+    @if (chart.length > 0) {
+      <section class="chart-section">
+        <h3>Curva de seguimiento (últimos 6 meses)</h3>
+        <div class="chart-container">
+          <div class="chart-bars">
+            @for (item of chart; track item.month) {
+              <div class="chart-bar-wrap">
+                <div
+                  class="chart-bar"
+                  [style.height.%]="(item.count / item.maxCount) * 100"
+                ></div>
+                <span class="chart-value">{{ item.count }}</span>
+                <span class="chart-label">{{ item.month }}</span>
+              </div>
+            }
+          </div>
+          <div class="chart-line-wrap">
+            <svg class="chart-line-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path
+                class="chart-line-path"
+                [attr.d]="getLinePath()"
+                fill="none"
+                stroke="var(--color-primary)"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+      </section>
+    }
+
+    <section class="sessions-section">
+      <h3>Historial de sesiones</h3>
+      @let sess = sessions();
+      @if (sess.length === 0) {
+        <p>Sin sesiones registradas.</p>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Modo</th>
+                <th>Duración</th>
+                <th>Plantilla</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of sess; track s.id) {
+                <tr>
+                  <td>{{ formatDate(s.started_at) }}</td>
+                  <td><app-status-badge [status]="s.status" /></td>
+                  <td>{{ s.mode }}</td>
+                  <td>{{ formatDuration(s.duration_seconds) }}</td>
+                  <td>{{ s.templateLabel }}</td>
+                  <td>
+                    @if (summariesBySession().get(s.id); as summary) {
+                      <details class="summary-details">
+                        <summary>Ver resumen</summary>
+                        <div class="summary-content">
+                          <p>{{ summary.summary_text }}</p>
+                          @if (summary.competency_tags?.length) {
+                            <p class="summary-tags">
+                              @for (tag of summary.competency_tags; track tag) {
+                                <span class="tag">{{ tag }}</span>
+                              }
+                            </p>
+                          }
+                          <button type="button" class="btn-sm btn-edit-summary" (click)="openSummaryForm(s.id)">Editar</button>
+                        </div>
+                      </details>
+                    } @else {
+                      <button type="button" class="btn-sm" (click)="openSummaryForm(s.id)">Registrar resumen</button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    @if (showSuggestMaterialPanel()) {
+      <section id="sugerir-material" class="suggest-material-section">
+        <h3>Sugerir material</h3>
+        <form [formGroup]="suggestMaterialForm" (ngSubmit)="submitSuggestMaterial()">
+          <div class="field">
+            <label for="material_id">Material *</label>
+            <select id="material_id" formControlName="material_id">
+              <option value="">Seleccione...</option>
+              @for (m of supportMaterials(); track m.id) {
+                <option [value]="m.id">{{ m.title }} ({{ m.type }})</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="reason">Razón</label>
+            <textarea id="reason" formControlName="reason" rows="2" placeholder="Opcional"></textarea>
+          </div>
+          <div class="field">
+            <label for="session_id">Asociar a sesión</label>
+            <select id="session_id" formControlName="session_id">
+              <option value="">Ninguna</option>
+              @for (s of sessions(); track s.id) {
+                <option [value]="s.id">{{ formatDate(s.started_at) }} - {{ s.status }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="suggestMaterialForm.invalid || submittingSuggest()">Sugerir</button>
+            <button type="button" class="btn-secondary" (click)="cancelSuggestMaterial()">Cancelar</button>
+          </div>
+        </form>
+      </section>
+    }
+
+    @if (showSummaryForm()) {
+      <section class="summary-form-section">
+        <h3>Registrar resumen</h3>
+        <form [formGroup]="summaryForm" (ngSubmit)="submitSummary()">
+          <div class="field">
+            <label for="summary_text">Resumen *</label>
+            <textarea id="summary_text" formControlName="summary_text" rows="4"></textarea>
+          </div>
+          <div class="field">
+            <label for="competency_tags">Etiquetas de competencia (separadas por coma)</label>
+            <input id="competency_tags" type="text" formControlName="competency_tags" placeholder="comunicación, liderazgo" />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="summaryForm.invalid || submittingSummary()">Guardar</button>
+            <button type="button" class="btn-secondary" (click)="cancelSummaryForm()">Cancelar</button>
+          </div>
+        </form>
+      </section>
+    }
+  } @else {
+    <p>Joven no encontrado.</p>
+  }
+}

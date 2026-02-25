@@ -1,0 +1,54 @@
+<div class="dashboard">
+  <header class="dashboard-header page-header">
+    <h2>Dashboard Profesional</h2>
+    <div class="page-header-actions">
+      <a routerLink="/profesional/jovenes" class="btn-primary">Ir a Jóvenes</a>
+      <a routerLink="/profesional/jovenes/nuevo" class="btn-secondary">Crear Joven</a>
+    </div>
+  </header>
+
+  @if (data$ | async; as data) {
+    <div class="kpis">
+      <div class="kpi-card">
+        <span class="kpi-value">{{ data.youthsCount }}</span>
+        <span class="kpi-label">Jóvenes</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-value">{{ data.activeYouthsCount }}</span>
+        <span class="kpi-label">Jóvenes activos</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-value">{{ data.sessionsCount }}</span>
+        <span class="kpi-label">Sesiones totales</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-value">{{ data.completedSessionsCount }}</span>
+        <span class="kpi-label">Sesiones completadas</span>
+      </div>
+    </div>
+
+    @if (data.recentSessions.length > 0) {
+      <section class="dashboard-section">
+        <h3>Últimas sesiones</h3>
+        <div class="recent-list">
+          @for (s of data.recentSessions; track s.id) {
+            <a [routerLink]="['/profesional/jovenes', s.youth_id]" class="recent-item">
+              <span class="recent-youth">{{ s.youthName }}</span>
+              <span class="recent-date">{{ formatDate(s.started_at) }}</span>
+              <app-status-badge [status]="s.status" />
+              <span class="recent-meta">{{ s.mode }} · {{ formatDuration(s.duration_seconds) }}</span>
+            </a>
+          }
+        </div>
+        <a routerLink="/profesional/jovenes" class="link-more">Ver todos los jóvenes</a>
+      </section>
+    } @else {
+      <section class="dashboard-section dashboard-section--empty">
+        <p class="empty-msg">No hay sesiones registradas. Los jóvenes pueden iniciar simulaciones desde su dashboard.</p>
+        <a routerLink="/profesional/jovenes" class="btn-primary">Ir a Jóvenes</a>
+      </section>
+    }
+  } @else {
+    <p class="loading">Cargando...</p>
+  }
+</div>

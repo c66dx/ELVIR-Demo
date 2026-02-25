@@ -1,0 +1,72 @@
+<div class="simulacion-page">
+  <div class="simulacion-main">
+    <div class="simulacion-header">
+      <h2>Simulación</h2>
+      @if (sessionMode() === 'SUPERVISADA') {
+        <span class="badge-supervisada">Modo: SUPERVISADA</span>
+      }
+    </div>
+
+    @if (sessionNotFound()) {
+  <div class="banner-session-not-found">
+    <p>Esta sesión no existe o expiró.</p>
+    <p class="banner-hint">Para iniciar una simulación, primero debes elegir cargo y caso.</p>
+    <div class="banner-actions">
+      <button type="button" class="btn-primary" (click)="goToElegirCargo()">Elegir cargo y caso</button>
+    </div>
+  </div>
+} @else if (connectionErrorBanner() || error()) {
+  <div class="banner-connection-error">
+    <p>No se pudo conectar con LiveAvatar.</p>
+    <div class="banner-actions">
+      <button type="button" class="btn-primary" (click)="onReintentar()" [disabled]="retrying()">Reintentar</button>
+      <button type="button" class="btn-secondary" (click)="onSalirConnectionError()">Salir</button>
+    </div>
+  </div>
+} @else if (loading()) {
+  <p>Cargando...</p>
+} @else if (embedUrl() || useLiveKit()) {
+  <div class="simulacion-video-block">
+    <div class="simulacion-meta">
+      @if (sessionContext(); as ctx) {
+        <div class="session-context">
+          <span class="context-badge">Cargo: {{ ctx.jobRoleName }}</span>
+          <span class="context-badge">Caso: {{ ctx.caseName }}</span>
+        </div>
+      }
+      <div class="contador" aria-live="polite">
+        <span class="contador-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </span>
+        <span class="contador-value">{{ elapsedTime() }}</span>
+      </div>
+    </div>
+    @if (useLiveKit()) {
+      <div class="embed-wrap livekit-wrap">
+        <video #avatarVideo autoplay playsinline class="avatar-video"></video>
+        <audio #avatarAudio autoplay playsinline muted></audio>
+        @if (audioBlocked()) {
+          <button type="button" class="audio-unlock-btn" (click)="onActivarAudio()">
+            🔊 Haz clic para activar el audio
+          </button>
+        }
+        <div class="turn-indicator">{{ turnIndicator() }}</div>
+      </div>
+    } @else {
+      <div class="embed-wrap">
+        <iframe [src]="embedUrl()!" title="LiveAvatar" class="embed-iframe"></iframe>
+      </div>
+    }
+    <div class="simulacion-controls">
+      <button type="button" class="btn-primary" (click)="closeSession('COMPLETADA')">Finalizar</button>
+      <button type="button" class="btn-secondary" (click)="closeSession('CANCELADA')">Cancelar</button>
+      <button type="button" class="btn-danger" (click)="closeSession('ERROR')">Simular ERROR</button>
+      <button type="button" class="btn-warning" (click)="connectionErrorBanner.set(true)">Simular error conexión</button>
+    </div>
+    @if (!useLiveKit()) {
+      <p class="hint">Placeholder: configurar LIVEAVATAR_* en .env para usar LiveAvatar real.</p>
+    }
+  </div>
+  }
+  </div>
+</div>

@@ -1,0 +1,122 @@
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--header-gap);
+  margin-bottom: var(--space-6);
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-bottom: var(--space-6);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+
+  th,
+  td {
+    padding: var(--space-3) var(--space-5);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  th {
+    background: var(--color-bg);
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  tbody tr {
+    transition: background 0.15s;
+
+    &:hover {
+      background: var(--color-bg);
+    }
+  }
+
+  .col-actions {
+    width: 8rem;
+  }
+
+  tr.inactive {
+    opacity: 0.65;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+
+    &.badge-active {
+      background: var(--color-success-light);
+      color: var(--color-success);
+    }
+
+    &.badge-inactive {
+      background: var(--color-danger-light);
+      color: var(--color-danger);
+    }
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--color-text-muted);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+
+      &:hover {
+        background: var(--color-primary-light);
+        color: var(--color-primary);
+      }
+
+      &.btn-icon-danger:hover {
+        background: var(--color-danger-light);
+        color: var(--color-danger);
+      }
+
+      &.btn-icon-success:hover {
+        background: var(--color-success-light);
+        color: var(--color-success);
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+  }
+}

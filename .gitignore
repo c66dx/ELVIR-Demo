@@ -1,0 +1,38 @@
+# Dependencias
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+code/backend/*.db
+
+# Build
+dist/
+frontend/dist/
+code/frontend/dist/
+code/frontend/.angular/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Archivos subidos (backend)
+code/backend/uploads/
+
+# Referencia interna (no subir a GitHub)
+docs/referencia-catalina/
+
+iniciar.bat
+pendribe-portable-100.md

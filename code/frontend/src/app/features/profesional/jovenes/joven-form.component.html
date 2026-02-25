@@ -1,0 +1,91 @@
+<div class="form-page">
+  <div class="page-header">
+    <h2>{{ isEdit ? 'Editar Joven' : 'Crear Joven' }}</h2>
+  </div>
+
+  @if (activationUrl) {
+    <div class="activation-success">
+      <p class="activation-success-title">{{ isEdit ? 'Joven actualizado' : 'Joven creado correctamente' }}</p>
+      <p class="activation-success-msg">Entrega este enlace al joven para que active su cuenta y defina su contraseña. El enlace expira en 7 días.</p>
+      <div class="activation-url-wrap">
+        <input type="text" [value]="activationUrl" readonly class="activation-url-input" />
+        <button type="button" class="btn-secondary" (click)="copyActivationUrl()">Copiar</button>
+      </div>
+      <div class="form-actions actions">
+        <button type="button" class="btn-primary" (click)="goToList()">Ir al listado</button>
+      </div>
+    </div>
+  } @else {
+  <form id="joven-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="field">
+    <label for="display_name">Nombre *</label>
+    <input id="display_name" type="text" formControlName="display_name" />
+  </div>
+  <div class="field">
+    <label for="identifier">Identificador</label>
+    <input id="identifier" type="text" formControlName="identifier" />
+  </div>
+  <div class="field">
+    <label for="phone">Teléfono</label>
+    <input id="phone" type="text" formControlName="phone" />
+  </div>
+  <div class="field">
+    <label for="year_of_birth">Año de nacimiento</label>
+    <input id="year_of_birth" type="number" formControlName="year_of_birth" placeholder="Ej. 2005" min="1900" [max]="currentYear" />
+  </div>
+  <div class="field">
+    <label for="diagnosis">Diagnóstico</label>
+    <textarea id="diagnosis" formControlName="diagnosis" rows="2" placeholder="Opcional"></textarea>
+  </div>
+  <div class="field checkbox">
+    <label>
+      <input type="checkbox" formControlName="login_enabled" />
+      Login habilitado
+    </label>
+  </div>
+  @if (form.get('login_enabled')?.value) {
+  <div class="field">
+    <label for="email">Email *</label>
+    <input id="email" type="email" formControlName="email" placeholder="ejemplo&#64;correo.cl" />
+    <span class="field-hint">
+      @if (needsInvitation) {
+        Si ya enviaste un enlace, ingresa el mismo u otro email para generar uno nuevo.
+      } @else {
+        El joven recibirá un enlace para definir su contraseña. Entrégalo en persona o por WhatsApp.
+      }
+    </span>
+  </div>
+  }
+  <div class="field">
+    <label for="general_notes">Notas generales</label>
+    <textarea id="general_notes" formControlName="general_notes" rows="3"></textarea>
+  </div>
+
+  <div class="field checklist-field">
+    <label>Perfil postulante (checklist)</label>
+    <p class="field-hint">Seleccione las competencias o características que definen el perfil del joven para inserción laboral.</p>
+    <div class="checklist-grid">
+      @for (item of checklistItems; track item.slug) {
+        <label class="checklist-item">
+          <input
+            type="checkbox"
+            [checked]="isChecklistSelected(item.slug)"
+            (change)="toggleChecklist(item.slug)"
+          />
+          <span>{{ item.label }}</span>
+        </label>
+      }
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  <div class="form-actions actions">
+    <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary">{{ isEdit ? 'Guardar' : 'Crear' }}</button>
+    <a routerLink="/profesional/jovenes" class="btn-link">Cancelar</a>
+  </div>
+  </form>
+  }
+</div>

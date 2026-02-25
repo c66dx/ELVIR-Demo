@@ -1,0 +1,18 @@
+%% Flujo integración LiveAvatar – Context Dinámico (16 plantillas)
+%% 4 cargos × 4 casos = 16. Backend ensambla prompt desde BD.
+%% Si LIVEAVATAR_* no configurado: devuelve embed (iframe placeholder).
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5f4', 'primaryTextColor': '#1a1a2e', 'primaryBorderColor': '#1b7f79', 'lineColor': '#1b7f79'}}}%%
+flowchart TD
+  A[Usuario selecciona cargo + caso] --> B[POST /sessions]
+  B --> C[POST /sessions/id/start]
+  C --> D{¿LIVEAVATAR configurado?}
+  D -->|Sí| E[Backend: obtiene plantilla cargo + caso]
+  D -->|No| PL[Devuelve embed iframe placeholder]
+  E --> F[Ensambla prompt: base + cargo + caso]
+  F --> G[PATCH LiveAvatar /contexts]
+  G --> H[POST LiveAvatar /sessions/token]
+  H --> I[POST LiveAvatar /sessions/start]
+  I --> J[Devuelve livekit_url + access_token]
+  J --> K[Frontend conecta a LiveKit]
+  K --> L[Sesión con avatar video/audio]
+  PL --> M[Frontend muestra iframe placeholder]

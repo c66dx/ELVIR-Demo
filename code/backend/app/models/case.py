@@ -1,0 +1,16 @@
+"""Modelo CASES."""
+from sqlalchemy import Column, Integer, String, Boolean, Text
+from sqlalchemy.orm import relationship
+
+from app.database import Base
+
+
+class Case(Base):
+    __tablename__ = "cases"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    slug = Column(String(100), unique=True, nullable=False, index=True)
+    name = Column(String(255), nullable=False)
+    difficulty = Column(String(20), nullable=False)  # NORMAL, BAJA, MEDIA, ALTA
+    prompt_instructions = Column(Text, nullable=True)
+    is_active = Column(Boolean, nullable=False, default=True)

@@ -1,0 +1,87 @@
+<div class="activate-page">
+  <div class="activate-bg">
+    <div class="activate-bg-shape activate-bg-shape-1"></div>
+    <div class="activate-bg-shape activate-bg-shape-2"></div>
+  </div>
+
+  <div class="activate-card">
+    <div class="activate-brand">
+      <h1>ELVIR</h1>
+      <p class="activate-tagline">Activa tu cuenta</p>
+    </div>
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="activate-loading">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>Verificando enlace...</p>
+        </div>
+      }
+      @case ('valid') {
+        <div class="activate-form-wrap">
+          <p class="activate-context">
+            Hola, <strong>{{ displayName() }}</strong>. Define tu contraseña para acceder a la plataforma.
+          </p>
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="activate-form">
+            <div class="field">
+              <label for="password">Contraseña *</label>
+              <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+            </div>
+            <div class="field">
+              <label for="passwordConfirm">Confirmar contraseña *</label>
+              <input id="passwordConfirm" type="password" formControlName="passwordConfirm" placeholder="Repite tu contraseña" autocomplete="new-password" />
+              @if (form.get('passwordConfirm')?.hasError('mismatch')) {
+                <span class="field-error">Las contraseñas no coinciden</span>
+              }
+            </div>
+            <button type="submit" [disabled]="form.invalid" class="btn-submit">Activar cuenta</button>
+          </form>
+        </div>
+      }
+      @case ('success') {
+        <div class="activate-success">
+          <p class="activate-success-title">¡Cuenta activada!</p>
+          <p class="activate-success-msg">Ya puedes iniciar sesión con tu correo y contraseña.</p>
+          <button type="button" class="btn-submit" (click)="goToLogin()">Ir a iniciar sesión</button>
+        </div>
+      }
+      @case ('invalid') {
+        <div class="activate-error">
+          <p class="activate-error-title">Enlace no válido</p>
+          @switch (errorCode()) {
+            @case ('TOKEN_EXPIRED') {
+              <p class="activate-error-msg">Este enlace ha expirado. Pide a tu profesional que genere uno nuevo.</p>
+            }
+            @case ('TOKEN_USED') {
+              <p class="activate-error-msg">Este enlace ya fue utilizado. Si ya activaste tu cuenta, puedes iniciar sesión.</p>
+            }
+            @default {
+              <p class="activate-error-msg">El enlace no es válido o ha expirado. Pide a tu profesional que te envíe uno nuevo.</p>
+            }
+          }
+          <a routerLink="/login" class="btn-link">Volver al login</a>
+        </div>
+      }
+      @case ('error') {
+        <div class="activate-error">
+          <p class="activate-error-title">No se pudo activar la cuenta</p>
+          @switch (errorCode()) {
+            @case ('TOKEN_EXPIRED') {
+              <p class="activate-error-msg">Este enlace ha expirado. Pide a tu profesional que genere uno nuevo.</p>
+            }
+            @case ('TOKEN_USED') {
+              <p class="activate-error-msg">Este enlace ya fue utilizado. Si ya activaste tu cuenta, puedes iniciar sesión.</p>
+            }
+            @case ('EMAIL_ALREADY_EXISTS') {
+              <p class="activate-error-msg">Esta cuenta ya está activada. Puedes iniciar sesión directamente.</p>
+            }
+            @default {
+              <p class="activate-error-msg">El enlace no es válido o ha expirado. Pide a tu profesional que te envíe uno nuevo.</p>
+            }
+          }
+          <a routerLink="/login" class="btn-link">Volver al login</a>
+        </div>
+      }
+    }
+  </div>
+</div>

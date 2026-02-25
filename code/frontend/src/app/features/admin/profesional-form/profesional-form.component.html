@@ -1,0 +1,36 @@
+<div class="form-page">
+  <div class="page-header">
+    <h2>Crear profesional</h2>
+    <a routerLink="/admin/profesionales" class="btn-link">← Volver</a>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="field">
+      <label for="email">Email *</label>
+      <input id="email" type="email" formControlName="email" placeholder="profesional&#64;institucion.cl" />
+    </div>
+    <div class="field">
+      <label for="password">Contraseña inicial *</label>
+      <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" />
+    </div>
+    <div class="field">
+      <label for="display_name">Nombre *</label>
+      <input id="display_name" type="text" formControlName="display_name" placeholder="Nombre del profesional" />
+    </div>
+    <div class="field">
+      <label for="specialty">Especialidad</label>
+      <input id="specialty" type="text" formControlName="specialty" placeholder="Ej. Terapia ocupacional" />
+    </div>
+    <div class="field">
+      <label for="institution">Institución</label>
+      <input id="institution" type="text" formControlName="institution" placeholder="Ej. Teletón Santiago" />
+    </div>
+    @if (errorMessage) {
+      <p class="error">{{ errorMessage }}</p>
+    }
+    <div class="form-actions actions">
+      <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary">Crear profesional</button>
+      <a routerLink="/admin/profesionales" class="btn-link">Cancelar</a>
+    </div>
+  </form>
+</div>

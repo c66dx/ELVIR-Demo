@@ -1,0 +1,49 @@
+<div class="page-header">
+  <h2>Material</h2>
+</div>
+
+<section class="section">
+  <h3>Sugerido para ti</h3>
+  @if (suggested$ | async; as suggested) {
+    @if (suggested.length === 0) {
+      <p class="empty-hint">No hay material sugerido. Tu profesional puede sugerirte material desde tu perfil (asociado a una sesión o en general).</p>
+    } @else {
+      <ul class="material-list">
+        @for (s of suggested; track s.id) {
+          <li>
+            @if (s.material) {
+              <span class="title">{{ s.material.title }}</span>
+              <span class="meta">{{ s.material.type }}</span>
+              @if (s.reason) {
+                <span class="reason">{{ s.reason }}</span>
+              }
+              <span class="visto-badge" [class.visto]="isViewed(s.material_id)">{{ isViewed(s.material_id) ? 'Visto' : 'No visto' }}</span>
+              <button type="button" class="btn-primary" (click)="openMaterial(s.material_id, s.material!.url)">Abrir</button>
+            } @else {
+              <span>Material no encontrado</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+  } @else {
+    <p>Cargando...</p>
+  }
+</section>
+
+<section class="section">
+  <h3>Catálogo</h3>
+  @if (catalog$ | async; as catalog) {
+    <ul class="material-list">
+      @for (m of catalog; track m.id) {
+        <li>
+          <span class="title">{{ m.title }}</span>
+          <span class="meta">{{ m.type }}</span>
+          <button type="button" class="btn-primary" (click)="openMaterial(m.id, m.url)">Abrir</button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p>Cargando...</p>
+  }
+</section>

@@ -1,0 +1,32 @@
+// Estilos heredados de .form-page en styles.scss global
+
+.file-input-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.file-upload {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+
+  .file-name {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .btn-sm {
+    font-size: 0.85rem;
+  }
+}
+
+.field-hint {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}

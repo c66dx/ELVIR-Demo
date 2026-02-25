@@ -1,0 +1,44 @@
+%% Flujo del Joven – ELVIR
+%% login_enabled: Si = cuenta propia, entra con email/contraseña. No = solo sesiones supervisadas por profesional.
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5f4', 'primaryTextColor': '#1a1a2e', 'primaryBorderColor': '#1b7f79', 'lineColor': '#1b7f79'}}}%%
+flowchart TD
+    A((Inicio)) --> B{¿Tiene login habilitado?}
+    B -->|Sí: tiene cuenta| C[Login con email y contraseña]
+    B -->|No: sin cuenta| X[Acceso supervisado]
+    
+    C --> D{Credenciales válidas?}
+    D -->|No| E[Error de login]
+    E --> C
+    D -->|Sí| F[Dashboard Joven]
+    
+    X --> Y[Profesional inicia sesión supervisada]
+    Y --> H[Sesión en curso con avatar]
+    
+    F --> G[Nueva simulación]
+    F --> I[Historial de sesiones]
+    F --> J[Material de apoyo]
+    I --> F
+    J --> F
+    
+    G --> K[Seleccionar cargo]
+    K --> L[Seleccionar caso/dificultad]
+    L --> M[Confirmar inicio]
+    M --> N[Crear sesión]
+    N --> H
+    
+    H --> O{¿Cómo termina?}
+    O -->|Finalizar| P[Cerrar sesión COMPLETADA]
+    O -->|Cancelar| Q{¿Confirmar cancelar?}
+    O -->|Error| R[Registrar ERROR]
+    
+    Q -->|Sí| P2[Cerrar sesión CANCELADA]
+    Q -->|No| H
+    
+    P --> S[Pantalla de cierre]
+    P2 --> S
+    R --> S
+    
+    S --> T[Ver material sugerido]
+    S --> U[Volver al dashboard]
+    T --> F
+    U --> F

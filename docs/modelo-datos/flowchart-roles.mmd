@@ -1,0 +1,26 @@
+%% Resumen de roles y alcance – ELVIR
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5f4', 'primaryTextColor': '#1a1a2e', 'primaryBorderColor': '#1b7f79', 'lineColor': '#1b7f79'}}}%%
+flowchart LR
+    subgraph JOVEN[JOVEN]
+        J1[Simulaciones]
+        J2[Historial]
+        J3[Material sugerido]
+        J4[Login propio o supervisado]
+    end
+    
+    subgraph PROF[PROFESIONAL]
+        P1[Crear/editar jóvenes]
+        P2[Sesiones supervisadas]
+        P3[Resúmenes]
+        P4[Sugerir material]
+        P5[Subir material propio]
+        P6[Checklist perfil]
+    end
+    
+    subgraph ADMIN[ADMIN]
+        A1[Crear profesionales]
+        A2[Subir material general]
+    end
+    
+    JOVEN --> PROF
+    PROF --> ADMIN

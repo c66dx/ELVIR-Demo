@@ -1,0 +1,38 @@
+<div class="form-page">
+  <div class="page-header">
+    <h2>Nueva Simulación</h2>
+  </div>
+
+  @if (loading) {
+    <p>Cargando...</p>
+  } @else {
+    <form id="simulacion-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="field">
+      <label for="job_role_id">Cargo / Rol</label>
+      <select id="job_role_id" formControlName="job_role_id">
+        <option value="">Seleccione...</option>
+        @for (jr of jobRoles; track jr.id) {
+          <option [value]="jr.id">{{ jr.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="case_id">Caso</label>
+      <select id="case_id" formControlName="case_id">
+        <option value="">Seleccione...</option>
+        @for (c of cases; track c.id) {
+          <option [value]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </div>
+
+    @if (errorMessage) {
+      <p class="error">{{ errorMessage }}</p>
+    }
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary">Iniciar simulación</button>
+    </div>
+    </form>
+  }
+</div>

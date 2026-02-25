@@ -1,0 +1,36 @@
+<div class="page-header">
+  <h2>Historial</h2>
+</div>
+
+@if (sessions$ | async; as sessions) {
+  @if (sessions.length === 0) {
+    <p>Sin sesiones registradas.</p>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Modo</th>
+            <th>Duración</th>
+            <th>Plantilla</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of sessions; track s.id) {
+            <tr>
+              <td>{{ formatDate(s.started_at) }}</td>
+              <td><app-status-badge [status]="s.status" /></td>
+              <td>{{ s.mode }}</td>
+              <td>{{ formatDuration(s.duration_seconds) }}</td>
+              <td>{{ s.templateLabel }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+} @else {
+  <p>Cargando...</p>
+}
