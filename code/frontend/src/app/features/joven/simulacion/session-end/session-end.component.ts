@@ -6,6 +6,7 @@ import {
   type SessionEndData,
 } from '../../../../core/services/session-end.service';
 import type { SessionStatus } from '../../../../core/models/types.model';
+import { formatDuration } from '../../../../shared/utils/date-format.util';
 
 type SessionSummary = NonNullable<SessionEndData['sessionSummary']>;
 
@@ -77,11 +78,5 @@ export class SessionEndComponent implements OnInit {
     this.router.navigateByUrl(target);
   }
 
-  formatDuration(seconds?: number): string {
-    if (!seconds) return '';
-    if (seconds < 60) return `${seconds} s`;
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return secs > 0 ? `${mins} min ${secs} s` : `${mins} min`;
-  }
+  readonly formatDuration = formatDuration;
 }

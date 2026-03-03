@@ -1,9 +1,11 @@
 import { Component, inject, OnDestroy, OnInit, signal, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Room, RoomEvent, RemoteTrack } from 'livekit-client';
 import { ApiService } from '../../../core/services/api.service';
 import { SessionEndService } from '../../../core/services/session-end.service';
+import type { InterviewSummary } from '../../../core/models/interview-summary.model';
+import { formatDate, formatDuration, formatStatusLabel } from '../../../shared/utils/date-format.util';
 
 /**
  * Pantalla de simulación en curso. Muestra LiveKit (avatar video/audio) cuando está
@@ -13,6 +15,7 @@ import { SessionEndService } from '../../../core/services/session-end.service';
 @Component({
   selector: 'app-simulacion-detail',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './simulacion-detail.component.html',
   styleUrl: './simulacion-detail.component.scss',
 })
@@ -47,6 +50,19 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
   /** True si el navegador bloqueó el audio (autoplay policy) y el usuario debe hacer clic. */
   audioBlocked = signal(false);
 
+  /** True si la sesión ya está finalizada (COMPLETADA/CANCELADA/ERROR) → mostrar resumen, no iniciar. */
+  sessionCompleted = signal(false);
+  completedSessionSummary = signal<InterviewSummary | null>(null);
+  completedSessionData = signal<{
+    status: string;
+    started_at?: string;
+    ended_at?: string;
+    duration_seconds?: number;
+    mode?: string;
+    jobRoleName?: string;
+    caseName?: string;
+  } | null>(null);
+
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.paramMap.get('sessionId') ?? '';
     if (!this.sessionId) return;
@@ -56,11 +72,43 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
         if (s) {
           this.sessionMode.set(s.mode);
           this.youthId.set(s.youth_id);
+          const isFinalizada = s.status === 'COMPLETADA' || s.status === 'CANCELADA' || s.status === 'ERROR';
+          if (isFinalizada) {
+            this.sessionCompleted.set(true);
+            this.loading.set(false);
+            this.loadSessionContextForCompleted();
+            this.completedSessionData.set({
+              status: s.status,
+              started_at: s.started_at,
+              ended_at: s.ended_at,
+              duration_seconds: s.duration_seconds,
+              mode: s.mode,
+            });
+            return;
+          }
+        }
+        this.doStartSession();
+      },
+      error: () => {
+        this.loading.set(false);
+        this.sessionNotFound.set(true);
+      },
+    });
+  }
+
+  private loadSessionContextForCompleted(): void {
+    this.api.getSessionContext(this.sessionId).subscribe({
+      next: (ctx) => {
+        if (ctx) {
+          this.completedSessionData.update((d) =>
+            d ? { ...d, jobRoleName: ctx.jobRoleName, caseName: ctx.caseName } : d
+          );
         }
       },
     });
-
-    this.doStartSession();
+    this.api.getSessionSummary(this.sessionId).subscribe({
+      next: (summary) => summary && this.completedSessionSummary.set(summary),
+    });
   }
 
   doStartSession(): void {
@@ -78,7 +126,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
           if (result.livekit_url && result.access_token) {
             this.useLiveKit.set(true);
             this.embedUrl.set(null);
-            setTimeout(() => this.connectToLiveKit(result.livekit_url!, result.access_token!), 0);
+            setTimeout(() => this.connectToLiveKit(result.livekit_url!, result.access_token!), 150);
           } else if (result.embed?.url) {
             this.useLiveKit.set(false);
             this.embedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(result.embed.url));
@@ -165,8 +213,6 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
       await this.room.localParticipant.setMicrophoneEnabled(true);
       this.sendCommandToAvatar('avatar.start_listening');
       this.turnIndicator.set('🎧 Escuchando...');
-      // Mostrar botón de audio por si el navegador bloqueó autoplay
-      this.audioBlocked.set(true);
     } catch (err) {
       this.error.set('Error al conectar con LiveAvatar');
       this.connectionErrorBanner.set(true);
@@ -253,6 +299,10 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
       this.room = null;
     }
   }
+
+  readonly formatDate = formatDate;
+  readonly formatDuration = formatDuration;
+  readonly formatStatusLabel = formatStatusLabel;
 
   closeSession(status: 'COMPLETADA' | 'CANCELADA' | 'ERROR', motivo?: string): void {
     if (status === 'CANCELADA' && !confirm('¿Estás seguro de que quieres cancelar esta simulación? Se registrará como cancelada.')) {

@@ -112,6 +112,16 @@ erDiagram
     json payload "nullable"
   }
 
+  SESSION_TRANSCRIPTS {
+    int id PK
+    int session_id FK "UQ"
+    json transcript_data
+    boolean session_active "nullable"
+    datetime fetched_at
+    datetime created_at
+    datetime updated_at
+  }
+
   INTERVIEW_SUMMARIES {
     int id PK
     int session_id FK
@@ -192,6 +202,7 @@ erDiagram
   SIMULATION_TEMPLATES ||--o{ SESSIONS : configured_by
 
   SESSIONS ||--o{ SESSION_EVENTS : logs
+  SESSIONS ||--o| SESSION_TRANSCRIPTS : has
   SESSIONS ||--o| INTERVIEW_SUMMARIES : summarized
 
   SUPPORT_MATERIAL ||--o{ MATERIAL_VIEWS : viewed

@@ -8,16 +8,11 @@ import { NotificationService } from '../../../core/services/notification.service
 import { StatusBadgeComponent } from '../../../shared/status-badge/status-badge.component';
 import type { Youth } from '../../../core/models/youth.model';
 import { PROFILE_CHECKLIST_ITEMS } from '../../../core/models/youth.model';
-import type { Session } from '../../../core/models/session.model';
-import type { JobRole } from '../../../core/models/job-role.model';
-import type { Case } from '../../../core/models/case.model';
-import type { SimulationTemplate } from '../../../core/models/simulation-template.model';
 import type { SupportMaterial } from '../../../core/models/support-material.model';
 import type { InterviewSummary } from '../../../core/models/interview-summary.model';
-
-interface SessionWithLabel extends Session {
-  templateLabel?: string;
-}
+import type { TranscriptResponse } from '../../../core/models/transcript.model';
+import { formatDate, formatDuration, durationBetween } from '../../../shared/utils/date-format.util';
+import type { SessionWithTemplateLabel, PlatformSessionItem } from '../../../core/services/api.service';
 
 /**
  * Perfil del joven: datos, historial de sesiones, resúmenes, sugerir material.
@@ -38,14 +33,22 @@ export class PerfilJovenComponent implements OnInit {
 
   youthId = '';
   youth = signal<Youth | null>(null);
-  sessions = signal<SessionWithLabel[]>([]);
+  sessions = signal<SessionWithTemplateLabel[]>([]);
+  platformSessions = signal<PlatformSessionItem[]>([]);
   summariesBySession = signal<Map<string, InterviewSummary>>(new Map());
   loading = signal(true);
 
   showSummaryForm = signal(false);
   selectedSessionId = signal<string | null>(null);
+  sessionTranscript = signal<TranscriptResponse | null>(null);
+  loadingTranscript = signal(false);
   summaryForm!: FormGroup;
   submittingSummary = signal(false);
+
+  competencies = signal<{ id: string; slug: string; name: string; is_active: boolean }[]>([]);
+  competencyLevels = signal<{ id: string; slug: string; label: string; sort_order: number }[]>([]);
+  sessionCompetencies = signal<{ competency_slug: string; level_slug: string | null }[]>([]);
+  loadingSessionCompetencies = signal(false);
 
   showSuggestMaterialPanel = signal(false);
   supportMaterials = signal<SupportMaterial[]>([]);
@@ -58,35 +61,27 @@ export class PerfilJovenComponent implements OnInit {
 
     forkJoin({
       youth: this.api.getYouth(this.youthId),
-      sessions: this.api.getSessions({ youth_id: this.youthId }),
+      sessions: this.api.getSessionsWithTemplateLabel({ youth_id: this.youthId }),
       summaries: this.api.getSummariesByYouth(this.youthId),
-      jobRoles: this.api.getJobRoles(),
-      cases: this.api.getCases(),
-      templates: this.api.getSimulationTemplates(),
+      platformSessions: this.api.getPlatformSessions(this.youthId),
+      competencies: this.api.getCompetencies(),
+      competencyLevels: this.api.getCompetencyLevels(),
     })
       .pipe(
-        map(({ youth, sessions, summaries, jobRoles, cases, templates }) => {
-          const jobMap = new Map<string, JobRole>(jobRoles.map((j) => [j.id, j]));
-          const caseMap = new Map<string, Case>(cases.map((c) => [c.id, c]));
-          const sessionsWithLabel: SessionWithLabel[] = sessions.map((s) => {
-            const t = templates.find((tpl) => tpl.id === s.simulation_template_id);
-            const jobName = t ? jobMap.get(t.job_role_id)?.name : '';
-            const caseName = t ? caseMap.get(t.case_id)?.name : '';
-            return {
-              ...s,
-              templateLabel: jobName && caseName ? `${jobName} / ${caseName}` : '-',
-            };
-          });
+        map(({ youth, sessions: sessionsWithLabel, summaries, platformSessions, competencies, competencyLevels }) => {
           const summariesMap = new Map<string, InterviewSummary>();
           summaries.forEach((sum) => summariesMap.set(sum.session_id, sum));
-          return { youth, sessionsWithLabel, summariesMap };
+          return { youth, sessionsWithLabel, summariesMap, platformSessions, competencies, competencyLevels };
         })
       )
       .subscribe({
-        next: ({ youth, sessionsWithLabel, summariesMap }) => {
+        next: ({ youth, sessionsWithLabel, summariesMap, platformSessions, competencies, competencyLevels }) => {
           this.youth.set(youth);
           this.sessions.set(sessionsWithLabel);
           this.summariesBySession.set(summariesMap);
+          this.platformSessions.set(platformSessions);
+          this.competencies.set(competencies);
+          this.competencyLevels.set(competencyLevels);
           const chart = this.buildChartData(sessionsWithLabel);
           this.chartData.set(chart);
           this.chartLinePoints.set(this.buildLinePoints(chart));
@@ -120,6 +115,11 @@ export class PerfilJovenComponent implements OnInit {
 
   private scrollToSuggestMaterial(): void {
     const el = document.getElementById('sugerir-material');
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  private scrollToSummaryForm(): void {
+    const el = document.getElementById('registrar-resumen');
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -174,7 +174,7 @@ export class PerfilJovenComponent implements OnInit {
       .filter((l): l is string => !!l);
   }
 
-  private buildChartData(sessions: SessionWithLabel[]): { month: string; count: number; maxCount: number }[] {
+  private buildChartData(sessions: SessionWithTemplateLabel[]): { month: string; count: number; maxCount: number }[] {
     const completed = sessions.filter((s) => s.status === 'COMPLETADA' && s.ended_at);
     const byMonth = new Map<string, number>();
     const now = new Date();
@@ -217,7 +217,7 @@ export class PerfilJovenComponent implements OnInit {
     return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
   }
 
-  private buildMetricsSummary(sessions: SessionWithLabel[]): { total: number; completed: number; cancelled: number; error: number; completionRate: number } | null {
+  private buildMetricsSummary(sessions: SessionWithTemplateLabel[]): { total: number; completed: number; cancelled: number; error: number; completionRate: number } | null {
     const total = sessions.length;
     if (total === 0) return { total: 0, completed: 0, cancelled: 0, error: 0, completionRate: 0 };
     const completed = sessions.filter((s) => s.status === 'COMPLETADA').length;
@@ -227,38 +227,82 @@ export class PerfilJovenComponent implements OnInit {
     return { total, completed, cancelled, error, completionRate };
   }
 
-  formatDate(iso?: string): string {
-    if (!iso) return '-';
-    return new Date(iso).toLocaleDateString('es-CL', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+  readonly formatDate = formatDate;
+  readonly formatDuration = formatDuration;
+  readonly durationBetween = durationBetween;
 
-  formatDuration(seconds?: number): string {
-    if (!seconds) return '-';
-    if (seconds < 60) return `${seconds} s`;
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return s > 0 ? `${m} min ${s} s` : `${m} min`;
+  getCompetencyName(slug: string): string {
+    const list = this.competencies();
+    const found = list.find((c) => c.slug === slug);
+    return found?.name ?? slug;
   }
 
   openSummaryForm(sessionId: string): void {
     this.selectedSessionId.set(sessionId);
     this.showSummaryForm.set(true);
+    this.sessionTranscript.set(null);
     const existing = this.summariesBySession().get(sessionId);
     this.summaryForm.reset({
       summary_text: existing?.summary_text ?? '',
       competency_tags: existing?.competency_tags?.join(', ') ?? '',
     });
+    this.loadingTranscript.set(true);
+    this.api.getSessionTranscript(sessionId).subscribe({
+      next: (t) => {
+        this.sessionTranscript.set(t);
+        this.loadingTranscript.set(false);
+      },
+      error: () => this.loadingTranscript.set(false),
+    });
+    this.loadSessionCompetencies(sessionId);
+    setTimeout(() => this.scrollToSummaryForm(), 100);
+  }
+
+  private loadSessionCompetencies(sessionId: string): void {
+    const comps = this.competencies();
+    if (comps.length === 0) {
+      this.sessionCompetencies.set([]);
+      return;
+    }
+    this.loadingSessionCompetencies.set(true);
+    this.api.getSessionCompetencies(sessionId).subscribe({
+      next: (res) => {
+        const levelBySlug = new Map<string, string>();
+        res.items.forEach((item) => {
+          levelBySlug.set(item.competency.slug, item.level.slug);
+        });
+        const rows = comps.map((c) => ({
+          competency_slug: c.slug,
+          level_slug: levelBySlug.get(c.slug) ?? null,
+        }));
+        this.sessionCompetencies.set(rows);
+        this.loadingSessionCompetencies.set(false);
+      },
+      error: () => {
+        this.sessionCompetencies.set([]);
+        this.loadingSessionCompetencies.set(false);
+      },
+    });
+  }
+
+  updateSessionCompetencyLevel(competencySlug: string, levelSlug: string): void {
+    const current = this.sessionCompetencies();
+    const updated = current.map((row) =>
+      row.competency_slug === competencySlug ? { ...row, level_slug: levelSlug || null } : row
+    );
+    this.sessionCompetencies.set(updated);
+  }
+
+  onCompetencyLevelChange(competencySlug: string, event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    const value = target?.value ?? '';
+    this.updateSessionCompetencyLevel(competencySlug, value);
   }
 
   cancelSummaryForm(): void {
     this.showSummaryForm.set(false);
     this.selectedSessionId.set(null);
+    this.sessionTranscript.set(null);
   }
 
   submitSummary(): void {
@@ -272,8 +316,19 @@ export class PerfilJovenComponent implements OnInit {
       ? value.competency_tags.split(',').map((t: string) => t.trim()).filter(Boolean)
       : undefined;
 
+    const evalItems = this.sessionCompetencies()
+      .filter((row) => row.level_slug)
+      .map((row) => ({
+        competency_slug: row.competency_slug,
+        level_slug: row.level_slug as string,
+        comment: undefined,
+      }));
+
     this.submittingSummary.set(true);
-    this.api.createSessionSummary(sessionId, { summary_text: value.summary_text, competency_tags: tags }).subscribe({
+    forkJoin([
+      this.api.createSessionSummary(sessionId, { summary_text: value.summary_text, competency_tags: tags }),
+      this.api.createSessionCompetencies(sessionId, evalItems),
+    ]).subscribe({
       next: () => {
         this.submittingSummary.set(false);
         this.cancelSummaryForm();

@@ -18,6 +18,7 @@ Para clonar y ejecutar el proyecto en cualquier Windows, Mac o Linux.
 | **Git** | Cualquiera | https://git-scm.com/downloads |
 | **Python** | 3.11 o superior | https://www.python.org/downloads/ |
 | **Node.js** | 18 o superior (LTS recomendado) | https://nodejs.org/ |
+| **Docker** | Cualquiera | https://www.docker.com/get-started (para PostgreSQL) |
 
 **Importante:** Al instalar Python, marcar la opción *"Add Python to PATH"*. Al instalar Node.js, se instala también npm automáticamente.
 
@@ -33,6 +34,10 @@ cd ELVIR-Platform
 Abre una terminal:
 
 ```bash
+# 1. Levantar PostgreSQL (Docker)
+docker compose up -d
+
+# 2. Backend
 cd code/backend
 pip install -r requirements.txt
 python seed.py
@@ -44,7 +49,7 @@ Deja esta terminal abierta. El backend queda en `http://localhost:8000`.
 **Si no existe `.env`:** copia `.env.example` a `.env`:
 - Windows: `copy .env.example .env`
 - Linux/Mac: `cp .env.example .env`  
-Para la demo local no hace falta configurar LiveAvatar.
+La URL de PostgreSQL por defecto es `postgresql://elvir:elvir@localhost:5432/elvir` (compatible con `docker compose`).
 
 ### 4. Configurar y ejecutar el frontend
 
@@ -89,7 +94,8 @@ Te explico cómo navegar todo esto para que no te pierdas. Yo lo organicé así 
 
 Todo lo que diseñé está en `docs/`. Ahí está el “por qué” y el “cómo” antes de tocar una línea de código.
 
-Ver **`docs/INDICE-LECTURA.md`** para una guía ordenada de lectura.
+- **`docs/CHANGELOG.md`** — Cambios recientes (alineación con Catalina, gestión de jóvenes, activación).
+- Ver **`docs/INDICE-LECTURA.md`** para una guía ordenada de lectura (si existe).
 
 **Orden que yo seguiría:**
 
@@ -123,7 +129,7 @@ Con eso ya tienes el mapa mental del sistema. A partir de ahí, el código encaj
 El código está en `code/`:
 
 - **`code/frontend/`** — SPA Angular 19+ con componentes standalone, rutas por rol, guards (auth, guest, role) y conectada al backend FastAPI. Integra LiveAvatar vía LiveKit para la simulación conversacional.
-- **`code/backend/`** — API REST FastAPI con SQLAlchemy y SQLite. Autenticación JWT, gestión de jóvenes, sesiones, material de apoyo e integración con LiveAvatar.
+- **`code/backend/`** — API REST FastAPI con SQLAlchemy y PostgreSQL. Autenticación JWT, gestión de jóvenes, sesiones, material de apoyo e integración con LiveAvatar.
 
 **Para entender el frontend:**
 
@@ -145,7 +151,7 @@ El código está en `code/`:
 
 - **`docs/`** — Documentación técnica, flujos, arquitectura, modelo de datos, diagramas Mermaid
 - **`code/frontend/`** — Aplicación web Angular 19 (MVP funcional, conectada al backend)
-- **`code/backend/`** — API REST FastAPI con SQLite (MVP)
+- **`code/backend/`** — API REST FastAPI con PostgreSQL (MVP)
 
 El frontend usa `ApiService` que llama al backend. La URL base se configura en `code/frontend/src/environments/environment.ts` (desarrollo: `http://localhost:8000/api/v1`).
 

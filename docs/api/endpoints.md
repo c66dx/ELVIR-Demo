@@ -33,7 +33,7 @@ Este documento describe los endpoints principales de la API REST del backend de 
 
 **POST** `/auth/login`
 
-Autentica a un usuario y retorna token + rol.
+Autentica a un usuario y retorna token + rol. Al hacer login, se crea un registro en `platform_sessions` (entrada a la plataforma) para métricas.
 
 #### Request
 
@@ -56,7 +56,23 @@ Autentica a un usuario y retorna token + rol.
 
 ---
 
-### 2.2 Usuario autenticado
+### 2.2 Logout
+
+**POST** `/auth/logout`
+
+Registra el cierre de sesión en la plataforma (actualiza `ended_at` en `platform_sessions`). Requiere autenticación. El frontend lo llama antes de limpiar el token local.
+
+#### Response
+
+~~~json
+{
+  "ok": true
+}
+~~~
+
+---
+
+### 2.3 Usuario autenticado
 
 **GET** `/auth/me`
 
@@ -74,7 +90,7 @@ Obtiene la información del usuario autenticado.
 
 ---
 
-### 2.3 Validar token de activación (opcional)
+### 2.4 Validar token de activación (opcional)
 
 **GET** `/auth/activate/validate?token=xxx`
 
@@ -86,9 +102,12 @@ Valida si un token de invitación es válido (existe, no expirado, no usado). El
 {
   "valid": true,
   "email": "maria.lopez@ejemplo.cl",
-  "display_name": "María López"
+  "display_name": "María López",
+  "is_change_email": false
 }
 ~~~
+
+`is_change_email`: `true` cuando el joven ya tiene cuenta (cambio de correo); en ese caso el formulario pide contraseña actual para confirmar.
 
 #### Response (inválido)
 
@@ -103,18 +122,29 @@ Valida si un token de invitación es válido (existe, no expirado, no usado). El
 
 ---
 
-### 2.4 Activar cuenta (joven)
+### 2.5 Activar cuenta (joven)
 
 **POST** `/auth/activate`
 
-El joven define su contraseña usando el token recibido del profesional. Crea el usuario (USERS), lo vincula al YOUTH e invalida la invitación.
+- **Primera activación:** El joven define su contraseña. Crea el usuario (USERS), lo vincula al YOUTH e invalida la invitación.
+- **Cambio de correo:** El joven confirma con su contraseña actual; opcionalmente puede definir una nueva. Actualiza email y/o contraseña en el usuario existente.
 
-#### Request
+#### Request (primera activación)
 
 ~~~json
 {
   "token": "abc123-def456-...",
   "password": "contraseña_segura"
+}
+~~~
+
+#### Request (cambio de correo)
+
+~~~json
+{
+  "token": "abc123-def456-...",
+  "current_password": "contraseña_actual",
+  "password": "nueva_contraseña_opcional"
 }
 ~~~
 
@@ -131,11 +161,70 @@ Tras la activación, el joven puede hacer login con su email y la contraseña de
 
 ---
 
+### 2.6 Cambiar contraseña
+
+**POST** `/auth/change-password`
+
+Permite al usuario autenticado (JOVEN, PROFESIONAL o ADMIN) cambiar su contraseña.  
+Requiere enviar la contraseña actual y la nueva contraseña.
+
+#### Request
+
+~~~json
+{
+  "current_password": "mi_contraseña_actual",
+  "new_password": "mi_nueva_contraseña_segura"
+}
+~~~
+
+- `new_password` debe tener al menos 6 caracteres.
+
+#### Response
+
+~~~json
+{
+  "success": true,
+  "message": "Contraseña actualizada correctamente"
+}
+~~~
+
+#### Errores
+
+- `400 Bad Request`  
+  - `"detail": "La nueva contraseña debe tener al menos 6 caracteres"`  
+  - `"detail": "Contraseña actual incorrecta"`
+- `401 Unauthorized` si no hay JWT válido.
+
+---
+
 ## 2.5 Profesionales (gestión por Admin)
 
 > Solo usuarios con rol ADMIN pueden crear profesionales. En el MVP los profesionales se cargan vía seed; en producción, Admin usa estos endpoints.
 
-### 2.5.1 Crear profesional
+### 2.5.1 Listar profesionales
+
+**GET** `/professionals`
+
+Lista todos los profesionales activos. Requiere rol ADMIN.
+
+#### Response
+
+~~~json
+[
+  {
+    "id": 3,
+    "user_id": 15,
+    "display_name": "María González",
+    "specialty": "Terapia ocupacional",
+    "institution": "Teletón Santiago",
+    "is_active": true
+  }
+]
+~~~
+
+---
+
+### 2.5.2 Crear profesional
 
 **POST** `/professionals`
 
@@ -168,6 +257,41 @@ Crea un nuevo profesional con credenciales. Requiere rol ADMIN.
 
 ---
 
+### 2.5.3 Actualizar profesional
+
+**PUT** `/professionals/{professional_id}`
+
+Actualiza los datos de perfil de un profesional (no modifica email ni contraseña). Requiere rol ADMIN.
+
+#### Request
+
+~~~json
+{
+  "display_name": "María González (actualizado)",
+  "specialty": "Terapia ocupacional",
+  "institution": "Teletón Valparaíso",
+  "is_active": true
+}
+~~~
+
+- `display_name`: obligatorio.
+- `specialty`, `institution`, `is_active`: opcionales (si se omiten, conservan el valor actual).
+
+#### Response
+
+~~~json
+{
+  "id": 3,
+  "user_id": 15,
+  "display_name": "María González (actualizado)",
+  "specialty": "Terapia ocupacional",
+  "institution": "Teletón Valparaíso",
+  "is_active": true
+}
+~~~
+
+---
+
 ## 3. Jóvenes (gestión por profesional)
 
 > En el MVP el profesional administra jóvenes (crear/ver/editar/desactivar) y puede habilitar o no el login del joven (`login_enabled`).  
@@ -178,6 +302,14 @@ Crea un nuevo profesional con credenciales. Requiere rol ADMIN.
 **GET** `/youths`
 
 Retorna lista de jóvenes **asignados al profesional autenticado** (vía ASSIGNMENTS con status ACTIVO), con campos útiles para tabla: estado, último intento, etc.
+
+**Query params (opcionales):**
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `search` | string | Buscar por nombre o identificador |
+| `is_active` | boolean | Filtrar por estado (true/false) |
+| `login_enabled` | boolean | Filtrar por login habilitado (true/false) |
 
 #### Response (ejemplo)
 
@@ -207,12 +339,13 @@ Retorna lista de jóvenes **asignados al profesional autenticado** (vía ASSIGNM
 
 Si `login_enabled = true`, el campo `email` es **obligatorio**. El backend crea el YOUTH sin credenciales, genera una invitación y devuelve `activation_url` para que el profesional entregue al joven. Si `login_enabled = false`, no se requiere email.
 
+> **Nota:** El `identifier` (JOV-001, JOV-002, …) lo genera el sistema automáticamente; no se envía en el request.
+
 #### Request (login deshabilitado)
 
 ~~~json
 {
   "display_name": "Juan Pérez",
-  "identifier": "ID002",
   "phone": "+56912345678",
   "login_enabled": false,
   "general_notes": "Observaciones generales del proceso (opcional)."
@@ -224,7 +357,6 @@ Si `login_enabled = true`, el campo `email` es **obligatorio**. El backend crea 
 ~~~json
 {
   "display_name": "María López",
-  "identifier": "ID003",
   "phone": "+56987654321",
   "login_enabled": true,
   "email": "maria.lopez@ejemplo.cl",
@@ -323,6 +455,62 @@ Si se habilita `login_enabled` para un joven que aún no tiene cuenta activa (`u
   "is_active": false
 }
 ~~~
+
+---
+
+### 3.6 Cambiar email del joven
+
+**POST** `/youths/{youth_id}/change-email`
+
+Cambia el email del joven y genera un nuevo enlace de activación. Requiere que el joven tenga `login_enabled`. Si el joven ya tiene cuenta activa, actualiza el email en USERS; si no, crea una nueva invitación. El profesional entrega el nuevo enlace al joven.
+
+#### Request
+
+~~~json
+{
+  "new_email": "nuevo@correo.cl"
+}
+~~~
+
+#### Response
+
+~~~json
+{
+  "id": 5,
+  "display_name": "María García",
+  "email": "nuevo@correo.cl",
+  "activation_url": "https://elvir.app/activar?token=xyz789-..."
+}
+~~~
+
+---
+
+### 3.7 Accesos a la plataforma (entradas/salidas)
+
+**GET** `/youths/{youth_id}/platform-sessions`
+
+Lista los registros de login/logout del joven (cuándo entró y salió de la plataforma). Solo aplica si el joven tiene `user_id` (cuenta activada). PROFESIONAL: jóvenes asignados. JOVEN: solo su propio historial. ADMIN: cualquier joven.
+
+#### Response
+
+~~~json
+[
+  {
+    "id": 1,
+    "user_id": 5,
+    "started_at": "2026-02-26T10:00:00Z",
+    "ended_at": "2026-02-26T11:30:00Z"
+  },
+  {
+    "id": 2,
+    "user_id": 5,
+    "started_at": "2026-02-26T14:00:00Z",
+    "ended_at": null
+  }
+]
+~~~
+
+`ended_at` null indica sesión activa (aún no ha cerrado sesión).
 
 ---
 
@@ -633,7 +821,7 @@ Inicia la experiencia con LiveAvatar según la plantilla. El backend obtiene el 
 
 **POST** `/sessions/{session_id}/close`
 
-Cierra la sesión y registra estado final + métricas.
+Cierra la sesión y registra estado final + métricas. Si la sesión tiene `liveavatar_session_id`, el backend obtiene automáticamente la transcripción desde LiveAvatar (`GET /v1/sessions/{id}/transcript`) y la persiste en `SESSION_TRANSCRIPTS`. Si el fetch falla (timeout, 404, etc.), la sesión se cierra igual; no se bloquea el cierre.
 
 #### Request
 
@@ -655,6 +843,37 @@ Cierra la sesión y registra estado final + métricas.
   "status": "COMPLETADA",
   "ended_at": "2026-02-10T15:55:00Z",
   "duration_seconds": 900
+}
+~~~
+
+---
+
+### 7.6 Obtener transcripción de sesión
+
+**GET** `/sessions/{session_id}/transcript`
+
+Obtiene la transcripción de la conversación de una sesión. Requiere acceso a la sesión (joven propio o profesional asignado). Si no existe transcripción (sesión sin LiveAvatar o fetch fallido), retorna `null` o 404 según implementación.
+
+#### Response (ejemplo)
+
+~~~json
+{
+  "transcript_data": [
+    {
+      "role": "user",
+      "transcript": "Hola, soy María y vengo a postular al cargo.",
+      "absolute_timestamp": 1739184000,
+      "relative_timestamp": 0
+    },
+    {
+      "role": "avatar",
+      "transcript": "Buenos días María. Cuéntame un poco sobre tu experiencia.",
+      "absolute_timestamp": 1739184005,
+      "relative_timestamp": 5
+    }
+  ],
+  "session_active": false,
+  "fetched_at": "2026-02-10T15:55:01Z"
 }
 ~~~
 

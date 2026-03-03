@@ -21,10 +21,12 @@
     <label for="display_name">Nombre *</label>
     <input id="display_name" type="text" formControlName="display_name" />
   </div>
-  <div class="field">
-    <label for="identifier">Identificador</label>
-    <input id="identifier" type="text" formControlName="identifier" />
-  </div>
+  @if (isEdit && currentYouth?.identifier) {
+    <div class="field field-readonly">
+      <label>Identificador</label>
+      <span class="readonly-value">{{ currentYouth?.identifier }}</span>
+    </div>
+  }
   <div class="field">
     <label for="phone">Teléfono</label>
     <input id="phone" type="text" formControlName="phone" />
@@ -44,17 +46,27 @@
     </label>
   </div>
   @if (form.get('login_enabled')?.value) {
-  <div class="field">
-    <label for="email">Email *</label>
-    <input id="email" type="email" formControlName="email" placeholder="ejemplo&#64;correo.cl" />
-    <span class="field-hint">
-      @if (needsInvitation) {
-        Si ya enviaste un enlace, ingresa el mismo u otro email para generar uno nuevo.
-      } @else {
-        El joven recibirá un enlace para definir su contraseña. Entrégalo en persona o por WhatsApp.
-      }
-    </span>
-  </div>
+    @if (hasUserAccount) {
+      <div class="field field-readonly">
+        <label>Email</label>
+        <div class="readonly-with-action">
+          <span class="readonly-value">{{ currentYouth?.email || '—' }}</span>
+          <button type="button" class="btn-secondary btn-sm" (click)="openChangeEmailModal()">Cambiar email</button>
+        </div>
+      </div>
+    } @else {
+      <div class="field">
+        <label for="email">Email *</label>
+        <input id="email" type="email" formControlName="email" placeholder="ejemplo&#64;correo.cl" />
+        <span class="field-hint">
+          @if (needsInvitation) {
+            Si ya enviaste un enlace, ingresa el mismo u otro email para generar uno nuevo.
+          } @else {
+            El joven recibirá un enlace para definir su contraseña. Entrégalo en persona o por WhatsApp.
+          }
+        </span>
+      </div>
+    }
   }
   <div class="field">
     <label for="general_notes">Notas generales</label>
@@ -87,5 +99,24 @@
     <a routerLink="/profesional/jovenes" class="btn-link">Cancelar</a>
   </div>
   </form>
+  }
+
+  @if (showChangeEmailModal) {
+    <div class="modal-overlay" (click)="closeChangeEmailModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3>Cambiar email</h3>
+        <p class="modal-hint">Se generará un nuevo enlace de activación. El joven deberá usarlo para actualizar su email y contraseña.</p>
+        <div class="field">
+          <label for="new_email">Nuevo email *</label>
+          <input id="new_email" type="email" [value]="newEmailForChange" (input)="newEmailForChange = $any($event.target).value" placeholder="ejemplo&#64;correo.cl" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-primary" (click)="submitChangeEmail()" [disabled]="changingEmail || !newEmailForChange.trim()">
+            {{ changingEmail ? 'Guardando...' : 'Cambiar y generar enlace' }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="closeChangeEmailModal()" [disabled]="changingEmail">Cancelar</button>
+        </div>
+      </div>
+    </div>
   }
 </div>

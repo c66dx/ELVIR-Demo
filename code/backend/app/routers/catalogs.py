@@ -9,6 +9,8 @@ from app.database import get_db
 from app.models.job_role import JobRole
 from app.models.case import Case
 from app.models.simulation_template import SimulationTemplate
+from app.models.competency import Competency
+from app.models.competency_level import CompetencyLevel
 from app.schemas.common import JobRoleResponse, CaseResponse, SimulationTemplateResponse, JobRoleRef, CaseRef
 from app.core.dependencies import get_current_user
 
@@ -121,6 +123,26 @@ def resolve_simulation_template(
         is_active=t.is_active,
         resolution_reason="DEFAULT_CASE",
     )
+
+
+@router.get("/competencies")
+def list_competencies(
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Lista catálogo de competencias activas."""
+    items = db.query(Competency).filter(Competency.is_active == True).order_by(Competency.slug).all()
+    return [{"id": c.id, "slug": c.slug, "name": c.name, "is_active": c.is_active} for c in items]
+
+
+@router.get("/competency-levels")
+def list_competency_levels(
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Lista niveles de competencia (BAJO, MEDIO, ALTO)."""
+    items = db.query(CompetencyLevel).order_by(CompetencyLevel.sort_order).all()
+    return [{"id": l.id, "slug": l.slug, "label": l.label, "sort_order": l.sort_order} for l in items]
 
 
 @router.get("/simulation-templates/{template_id}", response_model=Optional[SimulationTemplateResponse])

@@ -65,7 +65,6 @@ export class LoginComponent {
       },
       error: () => {
         this.loading = false;
-        this.errorMessage = 'Error de conexión';
       },
     });
   }

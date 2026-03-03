@@ -17,6 +17,7 @@
             <th>Especialidad</th>
             <th>Institución</th>
             <th>Estado</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -29,6 +30,9 @@
                 <span class="badge" [class.badge-active]="p.is_active" [class.badge-inactive]="!p.is_active">
                   {{ p.is_active ? 'Activo' : 'Inactivo' }}
                 </span>
+              </td>
+              <td class="actions-cell">
+                <a [routerLink]="['/admin/profesionales', p.id, 'editar']" class="btn-link">Editar</a>
               </td>
             </tr>
           }

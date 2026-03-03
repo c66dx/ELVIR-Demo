@@ -109,7 +109,6 @@ export class MaterialFormComponent {
         },
         error: () => {
           this.submitting = false;
-          this.errorMessage = 'Error de conexión';
         },
       });
     };
@@ -126,7 +125,6 @@ export class MaterialFormComponent {
         },
         error: () => {
           this.submitting = false;
-          this.errorMessage = 'Error al subir archivo';
         },
       });
     } else {

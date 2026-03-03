@@ -11,10 +11,10 @@ _ENV_FILE = _BACKEND_ROOT / ".env"
 class Settings(BaseSettings):
     """Configuración cargada desde variables de entorno."""
 
-    # Base de datos (SQLite para desarrollo)
-    DATABASE_URL: str = "sqlite:///./elvir.db"
+    # Base de datos (PostgreSQL)
+    DATABASE_URL: str = "postgresql://elvir:elvir@localhost:5432/elvir"
 
-    # JWT
+    # JWT - OBLIGATORIO en producción: generar con `openssl rand -hex 32`
     SECRET_KEY: str = "elvir-dev-secret-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 horas

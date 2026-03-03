@@ -130,6 +130,7 @@ En enfoque Context Dinámico, todas las plantillas pueden compartir el mismo `li
 - **PATCH /contexts/{id}** – Actualizar prompt del contexto
 - **POST /sessions/token** – Crear token de sesión
 - **POST /sessions/start** – Iniciar sesión (devuelve livekit_url, livekit_client_token)
+- **GET /sessions/{session_id}/transcript** – Obtener transcripción de la conversación (role, transcript, timestamps)
 
 ---
 
@@ -145,14 +146,26 @@ En enfoque Context Dinámico, todas las plantillas pueden compartir el mismo `li
 | Endpoint start | `app/routers/sessions.py` → `POST /sessions/{id}/start` |
 | Seed (16 plantillas) | `seed.py` — 4 cargos × 4 casos |
 
-**Cargos (seed):** Operario, Atención de Público, Administrativo, Técnico-Profesional.  
-**Casos (seed):** Normal, Baja, Media, Alta dificultad.
+**Cargos (seed):** Operario, Atención de Público, Administrativo, Técnico-Profesional. Contenido alineado con `cargos.json` y `Context Dinámico/roles-data`.  
+**Casos (seed):** Normal, Baja, Media, Alta dificultad. Las instrucciones de prompt provienen de `indicaciones.json` (normal, apoyo_regulacion_emocional, alta_estructuracion_respuesta, exigencia_alta_presentacion_discapacidad).
 
 **Diagrama:**
 
 ![Flujo integración LiveAvatar](../flujos/Flujo_integración_LiveAvatar.svg)
 
 **Fuente Mermaid:** `docs/modelo-datos/flowchart-liveavatar.mmd`
+
+---
+
+## 7. Transcripción de sesión
+
+Al cerrar una sesión (`POST /sessions/{id}/close`), el backend obtiene la transcripción desde LiveAvatar:
+
+1. Si `session.liveavatar_session_id` existe, llama a `GET https://api.liveavatar.com/v1/sessions/{liveavatar_session_id}/transcript`.
+2. Si la respuesta es exitosa, persiste el resultado en la tabla `SESSION_TRANSCRIPTS`.
+3. Si el fetch falla (404, timeout, etc.), la sesión se cierra igual; no se bloquea el flujo.
+
+El profesional puede consultar la transcripción vía `GET /sessions/{id}/transcript` al redactar el resumen cualitativo.
 
 ---
 

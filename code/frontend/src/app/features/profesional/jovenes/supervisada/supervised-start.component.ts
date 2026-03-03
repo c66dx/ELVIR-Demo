@@ -90,7 +90,6 @@ export class SupervisedStartComponent implements OnInit {
         },
         error: () => {
           this.submitting = false;
-          this.errorMessage = 'Error al crear la sesión';
         },
       });
   }

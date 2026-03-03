@@ -1,0 +1,25 @@
+# PostgreSQL para ELVIR (desarrollo y producción local)
+# Uso: docker compose up -d
+# Luego en .env: DATABASE_URL=postgresql://elvir:elvir@localhost:5432/elvir
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: elvir-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: elvir
+      POSTGRES_PASSWORD: elvir
+      POSTGRES_DB: elvir
+    ports:
+      - "5432:5432"
+    volumes:
+      - elvir_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U elvir -d elvir"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  elvir_postgres_data:

@@ -8,6 +8,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { StatusBadgeComponent } from '../../../shared/status-badge/status-badge.component';
 import type { Session } from '../../../core/models/session.model';
 import type { SessionStatus } from '../../../core/models/types.model';
+import { formatDate, formatDuration, formatStatusLabel } from '../../../shared/utils/date-format.util';
 
 export interface DashboardJovenData {
   totalSessions: number;
@@ -63,31 +64,10 @@ export class DashboardJovenComponent {
     };
   }
 
-  formatDate(iso?: string): string {
-    if (!iso) return '-';
-    return new Date(iso).toLocaleDateString('es-CL', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+  readonly formatDate = formatDate;
+  readonly formatDuration = formatDuration;
 
   formatStatus(status: SessionStatus | undefined): string {
-    const labels: Record<string, string> = {
-      EN_CURSO: 'En curso',
-      COMPLETADA: 'Completada',
-      CANCELADA: 'Cancelada',
-      ERROR: 'Error',
-    };
-    return status ? labels[status] ?? status : '-';
-  }
-
-  formatDuration(seconds?: number): string {
-    if (!seconds) return '-';
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return m > 0 ? `${m} min` : `${s} s`;
+    return status ? formatStatusLabel(status) : '-';
   }
 }

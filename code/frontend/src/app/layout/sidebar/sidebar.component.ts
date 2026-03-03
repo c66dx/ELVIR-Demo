@@ -27,6 +27,7 @@ export class SidebarComponent {
     { label: 'Nueva Simulación', route: '/joven/simulacion/nueva', roles: ['JOVEN'], exact: true, icon: 'play' },
     { label: 'Historial', route: '/joven/historial', roles: ['JOVEN'], exact: true, icon: 'history' },
     { label: 'Material', route: '/joven/material', roles: ['JOVEN'], exact: true, icon: 'material' },
+    { label: 'Cambiar contraseña', route: '/cambiar-contrasena', roles: ['JOVEN'], exact: true, icon: 'lock' },
   ];
 
   profesionalItems: NavItem[] = [
@@ -34,12 +35,14 @@ export class SidebarComponent {
     { label: 'Jóvenes', route: '/profesional/jovenes', roles: ['PROFESIONAL'], exact: true, icon: 'users' },
     { label: 'Crear Joven', route: '/profesional/jovenes/nuevo', roles: ['PROFESIONAL'], exact: true, icon: 'user-plus' },
     { label: 'Crear Material', route: '/profesional/material/nuevo', roles: ['PROFESIONAL'], exact: true, icon: 'material' },
+    { label: 'Cambiar contraseña', route: '/cambiar-contrasena', roles: ['PROFESIONAL'], exact: true, icon: 'lock' },
   ];
 
   adminItems: NavItem[] = [
     { label: 'Dashboard', route: '/admin/dashboard', roles: ['ADMIN'], exact: true, icon: 'dashboard' },
     { label: 'Crear Profesional', route: '/admin/profesionales/nuevo', roles: ['ADMIN'], exact: true, icon: 'user-plus' },
     { label: 'Crear Material', route: '/admin/material/nuevo', roles: ['ADMIN'], exact: true, icon: 'material' },
+    { label: 'Cambiar contraseña', route: '/cambiar-contrasena', roles: ['ADMIN'], exact: true, icon: 'lock' },
   ];
 
   get visibleItems(): NavItem[] {

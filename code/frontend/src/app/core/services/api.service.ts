@@ -12,8 +12,8 @@ import type { SupportMaterial } from '../models/support-material.model';
 import type { MaterialSuggestion } from '../models/material-suggestion.model';
 import type { MaterialView } from '../models/material-view.model';
 import type { InterviewSummary } from '../models/interview-summary.model';
+import type { TranscriptResponse } from '../models/transcript.model';
 import type { SessionEvent } from '../models/session-event.model';
-import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 
 /** Respuesta al crear joven: incluye activation_url si login_enabled. */
@@ -27,6 +27,17 @@ export interface YouthWithLastSession extends Youth {
   last_session?: Pick<Session, 'id' | 'status' | 'started_at' | 'ended_at'>;
 }
 
+export interface SessionWithTemplateLabel extends Session {
+  templateLabel?: string;
+}
+
+export interface PlatformSessionItem {
+  id: string;
+  user_id: string;
+  started_at: string;
+  ended_at?: string;
+}
+
 const API_BASE = environment.apiUrl;
 
 /** Convierte IDs numéricos a string para compatibilidad con el frontend. */
@@ -38,13 +49,8 @@ function str(id: unknown): string {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
-  private auth = inject(AuthService);
 
-  private headers(): Record<string, string> {
-    const token = this.auth.getToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  }
-
+  /** El AuthInterceptor añade el token Bearer automáticamente a las peticiones autenticadas. */
   login(email: string, password: string): Observable<{ access_token: string; role: Role; user_id: string } | { error: string }> {
     return this.http
       .post<{ access_token: string; role: string; user_id: number }>(`${API_BASE}/auth/login`, { email, password })
@@ -58,9 +64,16 @@ export class ApiService {
       );
   }
 
+  /** Registra cierre de sesión en backend (para métricas de plataforma). */
+  logout(): Observable<void> {
+    return this.http.post<void>(`${API_BASE}/auth/logout`, {}).pipe(
+      catchError(() => of(undefined))
+    );
+  }
+
   getMe(): Observable<{ user_id: string; role: Role; email: string; professional_id?: string; youth_id?: string } | null> {
     return this.http
-      .get<{ user_id: number; role: string; email: string; professional_id?: number; youth_id?: number }>(`${API_BASE}/auth/me`, { headers: this.headers() })
+      .get<{ user_id: number; role: string; email: string; professional_id?: number; youth_id?: number }>(`${API_BASE}/auth/me`)
       .pipe(
         map((r) => ({
           user_id: str(r.user_id),
@@ -73,8 +86,24 @@ export class ApiService {
       );
   }
 
+  changePassword(current_password: string, new_password: string): Observable<{ success: true } | { error: string }> {
+    return this.http
+      .post<{ success: boolean; message?: string }>(`${API_BASE}/auth/change-password`, {
+        current_password,
+        new_password,
+      })
+      .pipe(
+        map(() => ({ success: true as const })),
+        catchError((err) => {
+          const d = err.error?.detail;
+          const msg = typeof d === 'string' ? d : 'Error al cambiar contraseña';
+          return of({ error: msg });
+        })
+      );
+  }
+
   getJobRoles(): Observable<JobRole[]> {
-    return this.http.get<unknown[]>(`${API_BASE}/job-roles`, { headers: this.headers() }).pipe(
+    return this.http.get<unknown[]>(`${API_BASE}/job-roles`).pipe(
       map((list) =>
         ((list || []) as Record<string, unknown>[]).map((r) => ({
           id: str(r.id),
@@ -90,7 +119,7 @@ export class ApiService {
   }
 
   getCases(): Observable<Case[]> {
-    return this.http.get<unknown[]>(`${API_BASE}/cases`, { headers: this.headers() }).pipe(
+    return this.http.get<unknown[]>(`${API_BASE}/cases`).pipe(
       map((list) =>
         ((list || []) as Record<string, unknown>[]).map((c) => ({
           id: str(c.id),
@@ -109,7 +138,7 @@ export class ApiService {
     if (params?.job_role_id) httpParams = httpParams.set('job_role_id', params.job_role_id);
     if (params?.case_id) httpParams = httpParams.set('case_id', params.case_id);
     return this.http
-      .get<unknown[]>(`${API_BASE}/simulation-templates`, { headers: this.headers(), params: httpParams })
+      .get<unknown[]>(`${API_BASE}/simulation-templates`, { params: httpParams })
       .pipe(
         map((list) =>
           ((list || []) as Record<string, unknown>[]).map((t) => {
@@ -132,7 +161,7 @@ export class ApiService {
   }
 
   getSimulationTemplateById(id: string): Observable<SimulationTemplate | null> {
-    return this.http.get<Record<string, unknown>>(`${API_BASE}/simulation-templates/${id}`, { headers: this.headers() }).pipe(
+    return this.http.get<Record<string, unknown>>(`${API_BASE}/simulation-templates/${id}`).pipe(
       map((t) => {
         if (!t) return null;
         const jr = t.job_role as Record<string, unknown> | undefined;
@@ -155,14 +184,13 @@ export class ApiService {
 
   getSessionContext(sessionId: string): Observable<{ jobRoleName: string; caseName: string } | null> {
     return this.http
-      .get<{ jobRoleName: string; caseName: string }>(`${API_BASE}/sessions/${sessionId}/context`, { headers: this.headers() })
+      .get<{ jobRoleName: string; caseName: string }>(`${API_BASE}/sessions/${sessionId}/context`)
       .pipe(catchError(() => of(null)));
   }
 
   resolveSimulationTemplate(job_role_id: string): Observable<SimulationTemplate | null> {
     return this.http
       .get<Record<string, unknown>>(`${API_BASE}/simulation-templates/resolve`, {
-        headers: this.headers(),
         params: { job_role_id },
       })
       .pipe(
@@ -186,13 +214,18 @@ export class ApiService {
       );
   }
 
-  getYouths(): Observable<YouthWithLastSession[]> {
-    return this.http.get<unknown[]>(`${API_BASE}/youths`, { headers: this.headers() }).pipe(
+  getYouths(params?: { search?: string; is_active?: boolean; login_enabled?: boolean }): Observable<YouthWithLastSession[]> {
+    let p = new HttpParams();
+    if (params?.search?.trim()) p = p.set('search', params.search.trim());
+    if (params?.is_active !== undefined) p = p.set('is_active', String(params.is_active));
+    if (params?.login_enabled !== undefined) p = p.set('login_enabled', String(params.login_enabled));
+    return this.http.get<unknown[]>(`${API_BASE}/youths`, { params: p }).pipe(
       map((list) =>
         ((list || []) as Record<string, unknown>[]).map((y) => {
           const ls = y.last_session as Record<string, unknown> | undefined;
           return {
             id: str(y.id),
+            user_id: y.user_id != null ? str(y.user_id) : undefined,
             display_name: y.display_name as string,
             identifier: y.identifier as string | undefined,
             phone: y.phone as string | undefined,
@@ -219,16 +252,16 @@ export class ApiService {
   createYouth(data: Omit<Youth, 'id' | 'created_at' | 'updated_at'> & { email?: string }): Observable<CreateYouthResponse> {
     const body: Record<string, unknown> = {
       display_name: data.display_name,
-      identifier: data.identifier,
       phone: data.phone,
       login_enabled: data.login_enabled,
       general_notes: data.general_notes,
       profile_checklist: data.profile_checklist,
     };
     if (data.email) body.email = data.email;
-    return this.http.post<Record<string, unknown>>(`${API_BASE}/youths`, body, { headers: this.headers() }).pipe(
+    return this.http.post<Record<string, unknown>>(`${API_BASE}/youths`, body).pipe(
       map((y) => ({
         id: str(y.id),
+        user_id: y.user_id != null ? str(y.user_id) : undefined,
         display_name: y.display_name as string,
         identifier: y.identifier as string | undefined,
         phone: y.phone as string | undefined,
@@ -243,28 +276,40 @@ export class ApiService {
     );
   }
 
-  validateActivationToken(token: string): Observable<{ valid: boolean; email?: string; display_name?: string; error?: string }> {
+  validateActivationToken(token: string): Observable<{ valid: boolean; email?: string; display_name?: string; error?: string; is_change_email?: boolean }> {
     return this.http
-      .get<{ valid: boolean; email?: string; display_name?: string; error?: string }>(`${API_BASE}/auth/activate/validate`, {
-        params: { token },
-      })
+      .get<{ valid: boolean; email?: string; display_name?: string; error?: string; is_change_email?: boolean }>(
+        `${API_BASE}/auth/activate/validate`,
+        { params: { token } }
+      )
       .pipe(catchError(() => of({ valid: false, error: 'TOKEN_NOT_FOUND' })));
   }
 
-  activateAccount(token: string, password: string): Observable<{ success: boolean; error?: string }> {
-    return this.http.post<{ success: boolean; error?: string }>(`${API_BASE}/auth/activate`, { token, password }).pipe(
+  activateAccount(params: {
+    token: string;
+    password?: string;
+    current_password?: string;
+  }): Observable<{ success: boolean; error?: string }> {
+    const body: Record<string, string> = { token: params.token };
+    if (params.password != null) body.password = params.password;
+    if (params.current_password != null) body.current_password = params.current_password;
+    return this.http.post<{ success: boolean; error?: string }>(`${API_BASE}/auth/activate`, body).pipe(
       map((r) => ({ success: r.success, error: r.error })),
       catchError((err) => of({ success: false, error: err.error?.error ?? 'TOKEN_NOT_FOUND' }))
     );
   }
 
   getYouth(id: string): Observable<Youth | null> {
-    return this.http.get<Record<string, unknown>>(`${API_BASE}/youths/${id}`, { headers: this.headers() }).pipe(
+    return this.http.get<Record<string, unknown>>(`${API_BASE}/youths/${id}`).pipe(
       map((y) => ({
         id: str(y.id),
+        user_id: y.user_id != null ? str(y.user_id) : undefined,
         display_name: y.display_name as string,
         identifier: y.identifier as string | undefined,
+        email: y.email as string | undefined,
         phone: y.phone as string | undefined,
+        year_of_birth: y.year_of_birth as number | undefined,
+        diagnosis: y.diagnosis as string | undefined,
         login_enabled: (y.login_enabled as boolean) ?? false,
         is_active: (y.is_active as boolean) ?? true,
         general_notes: y.general_notes as string | undefined,
@@ -278,12 +323,16 @@ export class ApiService {
 
   updateYouth(id: string, data: Partial<Youth> & { email?: string }): Observable<UpdateYouthResponse | null> {
     const body: Record<string, unknown> = { ...data };
-    return this.http.put<Record<string, unknown>>(`${API_BASE}/youths/${id}`, body, { headers: this.headers() }).pipe(
+    delete body.identifier;
+    return this.http.put<Record<string, unknown>>(`${API_BASE}/youths/${id}`, body).pipe(
       map((y) => ({
         id: str(y.id),
+        user_id: y.user_id != null ? str(y.user_id) : undefined,
         display_name: y.display_name as string,
         identifier: y.identifier as string | undefined,
         phone: y.phone as string | undefined,
+        year_of_birth: y.year_of_birth as number | undefined,
+        diagnosis: y.diagnosis as string | undefined,
         login_enabled: (y.login_enabled as boolean) ?? false,
         is_active: (y.is_active as boolean) ?? true,
         general_notes: y.general_notes as string | undefined,
@@ -297,11 +346,52 @@ export class ApiService {
   }
 
   deactivateYouth(id: string): Observable<void> {
-    return this.http.patch<void>(`${API_BASE}/youths/${id}/deactivate`, {}, { headers: this.headers() });
+    return this.http.patch<void>(`${API_BASE}/youths/${id}/deactivate`, {});
   }
 
   activateYouth(id: string): Observable<void> {
-    return this.http.patch<void>(`${API_BASE}/youths/${id}/activate`, {}, { headers: this.headers() });
+    return this.http.patch<void>(`${API_BASE}/youths/${id}/activate`, {});
+  }
+
+  /** Cambia el email del joven y genera nuevo enlace de activación. */
+  changeYouthEmail(youthId: string, newEmail: string): Observable<UpdateYouthResponse | null> {
+    return this.http
+      .post<Record<string, unknown>>(`${API_BASE}/youths/${youthId}/change-email`, { new_email: newEmail })
+      .pipe(
+        map((y) => ({
+          id: str(y.id),
+          user_id: y.user_id != null ? str(y.user_id) : undefined,
+          display_name: y.display_name as string,
+          identifier: y.identifier as string | undefined,
+          email: y.email as string | undefined,
+          phone: y.phone as string | undefined,
+          year_of_birth: y.year_of_birth as number | undefined,
+          diagnosis: y.diagnosis as string | undefined,
+          login_enabled: (y.login_enabled as boolean) ?? false,
+          is_active: (y.is_active as boolean) ?? true,
+          general_notes: y.general_notes as string | undefined,
+          profile_checklist: (y.profile_checklist as string[] | undefined) ?? undefined,
+          created_at: '',
+          updated_at: '',
+          activation_url: y.activation_url as string | undefined,
+        })),
+        catchError(() => of(null))
+      );
+  }
+
+  /** Lista entradas/salidas del joven a la plataforma (login/logout). Solo si tiene user_id. */
+  getPlatformSessions(youthId: string): Observable<PlatformSessionItem[]> {
+    return this.http.get<unknown[]>(`${API_BASE}/youths/${youthId}/platform-sessions`).pipe(
+      map((list) =>
+        ((list || []) as Record<string, unknown>[]).map((s) => ({
+          id: str(s.id),
+          user_id: str(s.user_id),
+          started_at: s.started_at as string,
+          ended_at: s.ended_at as string | undefined,
+        }))
+      ),
+      catchError(() => of([]))
+    );
   }
 
   createSession(data: {
@@ -316,7 +406,7 @@ export class ApiService {
       mode: data.mode,
       professional_id: data.professional_id ? Number(data.professional_id) : undefined,
     };
-    return this.http.post<Record<string, unknown>>(`${API_BASE}/sessions`, body, { headers: this.headers() }).pipe(
+    return this.http.post<Record<string, unknown>>(`${API_BASE}/sessions`, body).pipe(
       map((s) => ({
         id: str(s.id),
         youth_id: str(s.youth_id),
@@ -337,7 +427,7 @@ export class ApiService {
 
   getSessionEvents(sessionId: string): Observable<SessionEvent[]> {
     return this.http
-      .get<unknown[]>(`${API_BASE}/sessions/${sessionId}/events`, { headers: this.headers() })
+      .get<unknown[]>(`${API_BASE}/sessions/${sessionId}/events`)
       .pipe(
         map((list) =>
           ((list || []) as Record<string, unknown>[]).map((e) => ({
@@ -354,7 +444,7 @@ export class ApiService {
   getSessions(params?: { youth_id?: string }): Observable<Session[]> {
     let httpParams = new HttpParams();
     if (params?.youth_id) httpParams = httpParams.set('youth_id', params.youth_id);
-    return this.http.get<unknown[]>(`${API_BASE}/sessions`, { headers: this.headers(), params: httpParams }).pipe(
+    return this.http.get<unknown[]>(`${API_BASE}/sessions`, { params: httpParams }).pipe(
       map((list) =>
         ((list || []) as Record<string, unknown>[]).map((s) => ({
           id: str(s.id),
@@ -375,8 +465,35 @@ export class ApiService {
     );
   }
 
+  /** Sesiones con templateLabel (cargo / caso) para mostrar en historial y perfil. */
+  getSessionsWithTemplateLabel(params?: { youth_id?: string }): Observable<SessionWithTemplateLabel[]> {
+    return this.getSessions(params).pipe(
+      switchMap((sessions) =>
+        forkJoin({
+          jobRoles: this.getJobRoles(),
+          cases: this.getCases(),
+          templates: this.getSimulationTemplates(),
+        }).pipe(
+          map(({ jobRoles, cases, templates }) => {
+            const jobMap = new Map(jobRoles.map((j) => [j.id, j]));
+            const caseMap = new Map(cases.map((c) => [c.id, c]));
+            return sessions.map((s) => {
+              const t = templates.find((tpl) => tpl.id === s.simulation_template_id);
+              const jobName = t ? jobMap.get(t.job_role_id)?.name : '';
+              const caseName = t ? caseMap.get(t.case_id)?.name : '';
+              return {
+                ...s,
+                templateLabel: jobName && caseName ? `${jobName} / ${caseName}` : '-',
+              };
+            });
+          })
+        )
+      )
+    );
+  }
+
   getSession(id: string): Observable<Session | null> {
-    return this.http.get<Record<string, unknown>>(`${API_BASE}/sessions/${id}`, { headers: this.headers() }).pipe(
+    return this.http.get<Record<string, unknown>>(`${API_BASE}/sessions/${id}`).pipe(
       map((s) => ({
         id: str(s.id),
         youth_id: str(s.youth_id),
@@ -414,7 +531,7 @@ export class ApiService {
         livekit_url?: string;
         access_token?: string;
         embed?: { type: string; url: string };
-      }>(`${API_BASE}/sessions/${id}/start`, {}, { headers: this.headers() })
+      }>(`${API_BASE}/sessions/${id}/start`, {})
       .pipe(
         map((r) => ({
           session_id: str(r.session_id),
@@ -435,7 +552,7 @@ export class ApiService {
     if (data.metrics) body.metrics = data.metrics;
     if (data.motivo) body.motivo = data.motivo;
     return this.http
-      .post<Record<string, unknown>>(`${API_BASE}/sessions/${id}/close`, body, { headers: this.headers() })
+      .post<Record<string, unknown>>(`${API_BASE}/sessions/${id}/close`, body)
       .pipe(
         map((s) => ({
           id: str(s.id),
@@ -455,7 +572,7 @@ export class ApiService {
 
   getProfessionals(): Observable<{ id: string; user_id: string; display_name: string; specialty?: string; institution?: string; is_active: boolean }[]> {
     return this.http
-      .get<unknown[]>(`${API_BASE}/professionals`, { headers: this.headers() })
+      .get<unknown[]>(`${API_BASE}/professionals`)
       .pipe(
         map((list) =>
           ((list || []) as Record<string, unknown>[]).map((p) => ({
@@ -471,6 +588,28 @@ export class ApiService {
       );
   }
 
+  getProfessional(
+    id: string
+  ): Observable<{ id: string; user_id: string; display_name: string; specialty?: string; institution?: string; is_active: boolean } | null> {
+    return this.http
+      .get<Record<string, unknown>>(`${API_BASE}/professionals/${id}`)
+      .pipe(
+        map((p) =>
+          p
+            ? {
+                id: str(p.id),
+                user_id: str(p.user_id),
+                display_name: (p.display_name as string) ?? '',
+                specialty: p.specialty as string | undefined,
+                institution: p.institution as string | undefined,
+                is_active: (p.is_active as boolean) ?? true,
+              }
+            : null
+        ),
+        catchError(() => of(null))
+      );
+  }
+
   createProfessional(data: {
     email: string;
     password: string;
@@ -479,7 +618,7 @@ export class ApiService {
     institution?: string;
   }): Observable<{ id: string; user_id: string; display_name: string } | { error: string }> {
     return this.http
-      .post<Record<string, unknown>>(`${API_BASE}/professionals`, data, { headers: this.headers() })
+      .post<Record<string, unknown>>(`${API_BASE}/professionals`, data)
       .pipe(
         map((r) => ({
           id: str(r.id),
@@ -494,11 +633,31 @@ export class ApiService {
       );
   }
 
+  updateProfessional(
+    id: string,
+    data: { display_name: string; specialty?: string; institution?: string; is_active?: boolean }
+  ): Observable<{ id: string; user_id: string; display_name: string } | { error: string }> {
+    return this.http
+      .put<Record<string, unknown>>(`${API_BASE}/professionals/${id}`, data)
+      .pipe(
+        map((r) => ({
+          id: str(r.id),
+          user_id: str(r.user_id),
+          display_name: r.display_name as string,
+        })),
+        catchError((err) => {
+          const d = err.error?.detail;
+          const msg = typeof d === 'string' ? d : 'Error al actualizar profesional';
+          return of({ error: msg });
+        })
+      );
+  }
+
   uploadFile(file: File): Observable<{ url: string } | { error: string }> {
     const formData = new FormData();
     formData.append('file', file);
     return this.http
-      .post<{ url: string }>(`${API_BASE}/upload`, formData, { headers: this.headers() })
+      .post<{ url: string }>(`${API_BASE}/upload`, formData)
       .pipe(
         map((r) => ({ url: r.url })),
         catchError((err) => {
@@ -526,7 +685,7 @@ export class ApiService {
     if (data.job_role_id) body.job_role_id = Number(data.job_role_id);
     if (data.case_id) body.case_id = Number(data.case_id);
     return this.http
-      .post<Record<string, unknown>>(`${API_BASE}/support-material`, body, { headers: this.headers() })
+      .post<Record<string, unknown>>(`${API_BASE}/support-material`, body)
       .pipe(
         map((m) => ({
           id: str(m.id),
@@ -552,7 +711,7 @@ export class ApiService {
     let httpParams = new HttpParams();
     if (params?.job_role_id) httpParams = httpParams.set('job_role_id', params.job_role_id);
     if (params?.case_id) httpParams = httpParams.set('case_id', params.case_id);
-    return this.http.get<unknown[]>(`${API_BASE}/support-material`, { headers: this.headers(), params: httpParams }).pipe(
+    return this.http.get<unknown[]>(`${API_BASE}/support-material`, { params: httpParams }).pipe(
       map((list) =>
         ((list || []) as Record<string, unknown>[]).map((m) => ({
           id: str(m.id),
@@ -583,7 +742,7 @@ export class ApiService {
       reason: data.reason,
     };
     return this.http
-      .post<Record<string, unknown>>(`${API_BASE}/support-material/suggest`, body, { headers: this.headers() })
+      .post<Record<string, unknown>>(`${API_BASE}/support-material/suggest`, body)
       .pipe(
         map((r) => ({
           id: str(r.id),
@@ -599,7 +758,7 @@ export class ApiService {
 
   getYouthMaterialSuggestions(youthId: string): Observable<MaterialSuggestion[]> {
     return this.http
-      .get<unknown[]>(`${API_BASE}/youths/${youthId}/material-suggestions`, { headers: this.headers() })
+      .get<unknown[]>(`${API_BASE}/youths/${youthId}/material-suggestions`)
       .pipe(
         map((list) =>
           ((list || []) as Record<string, unknown>[]).map((m) => ({
@@ -618,7 +777,7 @@ export class ApiService {
 
   getYouthMaterialViews(youthId: string): Observable<MaterialView[]> {
     return this.http
-      .get<unknown[]>(`${API_BASE}/youths/${youthId}/material-views`, { headers: this.headers() })
+      .get<unknown[]>(`${API_BASE}/youths/${youthId}/material-views`)
       .pipe(
         map((list) =>
           ((list || []) as Record<string, unknown>[]).map((v) => ({
@@ -634,7 +793,7 @@ export class ApiService {
 
   recordMaterialView(materialId: string, youthId: string): Observable<MaterialView> {
     return this.http
-      .post<Record<string, unknown>>(`${API_BASE}/support-material/${materialId}/view`, { youth_id: Number(youthId) }, { headers: this.headers() })
+      .post<Record<string, unknown>>(`${API_BASE}/support-material/${materialId}/view`, { youth_id: Number(youthId) })
       .pipe(
         map((r) => ({
           id: str(r.id),
@@ -645,9 +804,18 @@ export class ApiService {
       );
   }
 
+  getSessionTranscript(sessionId: string): Observable<TranscriptResponse | null> {
+    return this.http
+      .get<TranscriptResponse | null>(`${API_BASE}/sessions/${sessionId}/transcript`)
+      .pipe(
+        map((t) => t ?? null),
+        catchError(() => of(null))
+      );
+  }
+
   getSessionSummary(sessionId: string): Observable<InterviewSummary | null> {
     return this.http
-      .get<Record<string, unknown>>(`${API_BASE}/sessions/${sessionId}/summary`, { headers: this.headers() })
+      .get<Record<string, unknown>>(`${API_BASE}/sessions/${sessionId}/summary`)
       .pipe(
         map((s) =>
           s
@@ -684,7 +852,7 @@ export class ApiService {
     data: { summary_text: string; competency_tags?: string[] }
   ): Observable<InterviewSummary | null> {
     return this.http
-      .post<Record<string, unknown>>(`${API_BASE}/sessions/${sessionId}/summary`, data, { headers: this.headers() })
+      .post<Record<string, unknown>>(`${API_BASE}/sessions/${sessionId}/summary`, data)
       .pipe(
         map((s) =>
           s
@@ -701,5 +869,77 @@ export class ApiService {
         ),
         catchError(() => of(null))
       );
+  }
+
+  /** Catálogo de competencias. */
+  getCompetencies(): Observable<{ id: string; slug: string; name: string; is_active: boolean }[]> {
+    return this.http.get<unknown[]>(`${API_BASE}/competencies`).pipe(
+      map((list) =>
+        ((list || []) as Record<string, unknown>[]).map((c) => ({
+          id: str(c.id),
+          slug: c.slug as string,
+          name: c.name as string,
+          is_active: (c.is_active as boolean) ?? true,
+        }))
+      )
+    );
+  }
+
+  /** Niveles de competencia (BAJO, MEDIO, ALTO). */
+  getCompetencyLevels(): Observable<{ id: string; slug: string; label: string; sort_order: number }[]> {
+    return this.http.get<unknown[]>(`${API_BASE}/competency-levels`).pipe(
+      map((list) =>
+        ((list || []) as Record<string, unknown>[]).map((l) => ({
+          id: str(l.id),
+          slug: l.slug as string,
+          label: l.label as string,
+          sort_order: (l.sort_order as number) ?? 0,
+        }))
+      )
+    );
+  }
+
+  /** Obtiene evaluación por competencias de una sesión. */
+  getSessionCompetencies(sessionId: string): Observable<{
+    session_id: number;
+    items: { competency: { slug: string; name: string }; level: { slug: string; label: string }; comment: string | null }[];
+  }> {
+    return this.http.get<{
+      session_id: number;
+      items: { competency: { slug: string; name: string }; level: { slug: string; label: string }; comment: string | null }[];
+    }>(`${API_BASE}/sessions/${sessionId}/competencies`);
+  }
+
+  /** Registra evaluación por competencias de una sesión. */
+  createSessionCompetencies(
+    sessionId: string,
+    items: { competency_slug: string; level_slug: string; comment?: string }[]
+  ): Observable<{ session_id: number; items_count: number }> {
+    return this.http.post<{ session_id: number; items_count: number }>(
+      `${API_BASE}/sessions/${sessionId}/competencies`,
+      { items }
+    );
+  }
+
+  /** Lista asignaciones de un profesional. */
+  getProfessionalAssignments(professionalId: string): Observable<
+    { id: number; youth_id: number; professional_id: number; status: string; assigned_at: string; ended_at?: string }[]
+  > {
+    return this.http.get<
+      { id: number; youth_id: number; professional_id: number; status: string; assigned_at: string; ended_at?: string }[]
+    >(`${API_BASE}/professionals/${professionalId}/assignments`);
+  }
+
+  /** Crea asignación joven–profesional. */
+  createAssignment(youthId: number, professionalId: number): Observable<Record<string, unknown>> {
+    return this.http.post<Record<string, unknown>>(`${API_BASE}/assignments`, {
+      youth_id: youthId,
+      professional_id: professionalId,
+    });
+  }
+
+  /** Finaliza una asignación. */
+  endAssignment(assignmentId: number): Observable<Record<string, unknown>> {
+    return this.http.patch<Record<string, unknown>>(`${API_BASE}/assignments/${assignmentId}/end`, {});
   }
 }

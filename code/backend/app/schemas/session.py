@@ -52,3 +52,16 @@ class SessionEventResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class TranscriptEntry(BaseModel):
+    role: str  # "user" | "avatar"
+    transcript: str
+    absolute_timestamp: int
+    relative_timestamp: int
+
+
+class TranscriptResponse(BaseModel):
+    transcript_data: list[TranscriptEntry]
+    session_active: Optional[bool] = None
+    fetched_at: Optional[datetime] = None

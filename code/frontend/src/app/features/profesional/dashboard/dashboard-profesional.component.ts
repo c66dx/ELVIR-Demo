@@ -6,6 +6,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
 import { StatusBadgeComponent } from '../../../shared/status-badge/status-badge.component';
 import type { Session } from '../../../core/models/session.model';
+import { formatDate, formatDuration } from '../../../shared/utils/date-format.util';
 
 export interface RecentSessionWithYouth extends Session {
   youthName: string;
@@ -54,20 +55,6 @@ export class DashboardProfesionalComponent {
     )
   );
 
-  formatDate(iso?: string): string {
-    if (!iso) return '-';
-    return new Date(iso).toLocaleDateString('es-CL', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
-
-  formatDuration(seconds?: number): string {
-    if (!seconds) return '-';
-    const m = Math.floor(seconds / 60);
-    return m > 0 ? `${m} min` : `${seconds} s`;
-  }
+  readonly formatDate = formatDate;
+  readonly formatDuration = formatDuration;
 }

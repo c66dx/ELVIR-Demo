@@ -1,6 +1,6 @@
 """Modelo INTERVIEW_SUMMARIES."""
 from sqlalchemy import Column, DateTime, Integer, Text, ForeignKey, func
-from sqlalchemy.dialects.sqlite import JSON
+from sqlalchemy import JSON
 from sqlalchemy.orm import relationship
 
 from app.database import Base

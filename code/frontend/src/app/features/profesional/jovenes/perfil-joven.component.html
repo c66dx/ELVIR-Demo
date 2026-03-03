@@ -46,6 +46,38 @@
       </dl>
     </section>
 
+    @if (y.login_enabled && y.user_id) {
+      <section class="platform-sessions-section">
+        <h3>Accesos a la plataforma</h3>
+        <p class="section-desc">Registro de cuándo el joven entró y salió de la plataforma (login/logout).</p>
+        @let ps = platformSessions();
+        @if (ps.length === 0) {
+          <p>Sin registros de acceso.</p>
+        } @else {
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Entrada</th>
+                  <th>Salida</th>
+                  <th>Duración</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of ps; track s.id) {
+                  <tr>
+                    <td>{{ formatDate(s.started_at) }}</td>
+                    <td>{{ s.ended_at ? formatDate(s.ended_at) : 'En curso' }}</td>
+                    <td>{{ s.ended_at ? formatDuration(durationBetween(s.started_at, s.ended_at)) : '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    }
+
     @let metrics = metricsSummary();
     @if (metrics && metrics.total > 0) {
       <section class="metrics-section">
@@ -202,8 +234,24 @@
     }
 
     @if (showSummaryForm()) {
-      <section class="summary-form-section">
+      <section id="registrar-resumen" class="summary-form-section">
         <h3>Registrar resumen</h3>
+        @let transcript = sessionTranscript();
+        @if (loadingTranscript()) {
+          <p class="transcript-loading">Cargando transcripción...</p>
+        } @else if (transcript?.transcript_data?.length) {
+          <details class="transcript-details">
+            <summary>Ver transcripción de la conversación</summary>
+            <div class="transcript-content">
+              @for (entry of transcript!.transcript_data; track $index) {
+                <div class="transcript-entry" [class.role-user]="entry.role === 'user'" [class.role-avatar]="entry.role === 'avatar'">
+                  <span class="transcript-role">{{ entry.role === 'user' ? 'Joven' : 'Avatar' }}:</span>
+                  <span class="transcript-text">{{ entry.transcript }}</span>
+                </div>
+              }
+            </div>
+          </details>
+        }
         <form [formGroup]="summaryForm" (ngSubmit)="submitSummary()">
           <div class="field">
             <label for="summary_text">Resumen *</label>
@@ -213,6 +261,37 @@
             <label for="competency_tags">Etiquetas de competencia (separadas por coma)</label>
             <input id="competency_tags" type="text" formControlName="competency_tags" placeholder="comunicación, liderazgo" />
           </div>
+          @if (competencies().length > 0 && competencyLevels().length > 0) {
+            <div class="field">
+              <label>Evaluación por competencias (opcional)</label>
+              @if (loadingSessionCompetencies()) {
+                <p class="small-muted">Cargando evaluación por competencias...</p>
+              } @else {
+                <div class="competencies-table">
+                  <div class="competencies-header">
+                    <span>Competencia</span>
+                    <span>Nivel</span>
+                  </div>
+                  <div class="competencies-body">
+                    @for (row of sessionCompetencies(); track row.competency_slug) {
+                      <div class="competency-row">
+                        <span class="competency-name">{{ getCompetencyName(row.competency_slug) }}</span>
+                        <select
+                          [value]="row.level_slug ?? ''"
+                          (change)="onCompetencyLevelChange(row.competency_slug, $event)"
+                        >
+                          <option value="">Sin evaluar</option>
+                          @for (lvl of competencyLevels(); track lvl.slug) {
+                            <option [value]="lvl.slug">{{ lvl.label }}</option>
+                          }
+                        </select>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
           <div class="form-actions">
             <button type="submit" class="btn-primary" [disabled]="summaryForm.invalid || submittingSummary()">Guardar</button>
             <button type="button" class="btn-secondary" (click)="cancelSummaryForm()">Cancelar</button>

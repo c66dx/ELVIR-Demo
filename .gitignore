@@ -31,3 +31,5 @@ npm-debug.log*
 # Archivos subidos (backend)
 code/backend/uploads/
 
+referencia-catalina/
+docs/CHANGELOG.md

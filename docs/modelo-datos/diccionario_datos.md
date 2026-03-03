@@ -119,6 +119,22 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 ---
 
+## 5.5. PLATFORM_SESSIONS
+
+**Propósito:** registro de entrada/salida a la plataforma web (login/logout) para métricas. **Diferente de SESSIONS** (simulaciones de entrevista).  
+**Flujo:** Al hacer login se crea un registro con `ended_at = null`. Al hacer logout (`POST /auth/logout`), se actualiza `ended_at` en la sesión activa más reciente.
+
+| Campo | Tipo | Restricciones | Descripción |
+|------|------|---------------|-------------|
+| id | int | PK, NN | Identificador |
+| user_id | int | FK → USERS.id, NN | Usuario que inició sesión |
+| started_at | datetime | NN | Momento del login |
+| ended_at | datetime | nullable | Momento del logout (null = sesión activa) |
+
+**Nota:** Si el usuario cierra el navegador sin hacer logout, la sesión queda con `ended_at` null. Para métricas se puede tratar como sesión abandonada (p. ej. `started_at` hace más de X horas).
+
+---
+
 ## 6. JOB_ROLES
 
 **Propósito:** catálogo de cargos/puestos (dominio ELVIR).  
@@ -217,7 +233,35 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 ---
 
-## 11. INTERVIEW_SUMMARIES
+## 11. SESSION_TRANSCRIPTS
+
+**Propósito:** transcripción completa de la conversación de una sesión, obtenida desde LiveAvatar al cerrar la sesión.  
+**Regla:** 0..1 transcripción por sesión (relación 1:1 con SESSIONS).  
+**Diseño:** tabla separada para separación de responsabilidades, escalabilidad y buenas prácticas (SESSIONS mantiene metadatos; SESSION_TRANSCRIPTS almacena contenido pesado).
+
+| Campo | Tipo | Restricciones | Descripción |
+|------|------|---------------|-------------|
+| id | int | PK, NN | Identificador |
+| session_id | int | FK → SESSIONS.id, NN, UQ | Sesión (1:1) |
+| transcript_data | json | NN | Array de entradas: `{ role, transcript, absolute_timestamp, relative_timestamp }` |
+| session_active | boolean | nullable | Estado de LiveAvatar al momento del fetch |
+| fetched_at | datetime | NN | Momento en que se obtuvo la transcripción |
+| created_at | datetime | NN | Creación |
+| updated_at | datetime | NN | Última actualización |
+
+**Formato `transcript_data` (LiveAvatar):**
+```json
+[
+  { "role": "user", "transcript": "texto del usuario", "absolute_timestamp": 1234567890, "relative_timestamp": 0 },
+  { "role": "avatar", "transcript": "texto del avatar", "absolute_timestamp": 1234567895, "relative_timestamp": 5 }
+]
+```
+
+**Uso:** El profesional consulta la transcripción al redactar el resumen cualitativo. La compañía de IA de LiveAvatar puede usar este formato para generar resúmenes automáticos en el futuro.
+
+---
+
+## 12. INTERVIEW_SUMMARIES
 
 **Propósito:** resumen cualitativo redactado por el profesional para una sesión.  
 **Regla:** 0..1 resumen por sesión (en MVP).
@@ -238,7 +282,7 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 ---
 
-## 12. SUPPORT_MATERIAL
+## 13. SUPPORT_MATERIAL
 
 **Propósito:** catálogo de recursos (videos, PDFs, links).  
 **Filtros opcionales:** por cargo y/o caso.
@@ -264,7 +308,7 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 ---
 
-## 13. MATERIAL_VIEWS
+## 14. MATERIAL_VIEWS
 
 **Propósito:** registrar consumo efectivo de material por parte del joven.
 
@@ -279,7 +323,7 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 ---
 
-## 14. MATERIAL_SUGGESTIONS
+## 15. MATERIAL_SUGGESTIONS
 
 **Propósito:** sugerencias de material hechas por profesional (opcionalmente asociadas a una sesión).
 
@@ -295,7 +339,7 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 ---
 
-## 15. COMPETENCIES
+## 16. COMPETENCIES
 
 **Propósito:** catálogo configurable de competencias (desacoplado del joven).  
 **Nota:** evita campos fijos por joven.
@@ -310,7 +354,7 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 ---
 
-## 16. COMPETENCY_LEVELS
+## 17. COMPETENCY_LEVELS
 
 **Propósito:** catálogo de niveles (bajo/medio/alto u otros).
 
@@ -323,7 +367,7 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 ---
 
-## 17. SESSION_COMPETENCIES
+## 18. SESSION_COMPETENCIES
 
 **Propósito:** evaluación estructurada de competencias por sesión.  
 **Nota:** permite historial por sesión y posteriormente derivar un “estado actual” del joven sin campos fijos.
@@ -341,7 +385,7 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 ---
 
-## 18. Relaciones clave (resumen)
+## 19. Relaciones clave (resumen)
 
 - USERS 1–0/1 YOUTH (login opcional del joven)
 - YOUTH 0–N YOUTH_INVITATIONS (invitaciones pendientes para activar cuenta)
@@ -349,6 +393,7 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 - YOUTH 1–N SESSIONS
 - SIMULATION_TEMPLATES 1–N SESSIONS
 - SESSIONS 1–N SESSION_EVENTS
+- SESSIONS 0–1 SESSION_TRANSCRIPTS
 - SESSIONS 0–1 INTERVIEW_SUMMARIES
 - SESSIONS 0–N SESSION_COMPETENCIES
 - COMPETENCIES 1–N SESSION_COMPETENCIES
@@ -361,7 +406,7 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 ---
 
-## 19. Campos mínimos vs extensiones
+## 20. Campos mínimos vs extensiones
 
 **Mínimos MVP (prioridad alta):**
 - USERS, YOUTH, YOUTH_INVITATIONS, PROFESSIONALS, ASSIGNMENTS
@@ -372,6 +417,7 @@ Este documento describe el **diccionario de datos** del MVP de ELVIR, alineado c
 
 **Extensión MVP+:**
 - SESSION_EVENTS (si quieren trazabilidad fina)
+- SESSION_TRANSCRIPTS (transcripción de conversación desde LiveAvatar)
 - COMPETENCIES / LEVELS / SESSION_COMPETENCIES (si ya definen catálogo final)
 - Campos adicionales en `metrics` (si LiveAvatar entrega datos)
 - Rol ADMIN: crear profesionales, crear material. Campo `created_by` en SUPPORT_MATERIAL.

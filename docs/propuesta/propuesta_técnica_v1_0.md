@@ -207,8 +207,7 @@ Si finalmente Teletón/LiveAvatar define que el “caso” se decide automática
 - Tests: Pytest
 
 ## 8.3 Base de datos
-- PostgreSQL (preferente)
-- SQLite para entorno local/demo
+- PostgreSQL (desarrollo y producción)
 
 ---
 

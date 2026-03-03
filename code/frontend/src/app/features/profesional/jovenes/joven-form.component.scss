@@ -47,6 +47,32 @@
   }
 }
 
+.field-readonly {
+  .readonly-value {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-bg-muted, #f3f4f6);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    color: var(--color-text);
+  }
+
+  .readonly-with-action {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+
+    .readonly-value {
+      flex: 1;
+    }
+
+    .btn-sm {
+      padding: var(--space-2) var(--space-3);
+      font-size: 0.875rem;
+    }
+  }
+}
+
 .field-hint {
   display: block;
   margin-top: var(--space-1);
@@ -130,6 +156,42 @@
   background: var(--color-danger-light);
   border-radius: var(--radius-sm);
   font-size: 0.875rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--color-card);
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 420px;
+  width: 90%;
+
+  h3 {
+    margin: 0 0 var(--space-3);
+    font-size: 1.25rem;
+  }
+
+  .modal-hint {
+    margin: 0 0 var(--space-4);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
 }
 
 .actions {

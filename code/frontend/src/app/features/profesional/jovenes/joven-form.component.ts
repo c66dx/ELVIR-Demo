@@ -24,7 +24,6 @@ export class JovenFormComponent implements OnInit {
 
   form: FormGroup = this.fb.nonNullable.group({
     display_name: ['', Validators.required],
-    identifier: [''],
     phone: [''],
     year_of_birth: [null as number | null],
     diagnosis: [''],
@@ -45,6 +44,12 @@ export class JovenFormComponent implements OnInit {
   needsInvitation = false;
   /** Si el joven ya tiene cuenta activa (user_id). En edit, si no tiene, al habilitar login pedimos email. */
   hasUserAccount = false;
+  /** Datos del joven cargado (para mostrar identifier y email en modo solo lectura). */
+  currentYouth: { identifier?: string; email?: string } | null = null;
+  /** Modal cambiar email */
+  showChangeEmailModal = false;
+  newEmailForChange = '';
+  changingEmail = false;
 
   ngOnInit(): void {
     this.youthId = this.route.parent?.snapshot.paramMap.get('youthId') ?? null;
@@ -69,9 +74,9 @@ export class JovenFormComponent implements OnInit {
           if (youth) {
             this.hasUserAccount = !!youth.user_id;
             this.needsInvitation = youth.login_enabled && !youth.user_id;
+            this.currentYouth = { identifier: youth.identifier, email: youth.email };
             this.form.patchValue({
               display_name: youth.display_name,
-              identifier: youth.identifier ?? '',
               phone: youth.phone ?? '',
               year_of_birth: youth.year_of_birth ?? null,
               diagnosis: youth.diagnosis ?? '',
@@ -86,10 +91,14 @@ export class JovenFormComponent implements OnInit {
             if (!youth.login_enabled && emailCtrl) {
               emailCtrl.clearValidators();
             }
+            if (this.needsInvitation && youth.email) {
+              emailCtrl?.setValue(youth.email);
+            }
           }
         },
       });
     } else {
+      this.currentYouth = null;
       const emailCtrl = this.form.get('email');
       if (this.form.get('login_enabled')?.value && emailCtrl) {
         emailCtrl.setValidators([Validators.required, Validators.email]);
@@ -109,7 +118,6 @@ export class JovenFormComponent implements OnInit {
       this.api
         .updateYouth(this.youthId, {
           display_name: value.display_name,
-          identifier: value.identifier || undefined,
           phone: value.phone || undefined,
           year_of_birth: value.year_of_birth ?? undefined,
           diagnosis: value.diagnosis || undefined,
@@ -120,7 +128,12 @@ export class JovenFormComponent implements OnInit {
         })
         .subscribe({
           next: (res) => {
-            if (res?.activation_url) {
+            if (res === null) {
+              this.errorMessage = 'Error al actualizar. Verifica los datos e intenta de nuevo.';
+              this.submitting = false;
+              return;
+            }
+            if (res.activation_url) {
               this.activationUrl = res.activation_url;
               this.submitting = false;
               this.notification.success('Joven actualizado. Copia el enlace de activación.');
@@ -130,7 +143,6 @@ export class JovenFormComponent implements OnInit {
             }
           },
           error: () => {
-            this.errorMessage = 'Error al actualizar';
             this.submitting = false;
           },
         });
@@ -138,7 +150,6 @@ export class JovenFormComponent implements OnInit {
       this.api
         .createYouth({
           display_name: value.display_name,
-          identifier: value.identifier || undefined,
           phone: value.phone || undefined,
           year_of_birth: value.year_of_birth ?? undefined,
           diagnosis: value.diagnosis || undefined,
@@ -160,7 +171,6 @@ export class JovenFormComponent implements OnInit {
             }
           },
           error: () => {
-            this.errorMessage = 'Error al crear el joven';
             this.submitting = false;
           },
         });
@@ -190,5 +200,48 @@ export class JovenFormComponent implements OnInit {
     if (idx >= 0) arr.splice(idx, 1);
     else arr.push(slug);
     ctrl.setValue(arr);
+  }
+
+  openChangeEmailModal(): void {
+    this.newEmailForChange = this.currentYouth?.email ?? '';
+    this.showChangeEmailModal = true;
+  }
+
+  closeChangeEmailModal(): void {
+    this.showChangeEmailModal = false;
+    this.newEmailForChange = '';
+  }
+
+  submitChangeEmail(): void {
+    const email = this.newEmailForChange.trim();
+    if (!email || !this.youthId) return;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      this.notification.error('Ingresa un email válido');
+      return;
+    }
+    this.changingEmail = true;
+    this.api.changeYouthEmail(this.youthId, email).subscribe({
+      next: (res) => {
+        this.changingEmail = false;
+        if (res === null) {
+          this.notification.error('Error al cambiar el email');
+          return;
+        }
+        this.currentYouth = { ...this.currentYouth, email: res.email ?? email };
+        this.closeChangeEmailModal();
+        if (res.activation_url) {
+          this.activationUrl = res.activation_url;
+          this.notification.success('Email actualizado. Entrega el nuevo enlace al joven.');
+        } else {
+          this.notification.success('Email actualizado correctamente');
+        }
+      },
+      error: (err) => {
+        this.changingEmail = false;
+        const msg = err.error?.detail ?? 'Error al cambiar el email';
+        this.notification.error(typeof msg === 'string' ? msg : 'Error al cambiar el email');
+      },
+    });
   }
 }

@@ -1,18 +1,20 @@
 <div class="form-page">
   <div class="page-header">
-    <h2>Crear profesional</h2>
+    <h2>{{ isEdit ? 'Editar profesional' : 'Crear profesional' }}</h2>
     <a routerLink="/admin/profesionales" class="btn-link">← Volver</a>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="field">
-      <label for="email">Email *</label>
-      <input id="email" type="email" formControlName="email" placeholder="profesional&#64;institucion.cl" />
-    </div>
-    <div class="field">
-      <label for="password">Contraseña inicial *</label>
-      <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" />
-    </div>
+    @if (!isEdit) {
+      <div class="field">
+        <label for="email">Email *</label>
+        <input id="email" type="email" formControlName="email" placeholder="profesional&#64;institucion.cl" />
+      </div>
+      <div class="field">
+        <label for="password">Contraseña inicial *</label>
+        <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" />
+      </div>
+    }
     <div class="field">
       <label for="display_name">Nombre *</label>
       <input id="display_name" type="text" formControlName="display_name" placeholder="Nombre del profesional" />
@@ -29,7 +31,9 @@
       <p class="error">{{ errorMessage }}</p>
     }
     <div class="form-actions actions">
-      <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary">Crear profesional</button>
+      <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary">
+        {{ isEdit ? 'Guardar cambios' : 'Crear profesional' }}
+      </button>
       <a routerLink="/admin/profesionales" class="btn-link">Cancelar</a>
     </div>
   </form>

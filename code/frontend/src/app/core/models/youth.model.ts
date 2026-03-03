@@ -4,6 +4,7 @@ export interface Youth {
   login_enabled: boolean;
   display_name: string;
   identifier?: string;
+  email?: string;
   phone?: string;
   year_of_birth?: number;
   diagnosis?: string;

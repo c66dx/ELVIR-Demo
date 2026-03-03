@@ -46,8 +46,8 @@ La API estará disponible en `http://localhost:8000`.
 
 Copiar `.env.example` a `.env` y ajustar si es necesario. Variables de entorno (opcional, archivo `.env`):
 
-- `DATABASE_URL`: URL de conexión (default: `sqlite:///./elvir.db`)
-- `SECRET_KEY`: Clave para JWT (cambiar en producción)
+- `DATABASE_URL`: URL de conexión PostgreSQL (default: `postgresql://elvir:elvir@localhost:5432/elvir`)
+- `SECRET_KEY`: Clave para JWT (**obligatorio en producción**; generar con `openssl rand -hex 32`)
 - `CORS_ORIGINS`: Orígenes permitidos para CORS (default: `http://localhost:4200`)
 - `APP_BASE_URL`: URL base para enlaces de activación (default: `http://localhost:4200`)
 - `LIVEAVATAR_API_KEY`, `LIVEAVATAR_CONTEXT_ID`, `LIVEAVATAR_AVATAR_ID`, `LIVEAVATAR_VOICE_ID`: Para integración con LiveAvatar (simulación con avatar)

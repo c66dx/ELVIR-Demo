@@ -7,7 +7,7 @@
   <div class="activate-card">
     <div class="activate-brand">
       <h1>ELVIR</h1>
-      <p class="activate-tagline">Activa tu cuenta</p>
+      <p class="activate-tagline">{{ isChangeEmail() ? 'Confirmar cambio de correo' : 'Activa tu cuenta' }}</p>
     </div>
 
     @switch (state()) {
@@ -19,28 +19,52 @@
       }
       @case ('valid') {
         <div class="activate-form-wrap">
-          <p class="activate-context">
-            Hola, <strong>{{ displayName() }}</strong>. Define tu contraseña para acceder a la plataforma.
-          </p>
-          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="activate-form">
-            <div class="field">
-              <label for="password">Contraseña *</label>
-              <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
-            </div>
-            <div class="field">
-              <label for="passwordConfirm">Confirmar contraseña *</label>
-              <input id="passwordConfirm" type="password" formControlName="passwordConfirm" placeholder="Repite tu contraseña" autocomplete="new-password" />
-              @if (form.get('passwordConfirm')?.hasError('mismatch')) {
-                <span class="field-error">Las contraseñas no coinciden</span>
-              }
-            </div>
-            <button type="submit" [disabled]="form.invalid" class="btn-submit">Activar cuenta</button>
-          </form>
+          @if (isChangeEmail()) {
+            <p class="activate-context">
+              Hola, <strong>{{ displayName() }}</strong>. Confirma tu identidad con tu contraseña actual para completar el cambio de correo.
+            </p>
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" class="activate-form">
+              <div class="field">
+                <label for="currentPassword">Contraseña actual *</label>
+                <input id="currentPassword" type="password" formControlName="currentPassword" placeholder="Tu contraseña actual" autocomplete="current-password" />
+              </div>
+              <div class="field">
+                <label for="password">Nueva contraseña (opcional)</label>
+                <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres si quieres cambiarla" autocomplete="new-password" />
+              </div>
+              <div class="field">
+                <label for="passwordConfirm">Confirmar nueva contraseña</label>
+                <input id="passwordConfirm" type="password" formControlName="passwordConfirm" placeholder="Solo si ingresaste una nueva" autocomplete="new-password" />
+                @if (form.get('passwordConfirm')?.hasError('mismatch')) {
+                  <span class="field-error">Las contraseñas no coinciden</span>
+                }
+              </div>
+              <button type="submit" [disabled]="!form.get('currentPassword')?.value?.trim()" class="btn-submit">Confirmar cambio de correo</button>
+            </form>
+          } @else {
+            <p class="activate-context">
+              Hola, <strong>{{ displayName() }}</strong>. Define tu contraseña para acceder a la plataforma.
+            </p>
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" class="activate-form">
+              <div class="field">
+                <label for="password">Contraseña *</label>
+                <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+              </div>
+              <div class="field">
+                <label for="passwordConfirm">Confirmar contraseña *</label>
+                <input id="passwordConfirm" type="password" formControlName="passwordConfirm" placeholder="Repite tu contraseña" autocomplete="new-password" />
+                @if (form.get('passwordConfirm')?.hasError('mismatch')) {
+                  <span class="field-error">Las contraseñas no coinciden</span>
+                }
+              </div>
+              <button type="submit" [disabled]="form.invalid" class="btn-submit">Activar cuenta</button>
+            </form>
+          }
         </div>
       }
       @case ('success') {
         <div class="activate-success">
-          <p class="activate-success-title">¡Cuenta activada!</p>
+          <p class="activate-success-title">{{ isChangeEmail() ? '¡Correo actualizado!' : '¡Cuenta activada!' }}</p>
           <p class="activate-success-msg">Ya puedes iniciar sesión con tu correo y contraseña.</p>
           <button type="button" class="btn-submit" (click)="goToLogin()">Ir a iniciar sesión</button>
         </div>
@@ -64,7 +88,7 @@
       }
       @case ('error') {
         <div class="activate-error">
-          <p class="activate-error-title">No se pudo activar la cuenta</p>
+          <p class="activate-error-title">No se pudo completar</p>
           @switch (errorCode()) {
             @case ('TOKEN_EXPIRED') {
               <p class="activate-error-msg">Este enlace ha expirado. Pide a tu profesional que genere uno nuevo.</p>
@@ -74,6 +98,12 @@
             }
             @case ('EMAIL_ALREADY_EXISTS') {
               <p class="activate-error-msg">Esta cuenta ya está activada. Puedes iniciar sesión directamente.</p>
+            }
+            @case ('CURRENT_PASSWORD_INVALID') {
+              <p class="activate-error-msg">La contraseña actual no es correcta. Verifica e intenta de nuevo.</p>
+            }
+            @case ('CURRENT_PASSWORD_REQUIRED') {
+              <p class="activate-error-msg">Debes ingresar tu contraseña actual para confirmar el cambio.</p>
             }
             @default {
               <p class="activate-error-msg">El enlace no es válido o ha expirado. Pide a tu profesional que te envíe uno nuevo.</p>

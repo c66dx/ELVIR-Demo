@@ -106,6 +106,20 @@ Ventajas:
 
 ---
 
+### 3.5 PLATFORM_SESSIONS
+
+La entidad **PLATFORM_SESSIONS** registra la entrada y salida de usuarios a la plataforma web (login/logout). **Diferente de SESSIONS**, que representa simulaciones de entrevista.
+
+Contiene:
+
+- `user_id`
+- `started_at` (momento del login)
+- `ended_at` (nullable; null = sesión activa; se actualiza al hacer logout)
+
+**Propósito:** métricas de uso (cuánto tiempo permanecen en la plataforma, frecuencia de acceso, etc.). Se crea un registro en cada login; el endpoint `POST /auth/logout` actualiza `ended_at`.
+
+---
+
 ## 4. Dominio de simulaciones
 
 ### 4.1 JOB_ROLES
@@ -218,6 +232,21 @@ Permite registrar eventos relevantes:
 - ERROR
 
 Es opcional para el MVP, pero aporta trazabilidad frente al riesgo de integración con LiveAvatar.
+
+---
+
+### 5.4 SESSION_TRANSCRIPTS
+
+Almacena la transcripción completa de la conversación de una sesión, obtenida desde LiveAvatar al cerrar la sesión.
+
+Características:
+
+- Relación 1:1 con SESSIONS (0..1 transcripción por sesión).
+- Tabla separada para separación de responsabilidades y escalabilidad.
+- `transcript_data`: array JSON con entradas `{ role, transcript, absolute_timestamp, relative_timestamp }`.
+- `fetched_at`: momento en que se obtuvo la transcripción desde LiveAvatar.
+
+El profesional consulta la transcripción al redactar el resumen cualitativo. Este formato permite futuros resúmenes automáticos por IA.
 
 ---
 

@@ -12,3 +12,4 @@ export * from './support-material.model';
 export * from './material-suggestion.model';
 export * from './material-view.model';
 export * from './interview-summary.model';
+export * from './transcript.model';

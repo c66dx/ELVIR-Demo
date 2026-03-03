@@ -10,10 +10,15 @@ from app.models.case import Case
 from app.models.simulation_template import SimulationTemplate
 from app.models.session import Session
 from app.models.session_event import SessionEvent
+from app.models.session_transcript import SessionTranscript
 from app.models.interview_summary import InterviewSummary
 from app.models.support_material import SupportMaterial
 from app.models.material_suggestion import MaterialSuggestion
 from app.models.material_view import MaterialView
+from app.models.platform_session import PlatformSession
+from app.models.competency import Competency
+from app.models.competency_level import CompetencyLevel
+from app.models.session_competency import SessionCompetency
 
 __all__ = [
     "Base",
@@ -27,8 +32,13 @@ __all__ = [
     "SimulationTemplate",
     "Session",
     "SessionEvent",
+    "SessionTranscript",
     "InterviewSummary",
     "SupportMaterial",
     "MaterialSuggestion",
     "MaterialView",
+    "PlatformSession",
+    "Competency",
+    "CompetencyLevel",
+    "SessionCompetency",
 ]

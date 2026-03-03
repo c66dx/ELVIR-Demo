@@ -3,6 +3,32 @@
   <a routerLink="/profesional/jovenes/nuevo" class="btn-primary">Crear Joven</a>
 </div>
 
+<div class="filters-bar">
+  <div class="filter-group">
+    <label for="filter-search">Buscar</label>
+    <input id="filter-search" type="text" [ngModel]="filterSearch" (ngModelChange)="filterSearch=$event; onSearchInput()" placeholder="Nombre o identificador" />
+  </div>
+  <div class="filter-group">
+    <label for="filter-status">Estado</label>
+    <select id="filter-status" [ngModel]="filterStatus" (ngModelChange)="filterStatus=$event; onFilterChange()">
+      <option value="">Todos</option>
+      <option value="active">Activo</option>
+      <option value="inactive">Inactivo</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label for="filter-login">Login</label>
+    <select id="filter-login" [ngModel]="filterLogin" (ngModelChange)="filterLogin=$event; onFilterChange()">
+      <option value="">Todos</option>
+      <option value="yes">Con login</option>
+      <option value="no">Sin login</option>
+    </select>
+  </div>
+  @if (filterSearch || filterStatus || filterLogin) {
+    <button type="button" class="btn-secondary btn-sm" (click)="clearFilters()">Limpiar filtros</button>
+  }
+</div>
+
 @if (loading) {
   <p>Cargando...</p>
 } @else {

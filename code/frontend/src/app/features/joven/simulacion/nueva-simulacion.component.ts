@@ -91,7 +91,7 @@ export class NuevaSimulacionComponent implements OnInit {
           }
         },
         error: () => {
-          this.errorMessage = 'Error al crear la sesión';
+          this.submitting = false;
         },
       });
   }

@@ -26,10 +26,19 @@
 }
 
 .profile-section,
+.platform-sessions-section,
 .sessions-section,
 .summary-form-section,
 .chart-section {
   margin-bottom: var(--section-gap);
+}
+
+.platform-sessions-section {
+  .section-desc {
+    margin: 0 0 var(--space-3);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
 }
 
 .chart-section {
@@ -286,6 +295,108 @@
   background: var(--color-bg);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
+}
+
+.summary-form-section .competencies-table {
+  margin-top: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  background-color: var(--color-bg-elevated, #fafafa);
+
+  .competencies-header {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .competencies-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .competency-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    align-items: center;
+    gap: 0.75rem;
+
+    .competency-name {
+      font-size: 0.9rem;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.small-muted {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.transcript-loading {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.transcript-details {
+  margin-bottom: var(--space-4);
+
+  summary {
+    cursor: pointer;
+    color: var(--color-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.transcript-content {
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.transcript-entry {
+  margin-bottom: var(--space-2);
+  font-size: 0.9rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .transcript-role {
+    font-weight: 600;
+    margin-right: var(--space-1);
+  }
+
+  &.role-user .transcript-role {
+    color: var(--color-primary);
+  }
+
+  &.role-avatar .transcript-role {
+    color: var(--color-text-muted);
+  }
+
+  .transcript-text {
+    color: var(--color-text);
+  }
 }
 
 .field {

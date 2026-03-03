@@ -9,40 +9,19 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import engine, Base, get_db
-from app.routers import auth, youths, catalogs, sessions, material, summaries, professionals, upload
+from app.models import (  # noqa: F401 - ensure tables created
+    SessionTranscript,
+    PlatformSession,
+    Competency,
+    CompetencyLevel,
+    SessionCompetency,
+)
+from app.routers import auth, youths, catalogs, sessions, material, summaries, professionals, upload, assignments
 
 
 def create_tables():
-    """Crea las tablas en la BD."""
+    """Crea las tablas en la BD (PostgreSQL)."""
     Base.metadata.create_all(bind=engine)
-    _migrate_profile_checklist()
-    _migrate_support_material_created_by()
-
-
-def _migrate_profile_checklist():
-    """Añade columna profile_checklist a youths si no existe (SQLite)."""
-    if "sqlite" not in settings.DATABASE_URL:
-        return
-    from sqlalchemy import text
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("ALTER TABLE youths ADD COLUMN profile_checklist TEXT"))
-            conn.commit()
-    except Exception:
-        pass  # Columna ya existe
-
-
-def _migrate_support_material_created_by():
-    """Añade columna created_by a support_material si no existe (SQLite)."""
-    if "sqlite" not in settings.DATABASE_URL:
-        return
-    from sqlalchemy import text
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("ALTER TABLE support_material ADD COLUMN created_by INTEGER"))
-            conn.commit()
-    except Exception:
-        pass  # Columna ya existe
 
 
 @asynccontextmanager
@@ -75,6 +54,7 @@ app.include_router(material.router, prefix="/api/v1")
 app.include_router(summaries.router, prefix="/api/v1")
 app.include_router(professionals.router, prefix="/api/v1")
 app.include_router(upload.router, prefix="/api/v1")
+app.include_router(assignments.router, prefix="/api/v1")
 
 # Carpeta de archivos subidos
 uploads_dir = Path(__file__).resolve().parent.parent / "uploads"

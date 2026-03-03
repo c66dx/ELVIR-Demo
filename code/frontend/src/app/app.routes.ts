@@ -5,6 +5,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { redirectToDashboardGuard } from './core/guards/redirect-dashboard.guard';
 import { jovenGuard, profesionalGuard, adminGuard } from './core/guards/role.guard';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { LoginComponent } from './features/auth/login/login.component';
@@ -21,10 +22,12 @@ import { PerfilJovenComponent } from './features/profesional/jovenes/perfil-jove
 import { JovenDetailWrapperComponent } from './features/profesional/jovenes/joven-detail-wrapper.component';
 import { SupervisedStartComponent } from './features/profesional/jovenes/supervisada/supervised-start.component';
 import { ActivateComponent } from './features/auth/activate/activate.component';
+import { ChangePasswordComponent } from './features/auth/change-password/change-password.component';
 import { DashboardAdminComponent } from './features/admin/dashboard/dashboard-admin.component';
 import { ProfesionalFormComponent } from './features/admin/profesional-form/profesional-form.component';
 import { ProfesionalesListComponent } from './features/admin/profesionales-list/profesionales-list.component';
 import { MaterialFormComponent } from './features/admin/material-form/material-form.component';
+import { RedirectPlaceholderComponent } from './core/components/redirect-placeholder/redirect-placeholder.component';
 
 export const routes: Routes = [
   {
@@ -42,7 +45,22 @@ export const routes: Routes = [
     component: AppShellComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'login', pathMatch: 'full' },
+      {
+        path: '',
+        component: RedirectPlaceholderComponent,
+        canActivate: [redirectToDashboardGuard],
+        pathMatch: 'full',
+      },
+      {
+        path: 'session-end',
+        canActivate: [authGuard],
+        component: SessionEndComponent,
+      },
+      {
+        path: 'cambiar-contrasena',
+        canActivate: [authGuard],
+        component: ChangePasswordComponent,
+      },
       {
         path: 'joven/simulacion/nueva',
         canActivate: [jovenGuard],
@@ -54,21 +72,10 @@ export const routes: Routes = [
         component: SimulacionDetailComponent,
       },
       {
-        path: 'session-end',
-        canActivate: [authGuard],
-        component: SessionEndComponent,
-      },
-      {
         path: 'joven',
         canActivate: [jovenGuard],
         children: [
           { path: 'dashboard', component: DashboardJovenComponent },
-          {
-            path: 'simulacion',
-            children: [
-              { path: 'nueva', component: NuevaSimulacionComponent },
-            ],
-          },
           { path: 'historial', component: HistorialJovenComponent },
           { path: 'material', component: MaterialJovenComponent },
         ],
@@ -108,6 +115,7 @@ export const routes: Routes = [
             children: [
               { path: '', component: ProfesionalesListComponent },
               { path: 'nuevo', component: ProfesionalFormComponent },
+              { path: ':professionalId/editar', component: ProfesionalFormComponent },
             ],
           },
           { path: 'material/nuevo', component: MaterialFormComponent },

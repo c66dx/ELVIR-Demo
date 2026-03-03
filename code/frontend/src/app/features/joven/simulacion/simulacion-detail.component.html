@@ -7,7 +7,49 @@
       }
     </div>
 
-    @if (sessionNotFound()) {
+    @if (sessionCompleted()) {
+      <div class="session-completed-view">
+        <h3>Esta sesión ya finalizó</h3>
+        @if (completedSessionData(); as data) {
+          <div class="session-completed-card">
+            <span class="session-completed-status" [class]="'status-' + data.status.toLowerCase()">
+              {{ formatStatusLabel(data.status) }}
+            </span>
+            @if (data.jobRoleName || data.caseName) {
+              <p class="session-completed-meta">
+                <strong>Practicaste:</strong>
+                {{ data.jobRoleName && data.caseName ? data.jobRoleName + ' – ' + data.caseName : data.jobRoleName || data.caseName }}
+              </p>
+            }
+            <p class="session-completed-meta">
+              <strong>Fecha:</strong> {{ formatDate(data.started_at) }}
+            </p>
+            @if (data.duration_seconds) {
+              <p class="session-completed-meta">
+                <strong>Duración:</strong> {{ formatDuration(data.duration_seconds) }}
+              </p>
+            }
+          </div>
+        }
+        @if (completedSessionSummary(); as summary) {
+          <div class="session-summary-block">
+            <h4>Resumen de tu profesional</h4>
+            <p class="session-summary-text">{{ summary.summary_text }}</p>
+            @if (summary.competency_tags?.length) {
+              <p class="session-summary-tags">
+                @for (tag of summary.competency_tags; track tag) {
+                  <span class="tag">{{ tag }}</span>
+                }
+              </p>
+            }
+          </div>
+        }
+        <div class="session-completed-actions">
+          <a routerLink="/joven/dashboard" class="btn-primary">Volver al dashboard</a>
+          <a routerLink="/joven/historial" class="btn-secondary">Ver historial</a>
+        </div>
+      </div>
+    } @else if (sessionNotFound()) {
   <div class="banner-session-not-found">
     <p>Esta sesión no existe o expiró.</p>
     <p class="banner-hint">Para iniciar una simulación, primero debes elegir cargo y caso.</p>
