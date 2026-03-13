@@ -38,7 +38,7 @@ class SessionCloseRequest(BaseModel):
 class SessionStartResponse(BaseModel):
     session_id: int
     liveavatar_session_id: str
-    embed: dict | None = None  # { type: "iframe", url: "..." } - legacy
+    embed: dict | None = None  # { type: "iframe", url: "..." } - heredado
     livekit_url: str | None = None
     access_token: str | None = None
 
@@ -55,7 +55,7 @@ class SessionEventResponse(BaseModel):
 
 
 class TranscriptEntry(BaseModel):
-    role: str  # "user" | "avatar"
+    role: str  # valores: "user" | "avatar"
     transcript: str
     absolute_timestamp: int
     relative_timestamp: int

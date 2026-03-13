@@ -27,7 +27,7 @@ class ActivateValidateResponse(BaseModel):
     email: EmailStr | None = None
     display_name: str | None = None
     error: str | None = None
-    is_change_email: bool = False  # True cuando el joven ya tiene cuenta (cambio de correo)
+    is_change_email: bool = False  # Verdadero cuando el joven ya tiene cuenta (cambio de correo)
 
 
 class ActivateRequest(BaseModel):
@@ -39,7 +39,7 @@ class ActivateRequest(BaseModel):
 class ActivateResponse(BaseModel):
     success: bool
     message: str | None = None
-    error: str | None = None  # Usado por frontend cuando success=False
+    error: str | None = None  # Usado por la interfaz cuando success=False
 
 
 class ChangePasswordRequest(BaseModel):

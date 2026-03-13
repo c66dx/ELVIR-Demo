@@ -1,20 +1,20 @@
 ﻿#!/usr/bin/env python3
 """
-Clean user-created data for local testing.
-Keeps seed data (test users, youths, roles, cases, templates, competencies).
+Limpia datos creados por usuarios para pruebas locales.
+Mantiene datos base (usuarios de prueba, jovenes, cargos, casos, plantillas, competencias).
 
-Deletes:
-- Sessions and related data (events, summaries, transcripts, audio, competencies)
-- Platform sessions
-- Material views/suggestions
-- Support materials (then re-seeds the 4 defaults unless --skip-reseed)
-- Youth invitations
-- Audit logs
-- Non-seed youths, professionals, users (preserves seed emails and JOV-001..JOV-004)
+Elimina:
+- Sesiones y datos relacionados (eventos, resumenes, transcripciones, audio, competencias)
+- Sesiones de plataforma
+- Vistas/sugerencias de material
+- Material de apoyo (luego recrea los 4 por defecto salvo --skip-reseed)
+- Invitaciones de jovenes
+- Logs de auditoria
+- Jovenes, profesionales y usuarios no base (preserva emails base y JOV-001..JOV-004)
 
-Optional:
-- --delete-uploads removes files under backend/uploads
-- --skip-reseed keeps support materials empty after cleanup
+Opcional:
+- --delete-uploads elimina archivos bajo backend/uploads
+- --skip-reseed deja el material de apoyo vacio despues de la limpieza
 """
 import argparse
 import sys
@@ -68,7 +68,7 @@ def _delete_upload_files() -> int:
             removed += 1
         except OSError:
             pass
-    # Remove empty directories (but keep uploads root)
+    # Eliminar directorios vacios (pero mantener la raiz de uploads)
     for path in sorted([p for p in UPLOADS_DIR.rglob("*") if p.is_dir()], reverse=True):
         try:
             if not any(path.iterdir()):
@@ -79,7 +79,7 @@ def _delete_upload_files() -> int:
 
 
 def clean(db: Session) -> dict[str, int]:
-    """Delete user-created data, respecting FK order."""
+    """Elimina datos creados por usuarios, respetando el orden de llaves foraneas."""
     deleted: dict[str, int] = {}
 
     seed_user_ids = {row[0] for row in db.query(User.id).filter(User.email.in_(SEED_USER_EMAILS)).all()}
@@ -104,10 +104,10 @@ def clean(db: Session) -> dict[str, int]:
     deleted["session_transcripts"] = db.query(SessionTranscript).delete()
     deleted["session_audio"] = db.query(SessionAudio).delete()
     deleted["session_competencies"] = db.query(SessionCompetency).delete()
-    deleted["sessions"] = db.query(SessionModel).delete()
-    deleted["platform_sessions"] = db.query(PlatformSession).delete()
     deleted["material_views"] = db.query(MaterialView).delete()
     deleted["material_suggestions"] = db.query(MaterialSuggestion).delete()
+    deleted["sessions"] = db.query(SessionModel).delete()
+    deleted["platform_sessions"] = db.query(PlatformSession).delete()
     deleted["support_materials"] = db.query(SupportMaterial).delete()
     deleted["youth_invitations"] = db.query(YouthInvitation).delete()
     deleted["audit_logs"] = db.query(AuditLog).delete()
@@ -135,7 +135,7 @@ def clean(db: Session) -> dict[str, int]:
 
 
 def reseed_material(db: Session) -> None:
-    """Recreate the 4 default materials from seed."""
+    """Recrea los 4 materiales por defecto de la carga inicial."""
     from app.models.job_role import JobRole
     from app.models.case import Case
 

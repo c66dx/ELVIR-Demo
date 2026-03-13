@@ -1,4 +1,4 @@
-"""add rut and photo_url to youths
+﻿"""agregar rut y photo_url a youths
 
 Revision ID: 0006_youth_rut
 Revises: 0005_session_audio
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy import inspect
 
 
-# revision identifiers, used by Alembic.
+# identificadores de revision, usados por Alembic.
 revision = "0006_youth_rut"
 down_revision = "0005_session_audio"
 branch_labels = None
@@ -50,3 +50,4 @@ def downgrade() -> None:
         op.drop_column("youths", "photo_url")
     if "rut" in columns:
         op.drop_column("youths", "rut")
+

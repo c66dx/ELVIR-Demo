@@ -10,7 +10,7 @@ class JobRoleResponse(BaseModel):
     name: str
     description: Optional[str] = None
     objetivo: Optional[str] = None
-    competencias: Optional[Any] = None  # JSON array o string
+    competencias: Optional[Any] = None  # arreglo JSON o texto
     is_active: bool
 
     class Config:

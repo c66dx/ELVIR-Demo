@@ -51,7 +51,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
   elapsedTime = signal('0:00');
   private room: Room | null = null;
   private avatarIsSpeaking = false;
-  /** True si el navegador bloqueó el audio (autoplay policy) y el usuario debe hacer clic. */
+  /** Verdadero si el navegador bloqueó el audio (politica de autoplay) y el usuario debe hacer clic. */
   audioBlocked = signal(false);
   audioReady = signal(false);
   volume = signal(0.8);
@@ -65,7 +65,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
   private audioStartTime: number | null = null;
   private audioUploaded = false;
 
-  /** True si la sesión ya está finalizada (COMPLETADA/CANCELADA/ERROR) -> mostrar resumen, no iniciar. */
+  /** Verdadero si la sesion ya esta finalizada (COMPLETADA/CANCELADA/ERROR) -> mostrar resumen, no iniciar. */
   sessionCompleted = signal(false);
   completedSessionSummary = signal<InterviewSummary | null>(null);
   completedSessionData = signal<{
@@ -513,7 +513,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
     try {
       this.mediaRecorder?.stream?.getTracks().forEach((t) => t.stop());
     } catch {
-      // ignore
+      // ignorar
     }
     if (this.audioStream) {
       this.audioStream.getTracks().forEach((t) => t.stop());

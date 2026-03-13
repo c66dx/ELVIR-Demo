@@ -13,5 +13,5 @@ class JobRole(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     objetivo = Column(Text, nullable=True)
-    competencias = Column(Text, nullable=True)  # JSON array como texto
+    competencias = Column(Text, nullable=True)  # arreglo JSON como texto
     is_active = Column(Boolean, nullable=False, default=True)

@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> list[str]:
         """Orígenes CORS normalizados, deduplicados y sin entradas vacías."""
         cleaned = [o.strip().rstrip("/") for o in self.CORS_ORIGINS.split(",") if o.strip()]
-        # Dedupe preservando orden de primera aparición
+        # Eliminar duplicados preservando el orden de primera aparicion
         return list(dict.fromkeys(cleaned))
 
 

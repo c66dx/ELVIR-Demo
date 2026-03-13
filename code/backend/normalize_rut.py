@@ -1,6 +1,6 @@
-"""Normalize RUT values for youths.
+"""Normaliza valores de RUT para jovenes.
 
-Usage:
+Uso:
   python normalize_rut.py --dry-run
   python normalize_rut.py --apply
   python normalize_rut.py --apply --clear-invalid
@@ -79,7 +79,7 @@ def main() -> int:
             except ValueError:
                 invalid_items.append((y, "invalid"))
 
-        # Detect duplicates after normalization
+        # Detectar duplicados despues de normalizar
         norm_map: Dict[str, List[Youth]] = {}
         for y, norm in valid_items:
             norm_map.setdefault(norm, []).append(y)

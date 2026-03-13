@@ -18,7 +18,7 @@ class Youth(Base):
     diagnosis = Column(Text, nullable=True)
     is_active = Column(Boolean, nullable=False, default=True)
     general_notes = Column(Text, nullable=True)
-    profile_checklist = Column(Text, nullable=True)  # JSON array: ["comunicacion", "trabajo_equipo", ...]
+    profile_checklist = Column(Text, nullable=True)  # arreglo JSON: ["comunicacion", "trabajo_equipo", ...]
     photo_url = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

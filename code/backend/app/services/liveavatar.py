@@ -69,7 +69,7 @@ def resolve_liveavatar_ids(template: SimulationTemplate) -> tuple[str | None, st
 
 
 def get_liveavatar_config_status(template: SimulationTemplate) -> dict[str, bool]:
-    """Valida si la configuracion efectiva es utilizable (sin placeholders)."""
+    """Valida si la configuracion efectiva es utilizable (sin marcadores de posicion)."""
     context_id, avatar_id, voice_id = resolve_liveavatar_ids(template)
     return {
         "api_key": bool(settings.LIVEAVATAR_API_KEY),
@@ -91,7 +91,7 @@ def is_liveavatar_configured(template: SimulationTemplate) -> bool:
     reraise=True,
 )
 def _patch_context(client: httpx.Client, url: str, body: dict, request_id: str | None = None) -> httpx.Response:
-    """PATCH al contexto con retry en errores 5xx y timeout."""
+    """PATCH al contexto con reintentos en errores 5xx y tiempo de espera."""
     resp = client.patch(url, headers=_headers(request_id), json=body)
     if resp.status_code >= 500:
         resp.raise_for_status()
@@ -109,7 +109,7 @@ def start_liveavatar_session(
     Usa IDs de la plantilla con fallback a .env.
     Retorna: { session_id, livekit_url, access_token, max_session_duration }
     """
-    # .env tiene prioridad; placeholders no son validos para LiveAvatar
+    # .env tiene prioridad; marcadores de posicion no son validos para LiveAvatar
     context_id, avatar_id, voice_id = resolve_liveavatar_ids(template)
 
     if not settings.LIVEAVATAR_API_KEY:
@@ -127,7 +127,7 @@ def start_liveavatar_session(
 
     try:
         with httpx.Client(timeout=30.0) as client:
-            # 1. PATCH contexto (con retry en 5xx/timeout)
+            # 1. PATCH contexto (con reintentos en 5xx/tiempo de espera)
             patch_url = f"{base_url}/contexts/{context_id}"
             patch_body = {
                 "name": "elvir_context_dinamico",
@@ -158,7 +158,7 @@ def start_liveavatar_session(
                     patch_resp.status_code,
                 )
 
-            # 2. POST sessions/token
+            # 2. POST a sessions/token
             token_resp = client.post(
                 f"{base_url}/sessions/token",
                 headers=_headers(request_id),
@@ -185,7 +185,7 @@ def start_liveavatar_session(
             if not session_token:
                 raise LiveAvatarError("LiveAvatar no retornó session_token", 502)
 
-            # 3. POST sessions/start
+            # 3. POST a sessions/start
             start_resp = client.post(
                 f"{base_url}/sessions/start",
                 headers={
@@ -228,7 +228,7 @@ def get_session_transcript(liveavatar_session_id: str, request_id: str | None = 
     """
     Obtiene la transcripción de una sesión desde LiveAvatar.
     Retorna el dict con session_active, transcript_data (o None si falla).
-    No lanza excepción; retorna None en caso de error (404, timeout, etc.).
+    No lanza excepción; retorna None en caso de error (404, tiempo de espera, etc.).
     """
     if not liveavatar_session_id or not settings.LIVEAVATAR_API_KEY:
         return None

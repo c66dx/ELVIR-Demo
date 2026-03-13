@@ -20,7 +20,7 @@ from app.core.middleware import (
     get_request_metrics_snapshot,
     audit_log_middleware,
 )
-from app.models import (  # noqa: F401 - ensure tables created
+from app.models import (  # noqa: F401 - asegurar tablas creadas
     SessionTranscript,
     SessionAudio,
     PlatformSession,
@@ -44,7 +44,7 @@ async def lifespan(app: FastAPI):
             "AUTO_CREATE_TABLES está deprecado en startup; usa migraciones Alembic (python -m alembic upgrade head)."
         )
     yield
-    # cleanup si hace falta
+    # limpieza si hace falta
 
 
 app = FastAPI(

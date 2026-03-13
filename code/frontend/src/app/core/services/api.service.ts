@@ -743,7 +743,7 @@ export class ApiService {
     );
   }
 
-  /** Admin: elimina (soft) un joven y libera su email. */
+  /** Admin: elimina de forma logica un joven y libera su email. */
   deleteYouthAsAdmin(youthId: string): Observable<{ ok: true } | { error: string }> {
     return this.http.delete<Record<string, unknown>>(`${API_BASE}/admin/youths/${youthId}`).pipe(
       map(() => ({ ok: true as const })),

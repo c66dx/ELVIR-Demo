@@ -11,7 +11,7 @@ class SessionTranscript(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     session_id = Column(Integer, ForeignKey("sessions.id"), nullable=False, unique=True, index=True)
-    transcript_data = Column(JSON, nullable=False)  # [{ role, transcript, absolute_timestamp, relative_timestamp }]
+    transcript_data = Column(JSON, nullable=False)  # elementos con claves: role, transcript, absolute_timestamp, relative_timestamp
     session_active = Column(Boolean, nullable=True)
     fetched_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

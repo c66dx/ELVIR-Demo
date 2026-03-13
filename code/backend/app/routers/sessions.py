@@ -363,7 +363,7 @@ def start_session(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Inicia la experiencia con LiveAvatar: PATCH contexto, token, start. Devuelve livekit_url+access_token o embed placeholder."""
+    """Inicia la experiencia con LiveAvatar: PATCH contexto, token, start. Devuelve livekit_url+access_token o embed de respaldo."""
     from app.models.simulation_template import SimulationTemplate
     from app.models.job_role import JobRole
     from app.models.case import Case
@@ -454,7 +454,7 @@ def start_session(
             payload=payload,
         ))
 
-    # Placeholder si LiveAvatar no está configurado
+    # Marcador de posicion si LiveAvatar no esta configurado
     live_id = f"live-{session_id}-{int(datetime.now(timezone.utc).timestamp())}"
     session.liveavatar_session_id = live_id
     db.add(SessionEvent(

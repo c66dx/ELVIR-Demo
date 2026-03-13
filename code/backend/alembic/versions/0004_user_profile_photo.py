@@ -1,4 +1,4 @@
-"""add profile_photo_url to users
+﻿"""agregar profile_photo_url a users
 
 Revision ID: 0004_user_profile_photo
 Revises: 0003_audit_logs
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import inspect
 
-# revision identifiers, used by Alembic.
+# identificadores de revision, usados por Alembic.
 revision = "0004_user_profile_photo"
 down_revision = "0003_audit_logs"
 branch_labels = None
@@ -21,7 +21,9 @@ def upgrade() -> None:
     inspector = inspect(bind)
     if not inspector.has_table("users"):
         return
-    op.add_column("users", sa.Column("profile_photo_url", sa.String(length=255), nullable=True))
+    columns = {col["name"] for col in inspector.get_columns("users")}
+    if "profile_photo_url" not in columns:
+        op.add_column("users", sa.Column("profile_photo_url", sa.String(length=255), nullable=True))
 
 
 def downgrade() -> None:
@@ -29,4 +31,7 @@ def downgrade() -> None:
     inspector = inspect(bind)
     if not inspector.has_table("users"):
         return
-    op.drop_column("users", "profile_photo_url")
+    columns = {col["name"] for col in inspector.get_columns("users")}
+    if "profile_photo_url" in columns:
+        op.drop_column("users", "profile_photo_url")
+

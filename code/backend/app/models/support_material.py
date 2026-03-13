@@ -15,7 +15,7 @@ class SupportMaterial(Base):
     url = Column(String(500), nullable=False)
     job_role_id = Column(Integer, ForeignKey("job_roles.id"), nullable=True, index=True)
     case_id = Column(Integer, ForeignKey("cases.id"), nullable=True, index=True)
-    created_by = Column(Integer, ForeignKey("professionals.id"), nullable=True, index=True)  # null = Admin; valor = Profesional
+    created_by = Column(Integer, ForeignKey("professionals.id"), nullable=True, index=True)  # nulo = Admin; valor = Profesional
     active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

@@ -39,7 +39,7 @@ def create_support_material(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Crea material. Admin: material general (created_by=null). Profesional: material propio."""
+    """Crea material. Admin: material general (created_by=nulo). Profesional: material propio."""
     created_by = None
     if user.role == "PROFESIONAL":
         prof = db.query(Professional).filter(Professional.user_id == user.id).first()
@@ -79,7 +79,7 @@ def list_support_material(
         q = q.filter((SupportMaterial.job_role_id == job_role_id) | (SupportMaterial.job_role_id.is_(None)))
     if case_id:
         q = q.filter((SupportMaterial.case_id == case_id) | (SupportMaterial.case_id.is_(None)))
-    # Profesional ve material general (created_by null) + su material propio
+    # Profesional ve material general (created_by nulo) + su material propio
     if user.role == "PROFESIONAL":
         prof = db.query(Professional).filter(Professional.user_id == user.id).first()
         if prof:
