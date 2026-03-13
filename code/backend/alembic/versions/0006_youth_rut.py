@@ -20,6 +20,8 @@ depends_on = None
 def upgrade() -> None:
     bind = op.get_bind()
     inspector = inspect(bind)
+    if not inspector.has_table("youths"):
+        return
     columns = {col["name"] for col in inspector.get_columns("youths")}
     indexes = inspector.get_indexes("youths")
     index_names = {idx.get("name") for idx in indexes}
@@ -36,6 +38,8 @@ def upgrade() -> None:
 def downgrade() -> None:
     bind = op.get_bind()
     inspector = inspect(bind)
+    if not inspector.has_table("youths"):
+        return
     columns = {col["name"] for col in inspector.get_columns("youths")}
     indexes = inspector.get_indexes("youths")
     index_names = {idx.get("name") for idx in indexes}
