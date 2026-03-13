@@ -1,4 +1,4 @@
-<div class="dashboard">
+﻿<div class="dashboard">
   <header class="dashboard-header page-header">
     <h2>Dashboard Profesional</h2>
     <div class="page-header-actions">
@@ -33,14 +33,27 @@
         <div class="recent-list">
           @for (s of data.recentSessions; track s.id) {
             <a [routerLink]="['/profesional/jovenes', s.youth_id]" class="recent-item">
-              <span class="recent-youth">{{ s.youthName }}</span>
+              <div class="recent-avatar" [class.recent-avatar--image]="s.youthPhotoUrl">
+                @if (s.youthPhotoUrl) {
+                  <img [src]="s.youthPhotoUrl" alt="Foto del joven" />
+                } @else {
+                  <span>{{ initials(s.youthName) }}</span>
+                }
+              </div>
+              <div class="recent-youth-info">
+                <span class="recent-youth">{{ s.youthName }}</span>
+                <span class="recent-rut">RUT: {{ s.youthRut ?? '-' }}</span>
+              </div>
               <span class="recent-date">{{ formatDate(s.started_at) }}</span>
               <app-status-badge [status]="s.status" />
               <span class="recent-meta">{{ s.mode }} · {{ formatDuration(s.duration_seconds) }}</span>
             </a>
-          }
+        }
+      </div>
+        <div class="dashboard-links">
+          <a routerLink="/profesional/jovenes" class="link-more">Ver todos los jóvenes</a>
+          <a routerLink="/profesional/sesiones" class="link-more">Ver todas las sesiones</a>
         </div>
-        <a routerLink="/profesional/jovenes" class="link-more">Ver todos los jóvenes</a>
       </section>
     } @else {
       <section class="dashboard-section dashboard-section--empty">
@@ -52,3 +65,4 @@
     <p class="loading">Cargando...</p>
   }
 </div>
+

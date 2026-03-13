@@ -1,6 +1,6 @@
 """Esquemas de sesiones."""
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, Literal
 
 from pydantic import BaseModel
 
@@ -8,7 +8,7 @@ from pydantic import BaseModel
 class SessionCreate(BaseModel):
     youth_id: int
     simulation_template_id: int
-    mode: str  # AUTOGESTIONADA, SUPERVISADA
+    mode: Literal["AUTOGESTIONADA", "SUPERVISADA"]
     professional_id: Optional[int] = None
 
 
@@ -17,8 +17,8 @@ class SessionResponse(BaseModel):
     youth_id: int
     professional_id: Optional[int] = None
     simulation_template_id: int
-    mode: str
-    status: str
+    mode: Literal["AUTOGESTIONADA", "SUPERVISADA"]
+    status: Literal["EN_CURSO", "COMPLETADA", "CANCELADA", "ERROR"]
     started_at: datetime
     ended_at: Optional[datetime] = None
     duration_seconds: Optional[int] = None
@@ -30,7 +30,7 @@ class SessionResponse(BaseModel):
 
 
 class SessionCloseRequest(BaseModel):
-    status: str  # COMPLETADA, CANCELADA, ERROR
+    status: Literal["COMPLETADA", "CANCELADA", "ERROR"]
     metrics: Optional[dict[str, Any]] = None
     motivo: Optional[str] = None  # Para ERROR: LIVEAVATAR_CONNECTION, etc.
 

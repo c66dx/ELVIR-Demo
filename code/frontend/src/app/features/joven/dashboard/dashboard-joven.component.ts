@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
 import { YouthService } from '../../../core/services/youth.service';
 import { ApiService } from '../../../core/services/api.service';
@@ -33,21 +33,19 @@ export class DashboardJovenComponent {
   data$: Observable<DashboardJovenData> = this.youthService.getCurrentYouthId().pipe(
     switchMap((youthId) => {
       if (!youthId) return of(this.emptyData());
-      return this.api.getSessions({ youth_id: youthId }).pipe(
-        switchMap((sessions) =>
-          this.api.getYouthMaterialSuggestions(youthId).pipe(
-            map((suggestions) => ({ sessions, suggestions }))
-          )
-        ),
-        map(({ sessions, suggestions }) => {
-          const sorted = [...sessions].sort((a, b) => (b.started_at > a.started_at ? 1 : -1));
-          const completed = sessions.filter((s) => s.status === 'COMPLETADA').length;
+      return forkJoin({
+        sessionsPage: this.api.getSessionsPaged({ youth_id: youthId, page: 1, page_size: 5 }),
+        stats: this.api.getSessionStats({ youth_id: youthId, months: 6 }),
+        suggestionsMeta: this.api.getYouthMaterialSuggestionsPaged(youthId, { page: 1, page_size: 1 }),
+      }).pipe(
+        map(({ sessionsPage, stats, suggestionsMeta }) => {
+          const sorted = [...sessionsPage.items].sort((a, b) => (b.started_at > a.started_at ? 1 : -1));
           return {
-            totalSessions: sessions.length,
-            completedSessions: completed,
+            totalSessions: stats.total,
+            completedSessions: stats.completed,
             lastSession: sorted[0] ?? null,
             recentSessions: sorted.slice(0, 5),
-            materialSuggestionsCount: suggestions.length,
+            materialSuggestionsCount: suggestionsMeta.total,
           };
         })
       );
@@ -71,3 +69,4 @@ export class DashboardJovenComponent {
     return status ? formatStatusLabel(status) : '-';
   }
 }
+

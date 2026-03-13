@@ -1,4 +1,4 @@
-<div class="form-page">
+﻿<div class="form-page">
   <div class="page-header">
     <h2>{{ isEdit ? 'Editar Joven' : 'Crear Joven' }}</h2>
   </div>
@@ -28,6 +28,15 @@
     </div>
   }
   <div class="field">
+    <label for="rut">RUT</label>
+    <input id="rut" type="text" formControlName="rut" placeholder="12.345.678-9" (blur)="onRutBlur()" />
+    @if (form.get('rut')?.errors?.['server']) {
+      <span class="field-error">{{ form.get('rut')?.errors?.['server'] }}</span>
+    } @else if (form.get('rut')?.invalid && (form.get('rut')?.dirty || form.get('rut')?.touched)) {
+      <span class="field-error">RUT inválido. Verifica el dígito verificador.</span>
+    }
+  </div>
+  <div class="field">
     <label for="phone">Teléfono</label>
     <input id="phone" type="text" formControlName="phone" />
   </div>
@@ -50,7 +59,7 @@
       <div class="field field-readonly">
         <label>Email</label>
         <div class="readonly-with-action">
-          <span class="readonly-value">{{ currentYouth?.email || '—' }}</span>
+          <span class="readonly-value">{{ currentYouth?.email || '-' }}</span>
           <button type="button" class="btn-secondary btn-sm" (click)="openChangeEmailModal()">Cambiar email</button>
         </div>
       </div>
@@ -58,6 +67,11 @@
       <div class="field">
         <label for="email">Email *</label>
         <input id="email" type="email" formControlName="email" placeholder="ejemplo&#64;correo.cl" />
+        @if (form.get('email')?.errors?.['server']) {
+          <span class="field-error">{{ form.get('email')?.errors?.['server'] }}</span>
+        } @else if (form.get('email')?.invalid && (form.get('email')?.dirty || form.get('email')?.touched)) {
+          <span class="field-error">Email inválido. Verifica el formato.</span>
+        }
         <span class="field-hint">
           @if (needsInvitation) {
             Si ya enviaste un enlace, ingresa el mismo u otro email para generar uno nuevo.
@@ -120,3 +134,4 @@
     </div>
   }
 </div>
+

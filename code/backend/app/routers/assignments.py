@@ -1,4 +1,4 @@
-"""Router de asignaciones (joven–profesional)."""
+﻿"""Router de asignaciones (joven-profesional)."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -92,3 +92,5 @@ def end_assignment(
         "status": assignment.status,
         "ended_at": assignment.ended_at.isoformat() if assignment.ended_at else None,
     }
+
+

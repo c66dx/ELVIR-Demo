@@ -1,4 +1,4 @@
-"""Ensambla el prompt para LiveAvatar (Opción B: catálogo en BD)."""
+﻿"""Ensambla el prompt para LiveAvatar (Opción B: catálogo en BD)."""
 import json
 from pathlib import Path
 
@@ -57,3 +57,4 @@ def build_prompt(job_role: JobRole, case: Case) -> str:
     role_ctx = build_role_context(job_role)
     case_ctx = build_case_context(case)
     return f"{base}\n\n====================================\n{role_ctx}\n====================================\n{case_ctx}"
+

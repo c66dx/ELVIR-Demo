@@ -1,10 +1,12 @@
-export interface Youth {
+﻿export interface Youth {
   id: string;
   user_id?: string;
   login_enabled: boolean;
   display_name: string;
   identifier?: string;
+  rut?: string;
   email?: string;
+  profile_photo_url?: string;
   phone?: string;
   year_of_birth?: number;
   diagnosis?: string;
@@ -27,3 +29,4 @@ export const PROFILE_CHECKLIST_ITEMS: { slug: string; label: string }[] = [
   { slug: 'adaptabilidad', label: 'Adaptabilidad' },
   { slug: 'presentacion_personal', label: 'Presentación personal' },
 ];
+

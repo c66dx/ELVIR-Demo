@@ -1,9 +1,9 @@
-"""Esquemas de autenticación."""
+﻿"""Esquemas de autenticación."""
 from pydantic import BaseModel, EmailStr
 
 
 class LoginRequest(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 
@@ -16,14 +16,15 @@ class LoginResponse(BaseModel):
 class MeResponse(BaseModel):
     user_id: int
     role: str
-    email: str
+    email: EmailStr
+    profile_photo_url: str | None = None
     professional_id: int | None = None  # Solo cuando role=PROFESIONAL
     youth_id: int | None = None  # Solo cuando role=JOVEN
 
 
 class ActivateValidateResponse(BaseModel):
     valid: bool
-    email: str | None = None
+    email: EmailStr | None = None
     display_name: str | None = None
     error: str | None = None
     is_change_email: bool = False  # True cuando el joven ya tiene cuenta (cambio de correo)
@@ -44,3 +45,15 @@ class ActivateResponse(BaseModel):
 class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str
+
+
+class ChangeEmailRequest(BaseModel):
+    new_email: EmailStr
+    current_password: str
+
+
+class ChangeEmailResponse(BaseModel):
+    success: bool
+    message: str | None = None
+    activation_url: str | None = None
+

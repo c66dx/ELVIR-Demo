@@ -8,11 +8,29 @@ __pycache__/
 venv/
 code/backend/*.db
 
+# Python venv/cache
+.venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
 # Build
 dist/
 frontend/dist/
 code/frontend/dist/
 code/frontend/.angular/
+
+# Angular cache
+.angular/cache/
+
+# Tests temp
+code/backend/tests/_tmp/
+
+# DB
+*.db
 
 # IDE
 .idea/

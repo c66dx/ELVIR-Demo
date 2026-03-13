@@ -1,4 +1,4 @@
-<div class="simulacion-page">
+﻿<div class="simulacion-page">
   <div class="simulacion-main">
     <div class="simulacion-header">
       <h2>Simulación</h2>
@@ -9,44 +9,67 @@
 
     @if (sessionCompleted()) {
       <div class="session-completed-view">
-        <h3>Esta sesión ya finalizó</h3>
-        @if (completedSessionData(); as data) {
-          <div class="session-completed-card">
+        <div class="completed-header">
+          <div>
+            <h3>{{ completedTitle() }}</h3>
+            <p class="completed-subtitle">{{ completedSubtitle() }}</p>
+          </div>
+          @if (completedSessionData(); as data) {
             <span class="session-completed-status" [class]="'status-' + data.status.toLowerCase()">
               {{ formatStatusLabel(data.status) }}
             </span>
-            @if (data.jobRoleName || data.caseName) {
-              <p class="session-completed-meta">
-                <strong>Practicaste:</strong>
-                {{ data.jobRoleName && data.caseName ? data.jobRoleName + ' – ' + data.caseName : data.jobRoleName || data.caseName }}
-              </p>
-            }
-            <p class="session-completed-meta">
-              <strong>Fecha:</strong> {{ formatDate(data.started_at) }}
-            </p>
-            @if (data.duration_seconds) {
-              <p class="session-completed-meta">
-                <strong>Duración:</strong> {{ formatDuration(data.duration_seconds) }}
-              </p>
-            }
-          </div>
-        }
-        @if (completedSessionSummary(); as summary) {
-          <div class="session-summary-block">
-            <h4>Resumen de tu profesional</h4>
-            <p class="session-summary-text">{{ summary.summary_text }}</p>
-            @if (summary.competency_tags?.length) {
-              <p class="session-summary-tags">
-                @for (tag of summary.competency_tags; track tag) {
-                  <span class="tag">{{ tag }}</span>
+          }
+        </div>
+
+        <div class="completed-grid">
+          @if (completedSessionData(); as data) {
+            <div class="session-completed-card">
+              <h4>Resumen de la sesión</h4>
+              <div class="session-completed-list">
+                @if (data.jobRoleName || data.caseName) {
+                  <div class="session-row">
+                    <span class="label">Práctica</span>
+                    <span class="value">{{ data.jobRoleName && data.caseName ? data.jobRoleName + ' - ' + data.caseName : data.jobRoleName || data.caseName }}</span>
+                  </div>
                 }
-              </p>
+                <div class="session-row">
+                  <span class="label">Fecha</span>
+                  <span class="value">{{ formatDate(data.started_at) }}</span>
+                </div>
+                @if (data.duration_seconds) {
+                  <div class="session-row">
+                    <span class="label">Duración</span>
+                    <span class="value">{{ formatDuration(data.duration_seconds) }}</span>
+                  </div>
+                }
+                <div class="session-row">
+                  <span class="label">Modo</span>
+                  <span class="value">{{ data.mode }}</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="session-summary-block">
+            <h4>{{ summaryTitle() }}</h4>
+            @if (completedSessionSummary(); as summary) {
+              <p class="session-summary-text">{{ summary.summary_text }}</p>
+              @if (summary.competency_tags?.length) {
+                <p class="session-summary-tags">
+                  @for (tag of summary.competency_tags; track tag) {
+                    <span class="tag">{{ tag }}</span>
+                  }
+                </p>
+              }
+            } @else {
+              <p class="session-summary-empty">{{ summaryEmptyText() }}</p>
             }
           </div>
-        }
+        </div>
+
         <div class="session-completed-actions">
-          <a routerLink="/joven/dashboard" class="btn-primary">Volver al dashboard</a>
-          <a routerLink="/joven/historial" class="btn-secondary">Ver historial</a>
+          <a [routerLink]="primaryReturnLink()" class="btn-primary">{{ primaryReturnLabel() }}</a>
+          <a [routerLink]="secondaryReturnLink()" class="btn-secondary">{{ secondaryReturnLabel() }}</a>
         </div>
       </div>
     } @else if (sessionNotFound()) {
@@ -69,27 +92,58 @@
   <p>Cargando...</p>
 } @else if (embedUrl() || useLiveKit()) {
   <div class="simulacion-video-block">
-    <div class="simulacion-meta">
-      @if (sessionContext(); as ctx) {
-        <div class="session-context">
-          <span class="context-badge">Cargo: {{ ctx.jobRoleName }}</span>
-          <span class="context-badge">Caso: {{ ctx.caseName }}</span>
+      <div class="simulacion-meta">
+        @if (sessionContext(); as ctx) {
+          <div class="session-context">
+            <span class="context-badge">Cargo: {{ ctx.jobRoleName }}</span>
+            <span class="context-badge">Caso: {{ ctx.caseName }}</span>
+          </div>
+        }
+        <div class="contador" aria-live="polite">
+          <span class="contador-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </span>
+          <span class="contador-value">{{ elapsedTime() }}</span>
         </div>
-      }
-      <div class="contador" aria-live="polite">
-        <span class="contador-icon" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        </span>
-        <span class="contador-value">{{ elapsedTime() }}</span>
+        @if (audioRecording() === 'recording') {
+          <span class="recording-badge">Grabando audio</span>
+        } @else if (audioRecording() === 'error') {
+          <span class="recording-badge recording-badge--error">Audio no disponible</span>
+        }
+        @if (useLiveKit()) {
+          <div class="audio-controls">
+            <button type="button" class="audio-btn" (click)="toggleMute()" [attr.aria-pressed]="muted()">
+              @if (muted() || volume() === 0) {
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M9 9L5 12l4 3V9zm4.5-3.5v13l-5-3.7V9.2l5-3.7zm6 6.5l2.5 2.5-1 1-2.5-2.5-2.5 2.5-1-1 2.5-2.5-2.5-2.5 1-1 2.5 2.5 2.5-2.5 1 1-2.5 2.5z"/>
+                </svg>
+              } @else {
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M9 9L5 12l4 3V9zm4.5-3.5v13l-5-3.7V9.2l5-3.7zm3.5 2.5a6 6 0 010 8l-1.4-1.4a4 4 0 000-5.2L17 8z"/>
+                </svg>
+              }
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              [value]="volume()"
+              (input)="onVolumeChange($event)"
+              [disabled]="!audioReady() || audioBlocked()"
+              aria-label="Control de volumen"
+            />
+            <span class="volume-value">{{ volumePercent() }}%</span>
+          </div>
+        }
       </div>
-    </div>
     @if (useLiveKit()) {
       <div class="embed-wrap livekit-wrap">
         <video #avatarVideo autoplay playsinline class="avatar-video"></video>
         <audio #avatarAudio autoplay playsinline muted></audio>
         @if (audioBlocked()) {
           <button type="button" class="audio-unlock-btn" (click)="onActivarAudio()">
-            🔊 Haz clic para activar el audio
+            Haz clic para activar el audio
           </button>
         }
         <div class="turn-indicator">{{ turnIndicator() }}</div>
@@ -102,8 +156,6 @@
     <div class="simulacion-controls">
       <button type="button" class="btn-primary" (click)="closeSession('COMPLETADA')">Finalizar</button>
       <button type="button" class="btn-secondary" (click)="closeSession('CANCELADA')">Cancelar</button>
-      <button type="button" class="btn-danger" (click)="closeSession('ERROR')">Simular ERROR</button>
-      <button type="button" class="btn-warning" (click)="connectionErrorBanner.set(true)">Simular error conexión</button>
     </div>
     @if (!useLiveKit()) {
       <p class="hint">Placeholder: configurar LIVEAVATAR_* en .env para usar LiveAvatar real.</p>
@@ -112,3 +164,4 @@
   }
   </div>
 </div>
+

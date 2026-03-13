@@ -1,4 +1,4 @@
-@if (status) {
+﻿@if (status) {
   <div class="session-end" [class]="'session-end--' + variant">
     <div class="session-end-header">
       <h3>{{ title }}</h3>
@@ -25,7 +25,7 @@
               <li>
                 <strong>Practicaste:</strong>
                 {{ sessionSummary.jobRoleName && sessionSummary.caseName
-                  ? sessionSummary.jobRoleName + ' – ' + sessionSummary.caseName
+                  ? sessionSummary.jobRoleName + ' - ' + sessionSummary.caseName
                   : sessionSummary.jobRoleName || sessionSummary.caseName }}
               </li>
             }
@@ -44,3 +44,4 @@
     }
   </div>
 }
+

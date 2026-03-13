@@ -1,4 +1,4 @@
-"""Esquemas comunes: catálogos, plantillas."""
+﻿"""Esquemas comunes: catálogos, plantillas."""
 from typing import Optional, List, Any
 
 from pydantic import BaseModel
@@ -54,3 +54,4 @@ class SimulationTemplateResponse(BaseModel):
 
     class Config:
         from_attributes = True
+

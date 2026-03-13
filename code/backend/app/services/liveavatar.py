@@ -1,4 +1,4 @@
-"""Integración con LiveAvatar (Context Dinámico)."""
+﻿"""Integración con LiveAvatar (Context Dinámico)."""
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
@@ -10,6 +10,7 @@ from app.services.prompt_builder import build_prompt
 
 
 DEFAULT_OPENING_TEXT = "Hola, soy Javiera y estaré a cargo de esta entrevista."
+INVALID_LIVEAVATAR_IDS = {"", "default", "avatar-default", "voice-default", "ctx-elvir-dinamico"}
 
 
 class LiveAvatarError(Exception):
@@ -38,12 +39,49 @@ def _extract_error_detail(resp: httpx.Response) -> str:
     return resp.text[:200] if resp.text else ""
 
 
-def _headers() -> dict:
-    return {
+def _headers(request_id: str | None = None) -> dict:
+    headers = {
         "X-API-KEY": settings.LIVEAVATAR_API_KEY,
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
+    if request_id:
+        headers["X-Request-ID"] = request_id
+    return headers
+
+
+def _normalize_id(value: str | None) -> str:
+    return (value or "").strip()
+
+
+def _is_valid_id(value: str | None) -> bool:
+    v = _normalize_id(value)
+    return bool(v) and v not in INVALID_LIVEAVATAR_IDS
+
+
+def resolve_liveavatar_ids(template: SimulationTemplate) -> tuple[str | None, str | None, str | None]:
+    """Resuelve IDs finales considerando overrides en .env."""
+    return (
+        settings.LIVEAVATAR_CONTEXT_ID or template.liveavatar_context_id,
+        settings.LIVEAVATAR_AVATAR_ID or template.liveavatar_avatar_id,
+        settings.LIVEAVATAR_VOICE_ID or template.liveavatar_voice_id,
+    )
+
+
+def get_liveavatar_config_status(template: SimulationTemplate) -> dict[str, bool]:
+    """Valida si la configuracion efectiva es utilizable (sin placeholders)."""
+    context_id, avatar_id, voice_id = resolve_liveavatar_ids(template)
+    return {
+        "api_key": bool(settings.LIVEAVATAR_API_KEY),
+        "context_id": _is_valid_id(context_id),
+        "avatar_id": _is_valid_id(avatar_id),
+        "voice_id": _is_valid_id(voice_id),
+    }
+
+
+def is_liveavatar_configured(template: SimulationTemplate) -> bool:
+    status = get_liveavatar_config_status(template)
+    return all(status.values())
 
 
 @retry(
@@ -52,9 +90,9 @@ def _headers() -> dict:
     retry=retry_if_exception_type((httpx.TimeoutException, httpx.HTTPStatusError)),
     reraise=True,
 )
-def _patch_context(client: httpx.Client, url: str, body: dict) -> httpx.Response:
+def _patch_context(client: httpx.Client, url: str, body: dict, request_id: str | None = None) -> httpx.Response:
     """PATCH al contexto con retry en errores 5xx y timeout."""
-    resp = client.patch(url, headers=_headers(), json=body)
+    resp = client.patch(url, headers=_headers(request_id), json=body)
     if resp.status_code >= 500:
         resp.raise_for_status()
     return resp
@@ -64,21 +102,24 @@ def start_liveavatar_session(
     job_role: JobRole,
     case: Case,
     template: SimulationTemplate,
+    request_id: str | None = None,
 ) -> dict:
     """
     Arma el prompt, actualiza el contexto en LiveAvatar y crea la sesión.
     Usa IDs de la plantilla con fallback a .env.
     Retorna: { session_id, livekit_url, access_token, max_session_duration }
     """
-    # .env tiene prioridad; las plantillas usan placeholders (avatar-default, voice-default) que LiveAvatar rechaza
-    context_id = settings.LIVEAVATAR_CONTEXT_ID or template.liveavatar_context_id
-    avatar_id = settings.LIVEAVATAR_AVATAR_ID or template.liveavatar_avatar_id or "default"
-    voice_id = settings.LIVEAVATAR_VOICE_ID or template.liveavatar_voice_id or "default"
+    # .env tiene prioridad; placeholders no son validos para LiveAvatar
+    context_id, avatar_id, voice_id = resolve_liveavatar_ids(template)
 
     if not settings.LIVEAVATAR_API_KEY:
         raise LiveAvatarError("LIVEAVATAR_API_KEY no configurada", 503)
-    if not context_id:
-        raise LiveAvatarError("LIVEAVATAR_CONTEXT_ID no configurado (ni en .env ni en plantilla)", 503)
+    if not _is_valid_id(context_id):
+        raise LiveAvatarError("LIVEAVATAR_CONTEXT_ID no configurado o invalido", 503)
+    if not _is_valid_id(avatar_id):
+        raise LiveAvatarError("LIVEAVATAR_AVATAR_ID no configurado o invalido", 503)
+    if not _is_valid_id(voice_id):
+        raise LiveAvatarError("LIVEAVATAR_VOICE_ID no configurado o invalido", 503)
 
     prompt = build_prompt(job_role, case)
     opening_text = getattr(case, "opening_text", None) or DEFAULT_OPENING_TEXT
@@ -94,7 +135,7 @@ def start_liveavatar_session(
                 "opening_text": opening_text,
             }
             try:
-                patch_resp = _patch_context(client, patch_url, patch_body)
+                patch_resp = _patch_context(client, patch_url, patch_body, request_id=request_id)
             except httpx.HTTPStatusError as e:
                 detail = _extract_error_detail(e.response)
                 if e.response.status_code == 401:
@@ -111,15 +152,16 @@ def start_liveavatar_session(
                 raise
 
             if patch_resp.status_code >= 400:
+                detail = _extract_error_detail(patch_resp)
                 raise LiveAvatarError(
-                    f"Error al actualizar contexto: {patch_resp.status_code}",
+                    f"Error al actualizar contexto: {detail or patch_resp.status_code}",
                     patch_resp.status_code,
                 )
 
             # 2. POST sessions/token
             token_resp = client.post(
                 f"{base_url}/sessions/token",
-                headers=_headers(),
+                headers=_headers(request_id),
                 json={
                     "mode": "FULL",
                     "avatar_id": avatar_id,
@@ -149,6 +191,7 @@ def start_liveavatar_session(
                 headers={
                     "Authorization": f"Bearer {session_token}",
                     "Content-Type": "application/json",
+                    **({"X-Request-ID": request_id} if request_id else {}),
                 },
             )
             if start_resp.status_code >= 400:
@@ -181,7 +224,7 @@ def start_liveavatar_session(
         raise LiveAvatarError(f"Error inesperado LiveAvatar: {str(e)}", 502)
 
 
-def get_session_transcript(liveavatar_session_id: str) -> dict | None:
+def get_session_transcript(liveavatar_session_id: str, request_id: str | None = None) -> dict | None:
     """
     Obtiene la transcripción de una sesión desde LiveAvatar.
     Retorna el dict con session_active, transcript_data (o None si falla).
@@ -193,7 +236,7 @@ def get_session_transcript(liveavatar_session_id: str) -> dict | None:
     url = f"{base_url}/sessions/{liveavatar_session_id}/transcript"
     try:
         with httpx.Client(timeout=15.0) as client:
-            resp = client.get(url, headers=_headers())
+            resp = client.get(url, headers=_headers(request_id))
             if resp.status_code != 200:
                 return None
             data = resp.json()
@@ -206,3 +249,4 @@ def get_session_transcript(liveavatar_session_id: str) -> dict | None:
             }
     except Exception:
         return None
+

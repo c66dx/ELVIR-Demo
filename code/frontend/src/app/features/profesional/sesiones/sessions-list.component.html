@@ -1,0 +1,120 @@
+<div class="page-header">
+  <h2>Sesiones</h2>
+</div>
+
+<div class="filters-bar">
+  <div class="filter-group">
+    <label for="filter-search">Buscar</label>
+    <input
+      id="filter-search"
+      type="text"
+      [(ngModel)]="filterSearch"
+      (ngModelChange)="onSearchInput()"
+      placeholder="Nombre o RUT"
+    />
+  </div>
+  <div class="filter-group">
+    <label for="filter-youth">Joven</label>
+    <select id="filter-youth" [(ngModel)]="filterYouthId" (ngModelChange)="onFilterChange()">
+      <option value="">Todos</option>
+      @for (y of youthOptions; track y.id) {
+        <option [value]="y.id">{{ y.display_name }}{{ y.rut ? ' · ' + y.rut : '' }}</option>
+      }
+    </select>
+  </div>
+  <div class="filter-group">
+    <label for="filter-status">Estado</label>
+    <select id="filter-status" [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()">
+      <option value="">Todos</option>
+      @for (opt of statusOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+  <div class="filter-group">
+    <label for="filter-mode">Modo</label>
+    <select id="filter-mode" [(ngModel)]="filterMode" (ngModelChange)="onFilterChange()">
+      <option value="">Todos</option>
+      @for (opt of modeOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+  <div class="filter-group">
+    <label for="filter-start">Desde</label>
+    <input id="filter-start" type="date" [(ngModel)]="filterStartDate" (change)="onFilterChange()" />
+  </div>
+  <div class="filter-group">
+    <label for="filter-end">Hasta</label>
+    <input id="filter-end" type="date" [(ngModel)]="filterEndDate" (change)="onFilterChange()" />
+  </div>
+  @if (filterSearch || filterYouthId || filterStatus || filterMode || filterStartDate || filterEndDate) {
+    <button type="button" class="btn-secondary btn-sm" (click)="clearFilters()">Limpiar filtros</button>
+  }
+</div>
+
+@if (errorMessage) {
+  <p class="error">{{ errorMessage }}</p>
+}
+
+@if (loading) {
+  <p>Cargando...</p>
+} @else {
+  @if (sessions.length === 0) {
+    <p>Sin sesiones registradas.</p>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Foto</th>
+            <th>Joven</th>
+            <th>RUT</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Modo</th>
+            <th>Duración</th>
+            <th>Plantilla</th>
+            <th class="col-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of sessions; track s.id) {
+            <tr>
+              <td>
+                <div class="avatar" [class.avatar--image]="s.youthPhotoUrl">
+                  @if (s.youthPhotoUrl) {
+                    <img [src]="s.youthPhotoUrl" alt="Foto del joven" />
+                  } @else {
+                    <span>{{ initials(s.youthName) }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <div class="youth-name">{{ s.youthName }}</div>
+                <div class="youth-id">ID: {{ s.youth_id }}</div>
+              </td>
+              <td>{{ s.youthRut ?? '-' }}</td>
+              <td>{{ formatDate(s.started_at) }}</td>
+              <td><app-status-badge [status]="s.status" /></td>
+              <td>{{ s.mode }}</td>
+              <td>{{ formatDuration(s.duration_seconds) }}</td>
+              <td>{{ s.templateLabel ?? '-' }}</td>
+              <td class="actions">
+                <a [routerLink]="['/profesional/sesiones', s.id]" class="btn-sm btn-primary">Ver sesión</a>
+                <a [routerLink]="['/profesional/jovenes', s.youth_id]" class="btn-sm btn-secondary">Perfil</a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="pager">
+      <span>Página {{ page }} de {{ totalPages() }} · Total {{ total }}</span>
+      <div class="pager-actions">
+        <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="page <= 1">Anterior</button>
+        <button type="button" class="pager-btn" (click)="nextPage()" [disabled]="page >= totalPages()">Siguiente</button>
+      </div>
+    </div>
+  }
+}

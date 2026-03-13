@@ -1,4 +1,4 @@
-<div class="form-page">
+﻿<div class="form-page">
   <div class="page-header">
     <h2>{{ isAdmin ? 'Crear material general' : 'Crear material propio' }}</h2>
     <a [routerLink]="backRoute" class="btn-link">← Volver</a>
@@ -43,7 +43,7 @@
     <div class="field">
       <label for="job_role_id">Cargo (opcional)</label>
       <select id="job_role_id" formControlName="job_role_id">
-        <option value="">— Ninguno —</option>
+        <option value="">- Ninguno -</option>
         @if (jobRoles$ | async; as roles) {
           @for (r of roles; track r.id) {
             <option [value]="r.id">{{ r.name }}</option>
@@ -54,7 +54,7 @@
     <div class="field">
       <label for="case_id">Caso (opcional)</label>
       <select id="case_id" formControlName="case_id">
-        <option value="">— Ninguno —</option>
+        <option value="">- Ninguno -</option>
         @if (cases$ | async; as cases) {
           @for (c of cases; track c.id) {
             <option [value]="c.id">{{ c.name }}</option>

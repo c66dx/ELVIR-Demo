@@ -80,6 +80,13 @@
   color: var(--color-text-muted);
 }
 
+.field-error {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: 0.8rem;
+  color: var(--color-danger);
+}
+
 .checklist-field {
   .checklist-grid {
     display: grid;

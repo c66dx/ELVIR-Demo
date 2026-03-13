@@ -1,35 +1,37 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { UserRole } from '../models/user.model';
 
-const TOKEN_KEY = 'elvir_token';
 const ROLE_KEY = 'elvir_role';
 
 /**
- * Servicio de autenticación. Gestiona token y rol en localStorage.
- * El login se hace vía ApiService contra el backend; setSession guarda el resultado.
+ * Servicio de autenticación.
+ *
+ * La autenticación principal usa cookie HttpOnly emitida por backend.
+ * En frontend solo persistimos el rol para routing/UI.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private storage = window.sessionStorage;
+
   getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return null;
   }
 
   getRole(): UserRole | null {
-    const role = localStorage.getItem(ROLE_KEY);
+    const role = this.storage.getItem(ROLE_KEY);
     return role === 'JOVEN' || role === 'PROFESIONAL' || role === 'ADMIN' ? role : null;
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken() && !!this.getRole();
+    return !!this.getRole();
   }
 
-  setSession(token: string, role: UserRole): void {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(ROLE_KEY, role);
+  setSession(_token: string, role: UserRole): void {
+    this.storage.setItem(ROLE_KEY, role);
   }
 
   logout(): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(ROLE_KEY);
+    this.storage.removeItem(ROLE_KEY);
   }
 }
+

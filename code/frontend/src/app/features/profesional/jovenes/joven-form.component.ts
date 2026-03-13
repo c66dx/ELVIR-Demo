@@ -1,9 +1,48 @@
-import { Component, inject, OnInit } from '@angular/core';
+﻿import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { PROFILE_CHECKLIST_ITEMS } from '../../../core/models/youth.model';
+import { extractErrorMessage } from '../../../core/utils/http-error.util';
+
+function normalizeRut(value: string): string {
+  return value.replace(/[^0-9kK]/g, '').toUpperCase();
+}
+
+function computeRutDv(body: string): string {
+  let sum = 0;
+  let multiplier = 2;
+  for (let i = body.length - 1; i >= 0; i -= 1) {
+    sum += Number(body[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+  const mod = 11 - (sum % 11);
+  if (mod === 11) return '0';
+  if (mod === 10) return 'K';
+  return String(mod);
+}
+
+function formatRut(value: string): string {
+  const cleaned = normalizeRut(value);
+  if (cleaned.length < 2) return value.trim();
+  const body = cleaned.slice(0, -1);
+  const dv = cleaned.slice(-1);
+  const withDots = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${withDots}-${dv}`;
+}
+
+const rutValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const raw = String(control.value ?? '').trim();
+  if (!raw) return null;
+  const cleaned = normalizeRut(raw);
+  if (cleaned.length < 2) return { rut: true };
+  if (!/^\d+[0-9K]$/.test(cleaned)) return { rut: true };
+  const body = cleaned.slice(0, -1);
+  if (!body) return { rut: true };
+  const dv = cleaned.slice(-1);
+  return computeRutDv(body) === dv ? null : { rut: true };
+};
 
 /** Formulario crear/editar joven. Checklist perfil, login_enabled, email. Genera activation_url si aplica. */
 @Component({
@@ -24,6 +63,7 @@ export class JovenFormComponent implements OnInit {
 
   form: FormGroup = this.fb.nonNullable.group({
     display_name: ['', Validators.required],
+    rut: ['', rutValidator],
     phone: [''],
     year_of_birth: [null as number | null],
     diagnosis: [''],
@@ -55,6 +95,9 @@ export class JovenFormComponent implements OnInit {
     this.youthId = this.route.parent?.snapshot.paramMap.get('youthId') ?? null;
     this.isEdit = !!this.youthId;
 
+    this.form.get('rut')?.valueChanges.subscribe(() => this.clearRutServerError());
+    this.form.get('email')?.valueChanges.subscribe(() => this.clearEmailServerError());
+
     this.form.get('login_enabled')?.valueChanges.subscribe((enabled) => {
       const emailCtrl = this.form.get('email');
       if (!emailCtrl) return;
@@ -77,6 +120,7 @@ export class JovenFormComponent implements OnInit {
             this.currentYouth = { identifier: youth.identifier, email: youth.email };
             this.form.patchValue({
               display_name: youth.display_name,
+              rut: youth.rut ? formatRut(youth.rut) : '',
               phone: youth.phone ?? '',
               year_of_birth: youth.year_of_birth ?? null,
               diagnosis: youth.diagnosis ?? '',
@@ -113,16 +157,21 @@ export class JovenFormComponent implements OnInit {
     this.errorMessage = '';
     this.activationUrl = null;
     const value = this.form.getRawValue();
+    const rutRaw = String(value.rut ?? '').trim();
+    const rutValue = rutRaw ? formatRut(rutRaw) : undefined;
+    const shouldSendEmail = value.login_enabled && (!this.isEdit || !this.hasUserAccount);
+    const emailValue = shouldSendEmail && value.email ? value.email : undefined;
 
     if (this.isEdit && this.youthId) {
       this.api
         .updateYouth(this.youthId, {
           display_name: value.display_name,
+          rut: rutValue,
           phone: value.phone || undefined,
           year_of_birth: value.year_of_birth ?? undefined,
           diagnosis: value.diagnosis || undefined,
           login_enabled: value.login_enabled,
-          email: value.login_enabled ? value.email : undefined,
+          email: emailValue,
           general_notes: value.general_notes || undefined,
           profile_checklist: value.profile_checklist?.length ? value.profile_checklist : undefined,
         })
@@ -142,7 +191,11 @@ export class JovenFormComponent implements OnInit {
               this.router.navigate(['/profesional/jovenes']);
             }
           },
-          error: () => {
+          error: (err) => {
+            this.applyRutBackendError(err);
+            this.applyEmailBackendError(err);
+            const requestId = err?.headers?.get?.('X-Request-ID') ?? null;
+            this.errorMessage = extractErrorMessage(err, requestId);
             this.submitting = false;
           },
         });
@@ -150,11 +203,12 @@ export class JovenFormComponent implements OnInit {
       this.api
         .createYouth({
           display_name: value.display_name,
+          rut: rutValue,
           phone: value.phone || undefined,
           year_of_birth: value.year_of_birth ?? undefined,
           diagnosis: value.diagnosis || undefined,
           login_enabled: value.login_enabled,
-          email: value.login_enabled ? value.email : undefined,
+          email: emailValue,
           general_notes: value.general_notes || undefined,
           profile_checklist: value.profile_checklist?.length ? value.profile_checklist : undefined,
           is_active: true,
@@ -170,7 +224,11 @@ export class JovenFormComponent implements OnInit {
               this.router.navigate(['/profesional/jovenes']);
             }
           },
-          error: () => {
+          error: (err) => {
+            this.applyRutBackendError(err);
+            this.applyEmailBackendError(err);
+            const requestId = err?.headers?.get?.('X-Request-ID') ?? null;
+            this.errorMessage = extractErrorMessage(err, requestId);
             this.submitting = false;
           },
         });
@@ -200,6 +258,72 @@ export class JovenFormComponent implements OnInit {
     if (idx >= 0) arr.splice(idx, 1);
     else arr.push(slug);
     ctrl.setValue(arr);
+  }
+
+  onRutBlur(): void {
+    const ctrl = this.form.get('rut');
+    if (!ctrl) return;
+    const value = String(ctrl.value ?? '').trim();
+    if (!value) return;
+    ctrl.setValue(formatRut(value), { emitEvent: false });
+    ctrl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private applyRutBackendError(err: unknown): void {
+    const detail = (err as { error?: { detail?: unknown } })?.error?.detail;
+    const msg = typeof detail === 'string' ? detail : '';
+    if (!msg || !msg.toLowerCase().includes('rut')) return;
+    this.setRutServerError(msg);
+  }
+
+  private applyEmailBackendError(err: unknown): void {
+    const detail = (err as { error?: { detail?: unknown } })?.error?.detail;
+    if (!detail) return;
+    if (typeof detail === 'string') {
+      const msg = detail.toLowerCase();
+      if (msg.includes('email')) {
+        this.setEmailServerError(detail);
+      }
+      return;
+    }
+    if (Array.isArray(detail)) {
+      const emailError = detail.find((item) => {
+        const loc = item?.loc ?? [];
+        return Array.isArray(loc) && loc.includes('email');
+      });
+      const msg = emailError?.msg ?? emailError?.message;
+      if (msg) {
+        this.setEmailServerError(String(msg));
+      }
+    }
+  }
+
+  private setRutServerError(message: string): void {
+    const ctrl = this.form.get('rut');
+    if (!ctrl) return;
+    const errors = { ...(ctrl.errors ?? {}), server: message };
+    ctrl.setErrors(errors);
+  }
+
+  private setEmailServerError(message: string): void {
+    const ctrl = this.form.get('email');
+    if (!ctrl) return;
+    const errors = { ...(ctrl.errors ?? {}), server: message };
+    ctrl.setErrors(errors);
+  }
+
+  private clearRutServerError(): void {
+    const ctrl = this.form.get('rut');
+    if (!ctrl?.errors?.['server']) return;
+    const { server, ...rest } = ctrl.errors as Record<string, unknown>;
+    ctrl.setErrors(Object.keys(rest).length ? rest : null);
+  }
+
+  private clearEmailServerError(): void {
+    const ctrl = this.form.get('email');
+    if (!ctrl?.errors?.['server']) return;
+    const { server, ...rest } = ctrl.errors as Record<string, unknown>;
+    ctrl.setErrors(Object.keys(rest).length ? rest : null);
   }
 
   openChangeEmailModal(): void {
@@ -245,3 +369,4 @@ export class JovenFormComponent implements OnInit {
     });
   }
 }
+

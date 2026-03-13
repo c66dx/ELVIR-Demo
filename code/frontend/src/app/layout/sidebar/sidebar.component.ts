@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { UserRole } from '../../core/models/user.model';
@@ -27,19 +27,22 @@ export class SidebarComponent {
     { label: 'Nueva Simulación', route: '/joven/simulacion/nueva', roles: ['JOVEN'], exact: true, icon: 'play' },
     { label: 'Historial', route: '/joven/historial', roles: ['JOVEN'], exact: true, icon: 'history' },
     { label: 'Material', route: '/joven/material', roles: ['JOVEN'], exact: true, icon: 'material' },
-    { label: 'Cambiar contraseña', route: '/cambiar-contrasena', roles: ['JOVEN'], exact: true, icon: 'lock' },
+    { label: 'Mi Cuenta', route: '/joven/cuenta', roles: ['JOVEN'], exact: true, icon: 'settings' },
   ];
 
   profesionalItems: NavItem[] = [
     { label: 'Dashboard', route: '/profesional/dashboard', roles: ['PROFESIONAL'], exact: true, icon: 'dashboard' },
     { label: 'Jóvenes', route: '/profesional/jovenes', roles: ['PROFESIONAL'], exact: true, icon: 'users' },
+    { label: 'Sesiones', route: '/profesional/sesiones', roles: ['PROFESIONAL'], exact: true, icon: 'history' },
     { label: 'Crear Joven', route: '/profesional/jovenes/nuevo', roles: ['PROFESIONAL'], exact: true, icon: 'user-plus' },
     { label: 'Crear Material', route: '/profesional/material/nuevo', roles: ['PROFESIONAL'], exact: true, icon: 'material' },
-    { label: 'Cambiar contraseña', route: '/cambiar-contrasena', roles: ['PROFESIONAL'], exact: true, icon: 'lock' },
+    { label: 'Mi Cuenta', route: '/profesional/cuenta', roles: ['PROFESIONAL'], exact: true, icon: 'settings' },
   ];
 
   adminItems: NavItem[] = [
     { label: 'Dashboard', route: '/admin/dashboard', roles: ['ADMIN'], exact: true, icon: 'dashboard' },
+    { label: 'Usuarios y logs', route: '/admin/usuarios', roles: ['ADMIN'], exact: true, icon: 'users' },
+    { label: 'Auditoría', route: '/admin/auditoria', roles: ['ADMIN'], exact: true, icon: 'history' },
     { label: 'Crear Profesional', route: '/admin/profesionales/nuevo', roles: ['ADMIN'], exact: true, icon: 'user-plus' },
     { label: 'Crear Material', route: '/admin/material/nuevo', roles: ['ADMIN'], exact: true, icon: 'material' },
     { label: 'Cambiar contraseña', route: '/cambiar-contrasena', roles: ['ADMIN'], exact: true, icon: 'lock' },
@@ -51,3 +54,4 @@ export class SidebarComponent {
     return this.profesionalItems;
   }
 }
+

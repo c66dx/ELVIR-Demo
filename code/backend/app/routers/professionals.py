@@ -1,5 +1,6 @@
-"""Router de profesionales (gestión por Admin)."""
-from fastapi import APIRouter, Depends, HTTPException
+﻿"""Router de profesionales (gestión por Admin)."""
+from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, field_validator
 
@@ -26,15 +27,32 @@ def _can_access_professional(user: User, professional_id: int, db: Session) -> b
 @router.get("/{professional_id}/assignments")
 def list_professional_assignments(
     professional_id: int,
+    page: int | None = Query(None, ge=1),
+    page_size: int | None = Query(None, ge=1, le=200),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    response: Response = None,
 ):
     """Lista asignaciones de un profesional. Solo el propio profesional o Admin."""
     if not _can_access_professional(user, professional_id, db):
         raise HTTPException(status_code=403, detail="Acceso denegado")
-    items = db.query(Assignment).filter(
-        Assignment.professional_id == professional_id,
-    ).order_by(Assignment.assigned_at.desc()).all()
+    use_pagination = bool(page or page_size)
+    if use_pagination:
+        page = page or 1
+        page_size = page_size or 50
+
+    q = db.query(Assignment).filter(Assignment.professional_id == professional_id)
+    if use_pagination:
+        total = q.order_by(None).count()
+        if response:
+            response.headers["X-Total-Count"] = str(total)
+            response.headers["X-Page"] = str(page)
+            response.headers["X-Page-Size"] = str(page_size)
+        q = q.order_by(Assignment.assigned_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    else:
+        q = q.order_by(Assignment.assigned_at.desc())
+
+    items = q.all()
     return [
         {
             "id": a.id,
@@ -55,6 +73,8 @@ class ProfessionalResponse(BaseModel):
     specialty: str | None
     institution: str | None
     is_active: bool
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class ProfessionalUpdate(BaseModel):
@@ -66,11 +86,29 @@ class ProfessionalUpdate(BaseModel):
 
 @router.get("", response_model=list[ProfessionalResponse])
 def list_professionals(
+    page: int | None = Query(None, ge=1),
+    page_size: int | None = Query(None, ge=1, le=200),
     admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
+    response: Response = None,
 ):
     """Lista todos los profesionales. Solo Admin."""
-    profs = db.query(Professional).filter(Professional.is_active == True).order_by(Professional.id).all()
+    use_pagination = bool(page or page_size)
+    if use_pagination:
+        page = page or 1
+        page_size = page_size or 50
+
+    q = db.query(Professional).filter(Professional.is_active == True)
+    if use_pagination:
+        total = q.order_by(None).count()
+        if response:
+            response.headers["X-Total-Count"] = str(total)
+            response.headers["X-Page"] = str(page)
+            response.headers["X-Page-Size"] = str(page_size)
+        q = q.order_by(Professional.id).offset((page - 1) * page_size).limit(page_size)
+    else:
+        q = q.order_by(Professional.id)
+    profs = q.all()
     return [
         ProfessionalResponse(
             id=p.id,
@@ -79,6 +117,8 @@ def list_professionals(
             specialty=p.specialty,
             institution=p.institution,
             is_active=p.is_active,
+            created_at=p.created_at,
+            updated_at=p.updated_at,
         )
         for p in profs
     ]
@@ -134,16 +174,20 @@ def create_professional(
         specialty=prof.specialty,
         institution=prof.institution,
         is_active=prof.is_active,
+        created_at=prof.created_at,
+        updated_at=prof.updated_at,
     )
 
 
 @router.get("/{professional_id}", response_model=ProfessionalResponse)
 def get_professional(
     professional_id: int,
-    admin: User = Depends(get_current_admin),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Obtiene el detalle de un profesional. Solo Admin."""
+    """Obtiene el detalle de un profesional. Admin o el propio profesional."""
+    if not _can_access_professional(user, professional_id, db):
+        raise HTTPException(status_code=403, detail="Acceso denegado")
     prof = db.query(Professional).filter(Professional.id == professional_id).first()
     if not prof:
         raise HTTPException(status_code=404, detail="Profesional no encontrado")
@@ -154,6 +198,8 @@ def get_professional(
         specialty=prof.specialty,
         institution=prof.institution,
         is_active=prof.is_active,
+        created_at=prof.created_at,
+        updated_at=prof.updated_at,
     )
 
 
@@ -182,4 +228,7 @@ def update_professional(
         specialty=prof.specialty,
         institution=prof.institution,
         is_active=prof.is_active,
+        created_at=prof.created_at,
+        updated_at=prof.updated_at,
     )
+

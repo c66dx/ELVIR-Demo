@@ -1,9 +1,9 @@
-<div class="page-header">
+﻿<div class="page-header">
   <h2>Historial</h2>
 </div>
 
-@if (sessions$ | async; as sessions) {
-  @if (sessions.length === 0) {
+@if (data$ | async; as data) {
+  @if (data.items.length === 0) {
     <p>Sin sesiones registradas.</p>
   } @else {
     <div class="table-wrap">
@@ -19,7 +19,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (s of sessions; track s.id) {
+          @for (s of data.items; track s.id) {
             <tr [routerLink]="['/joven/simulacion', s.id]" class="row-clickable">
               <td>{{ formatDate(s.started_at) }}</td>
               <td><app-status-badge [status]="s.status" /></td>
@@ -42,7 +42,7 @@
                     </div>
                   </details>
                 } @else {
-                  <span class="no-summary">—</span>
+                  <span class="no-summary">-</span>
                 }
               </td>
             </tr>
@@ -50,7 +50,17 @@
         </tbody>
       </table>
     </div>
+    <div class="pager">
+      <span>Página {{ data.page }} de {{ totalPages(data.total) }} · Total {{ data.total }}</span>
+      <div class="pager-actions">
+        <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="data.page <= 1">Anterior</button>
+        <button type="button" class="pager-btn" (click)="nextPage(data.total)" [disabled]="data.page >= totalPages(data.total)">
+          Siguiente
+        </button>
+      </div>
+    </div>
   }
 } @else {
   <p>Cargando...</p>
 }
+

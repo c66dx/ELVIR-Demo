@@ -1,4 +1,4 @@
-# Estructura del Frontend ELVIR
+﻿# Estructura del Frontend ELVIR
 
 Este documento explica la organización del frontend de la plataforma ELVIR para que cualquier persona que trabaje en el proyecto entienda qué hay en cada carpeta y para qué sirve.
 
@@ -76,7 +76,7 @@ Servicios inyectables usados en toda la app:
 
 | Servicio | Función |
 |----------|---------|
-| `auth.service.ts` | Autenticación: token y rol en `localStorage`, login/logout, `isLoggedIn()`, `getRole()` |
+| `auth.service.ts` | Autenticación frontend: sesión principal vía cookie `HttpOnly`; en cliente se persiste solo rol en `sessionStorage` para UI/rutas |
 | `api.service.ts` | Cliente HTTP para el backend FastAPI: login, catálogos, sesiones, material, jóvenes, etc. |
 | `youth.service.ts` | Obtiene el `youthId` del usuario JOVEN actual a partir de `getMe()` y la lista de jóvenes |
 | `session-end.service.ts` | Guarda el resultado de una sesión finalizada (COMPLETADA, CANCELADA, ERROR) para mostrarlo en `SessionEndComponent` |
@@ -170,6 +170,10 @@ Gestión de jóvenes.
 | **`perfil-joven.component.*`** | Perfil del joven: datos, historial, botones "Registrar resumen" y "Sugerir material" |
 | **`supervisada/`** | **`supervised-start.component.*`** — Inicio de simulación supervisada: selección cargo/caso y botón para iniciar |
 
+#### `sesiones/`
+- **`sessions-list.component.*`** — Lista de sesiones con filtros y acceso a detalle.
+- **`session-view.component.*`** — Vista detallada: resumen, transcripción, audio, eventos y competencias.
+
 ---
 
 ### `features/admin/`
@@ -178,6 +182,8 @@ Funcionalidades para el rol ADMIN.
 | Componente | Función |
 |-------------|---------|
 | **`dashboard-admin.component.*`** | Dashboard: enlaces a Profesionales y Material |
+| **`usuarios-logs.component.*`** | Control de usuarios/logs: ver actividad, desactivar y eliminar definitivo |
+| **`audit-logs.component.*`** | Auditoria de requests con filtros y detalle |
 | **`profesionales-list.component.*`** | Lista de profesionales con acciones Crear, Editar |
 | **`profesional-form.component.*`** | Formulario crear/editar profesional |
 | **`material-form.component.*`** | Formulario subir material general |
@@ -193,33 +199,58 @@ Componentes reutilizables entre features.
 
 ---
 
+## Testing frontend (base actual)
+
+- Existen specs iniciales para servicios críticos en:
+  - `src/app/core/services/auth.service.spec.ts`
+  - `src/app/features/joven/simulacion/simulacion-runtime.service.spec.ts`
+- Configuración base de test:
+  - `karma.conf.cjs`
+  - `tsconfig.spec.json`
+  - `src/test.ts`
+
+Ejecución recomendada (cuando entorno tenga dependencias de Karma/Jasmine instaladas):
+
+```bash
+npx ng test --watch=false --browsers=ChromeHeadless
+```
+
+---
+
 ## Flujo de rutas (resumen)
 
 ```
-/login                    → LoginComponent (guestGuard)
+/login                    -> LoginComponent (guestGuard)
 '' (AppShell)
-├── /joven/simulacion/nueva     → NuevaSimulacionComponent (jovenGuard)
-├── /joven/simulacion/:sessionId → SimulacionDetailComponent (authGuard)
-├── /session-end                → SessionEndComponent (authGuard)
-├── /joven (jovenGuard)
-│   ├── /dashboard              → DashboardJovenComponent
-│   ├── /simulacion/nueva       → NuevaSimulacionComponent
-│   ├── /historial              → HistorialJovenComponent
-│   └── /material               → MaterialJovenComponent
-├── /profesional (profesionalGuard)
-│   ├── /dashboard              → DashboardProfesionalComponent
-│   └── /jovenes
-│       ├── ''                  → JovenesListComponent
-│       ├── /nuevo              → JovenFormComponent
-│       └── /:youthId
-│           ├── ''              → PerfilJovenComponent
-│           ├── /editar         → JovenFormComponent
-│           └── /supervisada/nueva → SupervisedStartComponent
-└── /admin (adminGuard)
-    ├── /dashboard              → DashboardAdminComponent
-    ├── /profesionales          → ProfesionalesListComponent
-    ├── /profesionales/nuevo    → ProfesionalFormComponent
-    └── /material/nuevo         → MaterialFormComponent
+|-- /joven/simulacion/nueva     -> NuevaSimulacionComponent (jovenGuard)
+|-- /joven/simulacion/:sessionId -> SimulacionDetailComponent (jovenGuard)
+|-- /session-end                -> SessionEndComponent (authGuard)
+|-- /joven (jovenGuard)
+|   |-- /dashboard              -> DashboardJovenComponent
+|   |-- /simulacion/nueva       -> NuevaSimulacionComponent
+|   |-- /historial              -> HistorialJovenComponent
+|   `-- /material               -> MaterialJovenComponent
+|-- /profesional (profesionalGuard)
+|   |-- /dashboard              -> DashboardProfesionalComponent
+|   |-- /material/nuevo         -> MaterialFormComponent
+|   |-- /sesiones               -> SessionsListComponent
+|   |-- /sesiones/:sessionId    -> SessionViewComponent
+|   |-- /simulacion/:sessionId  -> SimulacionDetailComponent (profesionalGuard)
+|   |-- /cuenta                 -> ProfessionalAccountComponent
+|   `-- /jovenes
+|       |-- ''                  -> JovenesListComponent
+|       |-- /nuevo              -> JovenFormComponent
+|       `-- /:youthId
+|           |-- ''              -> PerfilJovenComponent
+|           |-- /editar         -> JovenFormComponent
+|           `-- /supervisada/nueva -> SupervisedStartComponent
+`-- /admin (adminGuard)
+    |-- /dashboard              -> DashboardAdminComponent
+    |-- /usuarios               -> UsuariosLogsComponent
+    |-- /auditoria              -> AuditLogsComponent
+    |-- /profesionales          -> ProfesionalesListComponent
+    |-- /profesionales/nuevo    -> ProfesionalFormComponent
+    `-- /material/nuevo         -> MaterialFormComponent
 ```
 
 ---
@@ -240,3 +271,6 @@ Componentes reutilizables entre features.
 - **API**: `ApiService` llama al backend FastAPI (`environment.apiUrl`). Requiere backend en ejecución para funcionar.
 - **Auth**: Token JWT y rol en `localStorage`. El login se hace contra el backend vía `ApiService.login()`.
 - **RBAC**: Tres roles: `JOVEN`, `PROFESIONAL` y `ADMIN`. Los guards y el sidebar filtran por rol
+
+
+

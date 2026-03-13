@@ -85,6 +85,7 @@
   text-decoration: none;
   color: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
+  flex-wrap: wrap;
 
   &:hover {
     border-color: var(--color-primary);
@@ -102,6 +103,17 @@
   font-size: 0.85rem;
   color: var(--color-text-muted);
   margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .recent-date {
+    min-width: 0;
+  }
+
+  .recent-meta {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 .link-more {

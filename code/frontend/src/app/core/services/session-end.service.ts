@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import type { SessionStatus } from '../models/types.model';
 
 /**
@@ -35,3 +35,4 @@ export class SessionEndService {
     this.data = null;
   }
 }
+

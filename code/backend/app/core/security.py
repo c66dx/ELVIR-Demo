@@ -1,4 +1,4 @@
-"""Seguridad: JWT, hash de contraseñas."""
+﻿"""Seguridad: JWT, hash de contraseñas."""
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -31,3 +31,21 @@ def decode_token(token: str) -> Optional[dict]:
         return payload
     except JWTError:
         return None
+
+
+def create_csrf_token(subject: str, expires_delta: Optional[timedelta] = None) -> str:
+    """Genera token CSRF firmado y atado al subject autenticado."""
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    payload = {"sub": subject, "type": "csrf", "exp": expire}
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def decode_csrf_token(token: str) -> Optional[dict]:
+    """Decodifica token CSRF y exige claim de tipo csrf."""
+    payload = decode_token(token)
+    if not payload or payload.get("type") != "csrf":
+        return None
+    return payload
+

@@ -1,7 +1,7 @@
-"""Router de material de apoyo."""
+﻿"""Router de material de apoyo."""
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -67,8 +67,11 @@ def create_support_material(
 def list_support_material(
     job_role_id: Optional[int] = Query(None),
     case_id: Optional[int] = Query(None),
+    page: int | None = Query(None, ge=1),
+    page_size: int | None = Query(None, ge=1, le=200),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    response: Response = None,
 ):
     """Lista material activo. Filtros opcionales: job_role_id, case_id. Visibilidad por rol."""
     q = db.query(SupportMaterial).filter(SupportMaterial.active == True)
@@ -85,7 +88,17 @@ def list_support_material(
             )
     # JOVEN ve material general + material de profesionales que lo tienen asignado (vía sugerencias)
     # Por simplicidad MVP: joven ve todo el material activo (el filtro real sería por sugerencias)
-    items = q.all()
+    use_pagination = bool(page or page_size)
+    if use_pagination:
+        page = page or 1
+        page_size = page_size or 50
+        total = q.order_by(None).count()
+        if response:
+            response.headers["X-Total-Count"] = str(total)
+            response.headers["X-Page"] = str(page)
+            response.headers["X-Page-Size"] = str(page_size)
+        q = q.order_by(SupportMaterial.id.desc()).offset((page - 1) * page_size).limit(page_size)
+    items = q.order_by(SupportMaterial.id.desc()).all() if not use_pagination else q.all()
     return [_support_material_to_dict(m) for m in items]
 
 
@@ -127,8 +140,11 @@ def suggest_material(
 @router.get("/youths/{youth_id}/material-suggestions")
 def get_youth_material_suggestions(
     youth_id: int,
+    page: int | None = Query(None, ge=1),
+    page_size: int | None = Query(None, ge=1, le=200),
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
+    response: Response = None,
 ):
     """Lista sugerencias de material para un joven. JOVEN: solo propias. PROFESIONAL: si asignado."""
     if user.role == "JOVEN":
@@ -145,7 +161,22 @@ def get_youth_material_suggestions(
             ).first()
             if not assign:
                 raise HTTPException(status_code=403, detail="Acceso denegado")
-    items = db.query(MaterialSuggestion).filter(MaterialSuggestion.youth_id == youth_id).all()
+    q = (
+        db.query(MaterialSuggestion, SupportMaterial)
+        .outerjoin(SupportMaterial, MaterialSuggestion.material_id == SupportMaterial.id)
+        .filter(MaterialSuggestion.youth_id == youth_id)
+    )
+    use_pagination = bool(page or page_size)
+    if use_pagination:
+        page = page or 1
+        page_size = page_size or 50
+        total = q.order_by(None).count()
+        if response:
+            response.headers["X-Total-Count"] = str(total)
+            response.headers["X-Page"] = str(page)
+            response.headers["X-Page-Size"] = str(page_size)
+        q = q.order_by(MaterialSuggestion.suggested_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    items = q.order_by(MaterialSuggestion.suggested_at.desc()).all() if not use_pagination else q.all()
     return [
         {
             "id": m.id,
@@ -154,16 +185,20 @@ def get_youth_material_suggestions(
             "session_id": m.session_id,
             "reason": m.reason,
             "suggested_at": m.suggested_at.isoformat(),
+            "material": _support_material_to_dict(mat) if mat else None,
         }
-        for m in items
+        for m, mat in items
     ]
 
 
 @router.get("/youths/{youth_id}/material-views")
 def get_youth_material_views(
     youth_id: int,
+    page: int | None = Query(None, ge=1),
+    page_size: int | None = Query(None, ge=1, le=200),
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
+    response: Response = None,
 ):
     """Lista material visto por un joven. Requiere acceso al joven."""
     if user.role == "JOVEN":
@@ -180,7 +215,18 @@ def get_youth_material_views(
             ).first()
             if not assign:
                 raise HTTPException(status_code=403, detail="Acceso denegado")
-    items = db.query(MaterialView).filter(MaterialView.youth_id == youth_id).all()
+    q = db.query(MaterialView).filter(MaterialView.youth_id == youth_id)
+    use_pagination = bool(page or page_size)
+    if use_pagination:
+        page = page or 1
+        page_size = page_size or 50
+        total = q.order_by(None).count()
+        if response:
+            response.headers["X-Total-Count"] = str(total)
+            response.headers["X-Page"] = str(page)
+            response.headers["X-Page-Size"] = str(page_size)
+        q = q.order_by(MaterialView.seen_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    items = q.order_by(MaterialView.seen_at.desc()).all() if not use_pagination else q.all()
     return [{"id": m.id, "youth_id": m.youth_id, "material_id": m.material_id, "seen_at": m.seen_at.isoformat()} for m in items]
 
 
@@ -202,3 +248,4 @@ def record_material_view(
     db.commit()
     db.refresh(view)
     return {"id": view.id, "youth_id": view.youth_id, "material_id": view.material_id, "seen_at": view.seen_at.isoformat()}
+

@@ -1,8 +1,7 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+﻿import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { StatusBadgeComponent } from '../../../shared/status-badge/status-badge.component';
@@ -13,6 +12,8 @@ import type { InterviewSummary } from '../../../core/models/interview-summary.mo
 import type { TranscriptResponse } from '../../../core/models/transcript.model';
 import { formatDate, formatDuration, durationBetween } from '../../../shared/utils/date-format.util';
 import type { SessionWithTemplateLabel, PlatformSessionItem } from '../../../core/services/api.service';
+
+type ProfileTab = 'perfil' | 'accesos' | 'desempeno' | 'sesiones';
 
 /**
  * Perfil del joven: datos, historial de sesiones, resúmenes, sugerir material.
@@ -37,6 +38,23 @@ export class PerfilJovenComponent implements OnInit {
   platformSessions = signal<PlatformSessionItem[]>([]);
   summariesBySession = signal<Map<string, InterviewSummary>>(new Map());
   loading = signal(true);
+  activeTab = signal<ProfileTab>('perfil');
+  sessionsPage = signal(1);
+  sessionsTotal = signal(0);
+  readonly sessionsPageSize = 10;
+  platformPage = signal(1);
+  platformTotal = signal(0);
+  readonly platformPageSize = 10;
+  photoUploading = signal(false);
+  photoError = signal<string | null>(null);
+  sessionStats = signal<{
+    total: number;
+    completed: number;
+    cancelled: number;
+    error: number;
+    in_progress: number;
+    monthly: { month: string; count: number }[];
+  } | null>(null);
 
   showSummaryForm = signal(false);
   selectedSessionId = signal<string | null>(null);
@@ -61,35 +79,22 @@ export class PerfilJovenComponent implements OnInit {
 
     forkJoin({
       youth: this.api.getYouth(this.youthId),
-      sessions: this.api.getSessionsWithTemplateLabel({ youth_id: this.youthId }),
-      summaries: this.api.getSummariesByYouth(this.youthId),
-      platformSessions: this.api.getPlatformSessions(this.youthId),
       competencies: this.api.getCompetencies(),
       competencyLevels: this.api.getCompetencyLevels(),
-    })
-      .pipe(
-        map(({ youth, sessions: sessionsWithLabel, summaries, platformSessions, competencies, competencyLevels }) => {
-          const summariesMap = new Map<string, InterviewSummary>();
-          summaries.forEach((sum) => summariesMap.set(sum.session_id, sum));
-          return { youth, sessionsWithLabel, summariesMap, platformSessions, competencies, competencyLevels };
-        })
-      )
-      .subscribe({
-        next: ({ youth, sessionsWithLabel, summariesMap, platformSessions, competencies, competencyLevels }) => {
-          this.youth.set(youth);
-          this.sessions.set(sessionsWithLabel);
-          this.summariesBySession.set(summariesMap);
-          this.platformSessions.set(platformSessions);
-          this.competencies.set(competencies);
-          this.competencyLevels.set(competencyLevels);
-          const chart = this.buildChartData(sessionsWithLabel);
-          this.chartData.set(chart);
-          this.chartLinePoints.set(this.buildLinePoints(chart));
-          this.metricsSummary.set(this.buildMetricsSummary(sessionsWithLabel));
-          this.loading.set(false);
-        },
-        error: () => this.loading.set(false),
-      });
+      stats: this.api.getSessionStats({ youth_id: this.youthId, months: 6 }),
+    }).subscribe({
+      next: ({ youth, competencies, competencyLevels, stats }) => {
+        this.youth.set(youth);
+        this.photoError.set(null);
+        this.competencies.set(competencies);
+        this.competencyLevels.set(competencyLevels);
+        this.applyStats(stats);
+        this.loadSessionsPage();
+        this.loadPlatformPage();
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
 
     this.summaryForm = this.fb.nonNullable.group({
       summary_text: ['', Validators.required],
@@ -104,6 +109,7 @@ export class PerfilJovenComponent implements OnInit {
   }
 
   openSuggestMaterialPanel(): void {
+    this.setTab('sesiones');
     this.showSuggestMaterialPanel.set(true);
     this.suggestMaterialForm.reset({ material_id: '', reason: '', session_id: '' });
     this.api.getSupportMaterial().subscribe({
@@ -111,6 +117,39 @@ export class PerfilJovenComponent implements OnInit {
     });
     // Scroll a la sección después de que Angular la renderice
     setTimeout(() => this.scrollToSuggestMaterial(), 100);
+  }
+
+  initials(name?: string | null): string {
+    if (!name) return 'J';
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'J';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  onPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+    if (!file || !this.youthId) return;
+    this.photoError.set(null);
+    this.photoUploading.set(true);
+    this.api.uploadYouthPhoto(this.youthId, file).subscribe({
+      next: (res) => {
+        this.photoUploading.set(false);
+        if ('error' in res) {
+          this.photoError.set(res.error);
+          return;
+        }
+        this.youth.set(res);
+        this.notification.success('Foto actualizada correctamente');
+      },
+      error: (err) => {
+        const msg = err?.error?.detail ?? 'Error al subir foto';
+        this.photoUploading.set(false);
+        this.photoError.set(typeof msg === 'string' ? msg : 'Error al subir foto');
+      },
+    });
+    if (input) input.value = '';
   }
 
   private scrollToSuggestMaterial(): void {
@@ -128,14 +167,7 @@ export class PerfilJovenComponent implements OnInit {
   }
 
   loadSummaries(): void {
-    if (!this.youthId) return;
-    this.api.getSummariesByYouth(this.youthId).subscribe({
-      next: (summaries) => {
-        const map = new Map<string, InterviewSummary>();
-        summaries.forEach((s) => map.set(s.session_id, s));
-        this.summariesBySession.set(map);
-      },
-    });
+    this.loadSummariesForSessions(this.sessions());
   }
 
   submitSuggestMaterial(): void {
@@ -174,28 +206,14 @@ export class PerfilJovenComponent implements OnInit {
       .filter((l): l is string => !!l);
   }
 
-  private buildChartData(sessions: SessionWithTemplateLabel[]): { month: string; count: number; maxCount: number }[] {
-    const completed = sessions.filter((s) => s.status === 'COMPLETADA' && s.ended_at);
-    const byMonth = new Map<string, number>();
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      byMonth.set(key, 0);
-    }
-    completed.forEach((s) => {
-      if (!s.ended_at) return;
-      const d = new Date(s.ended_at);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      if (byMonth.has(key)) byMonth.set(key, (byMonth.get(key) ?? 0) + 1);
-    });
+  private buildChartDataFromMonthly(monthly: { month: string; count: number }[]): { month: string; count: number; maxCount: number }[] {
     const labels: Record<string, string> = {
       '01': 'Ene', '02': 'Feb', '03': 'Mar', '04': 'Abr', '05': 'May', '06': 'Jun',
       '07': 'Jul', '08': 'Ago', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic',
     };
-    const rows = Array.from(byMonth.entries()).map(([key, count]) => {
-      const [, month] = key.split('-');
-      return { month: labels[month] ?? month, count };
+    const rows = (monthly || []).map((row) => {
+      const [, month] = row.month.split('-');
+      return { month: labels[month] ?? month, count: row.count };
     });
     const maxCount = Math.max(1, ...rows.map((r) => r.count));
     return rows.map((r) => ({ ...r, maxCount }));
@@ -211,20 +229,121 @@ export class PerfilJovenComponent implements OnInit {
     });
   }
 
+  private applyStats(stats: {
+    total: number;
+    completed: number;
+    cancelled: number;
+    error: number;
+    in_progress: number;
+    monthly: { month: string; count: number }[];
+  }): void {
+    this.sessionStats.set(stats);
+    const chart = this.buildChartDataFromMonthly(stats.monthly || []);
+    this.chartData.set(chart);
+    this.chartLinePoints.set(this.buildLinePoints(chart));
+    this.metricsSummary.set(this.buildMetricsSummaryFromStats(stats));
+  }
+
+  private loadSessionsPage(): void {
+    this.api.getSessionsWithTemplateLabelPaged({
+      youth_id: this.youthId,
+      page: this.sessionsPage(),
+      page_size: this.sessionsPageSize,
+    }).subscribe({
+      next: (paged) => {
+        this.sessions.set(paged.items);
+        this.sessionsTotal.set(paged.total);
+        this.loadSummariesForSessions(paged.items);
+      },
+    });
+  }
+
+  private loadPlatformPage(): void {
+    this.api.getPlatformSessionsPaged(this.youthId, {
+      page: this.platformPage(),
+      page_size: this.platformPageSize,
+    }).subscribe({
+      next: (paged) => {
+        this.platformSessions.set(paged.items);
+        this.platformTotal.set(paged.total);
+      },
+    });
+  }
+
+  private loadSummariesForSessions(sessions: SessionWithTemplateLabel[]): void {
+    if (sessions.length === 0) {
+      this.summariesBySession.set(new Map());
+      return;
+    }
+    forkJoin(sessions.map((s) => this.api.getSessionSummary(s.id))).subscribe({
+      next: (summaries) => {
+        const map = new Map<string, InterviewSummary>();
+        summaries.forEach((s) => {
+          if (s) map.set(s.session_id, s);
+        });
+        this.summariesBySession.set(map);
+      },
+    });
+  }
+
   getLinePath(): string {
     const points = this.chartLinePoints();
     if (points.length === 0) return '';
     return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
   }
 
-  private buildMetricsSummary(sessions: SessionWithTemplateLabel[]): { total: number; completed: number; cancelled: number; error: number; completionRate: number } | null {
-    const total = sessions.length;
-    if (total === 0) return { total: 0, completed: 0, cancelled: 0, error: 0, completionRate: 0 };
-    const completed = sessions.filter((s) => s.status === 'COMPLETADA').length;
-    const cancelled = sessions.filter((s) => s.status === 'CANCELADA').length;
-    const error = sessions.filter((s) => s.status === 'ERROR').length;
-    const completionRate = Math.round((completed / total) * 100);
+  private buildMetricsSummaryFromStats(stats: {
+    total: number;
+    completed: number;
+    cancelled: number;
+    error: number;
+  }): { total: number; completed: number; cancelled: number; error: number; completionRate: number } {
+    const total = stats.total || 0;
+    const completed = stats.completed || 0;
+    const cancelled = stats.cancelled || 0;
+    const error = stats.error || 0;
+    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
     return { total, completed, cancelled, error, completionRate };
+  }
+
+  totalPages(total: number, pageSize: number): number {
+    return Math.max(1, Math.ceil(total / pageSize));
+  }
+
+  setTab(tab: ProfileTab): void {
+    this.activeTab.set(tab);
+  }
+
+  prevSessionsPage(): void {
+    const current = this.sessionsPage();
+    if (current > 1) {
+      this.sessionsPage.set(current - 1);
+      this.loadSessionsPage();
+    }
+  }
+
+  nextSessionsPage(): void {
+    const current = this.sessionsPage();
+    if (current < this.totalPages(this.sessionsTotal(), this.sessionsPageSize)) {
+      this.sessionsPage.set(current + 1);
+      this.loadSessionsPage();
+    }
+  }
+
+  prevPlatformPage(): void {
+    const current = this.platformPage();
+    if (current > 1) {
+      this.platformPage.set(current - 1);
+      this.loadPlatformPage();
+    }
+  }
+
+  nextPlatformPage(): void {
+    const current = this.platformPage();
+    if (current < this.totalPages(this.platformTotal(), this.platformPageSize)) {
+      this.platformPage.set(current + 1);
+      this.loadPlatformPage();
+    }
   }
 
   readonly formatDate = formatDate;
@@ -238,6 +357,7 @@ export class PerfilJovenComponent implements OnInit {
   }
 
   openSummaryForm(sessionId: string): void {
+    this.setTab('sesiones');
     this.selectedSessionId.set(sessionId);
     this.showSummaryForm.set(true);
     this.sessionTranscript.set(null);
@@ -338,3 +458,4 @@ export class PerfilJovenComponent implements OnInit {
     });
   }
 }
+

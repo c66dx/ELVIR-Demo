@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
+﻿import { HttpErrorResponse } from '@angular/common/http';
 
 /** Mensajes por código de estado cuando el backend no devuelve detail. */
 const STATUS_MESSAGES: Record<number, string> = {
@@ -14,15 +14,23 @@ const STATUS_MESSAGES: Record<number, string> = {
  * Extrae un mensaje legible de HttpErrorResponse.
  * Soporta FastAPI: detail como string o array de errores de validación.
  */
-export function extractErrorMessage(err: unknown): string {
+export function extractErrorMessage(err: unknown, requestId?: string | null): string {
   if (!(err instanceof HttpErrorResponse)) {
     return 'Ha ocurrido un error';
   }
   const d = err.error?.detail;
-  if (typeof d === 'string') return d;
-  if (Array.isArray(d) && d.length > 0) {
+  let message = '';
+  if (typeof d === 'string') {
+    message = d;
+  } else if (Array.isArray(d) && d.length > 0) {
     const first = d[0];
-    return (first?.msg ?? first?.message ?? STATUS_MESSAGES[err.status]) ?? 'Datos inválidos';
+    message = (first?.msg ?? first?.message ?? STATUS_MESSAGES[err.status]) ?? 'Datos inválidos';
+  } else {
+    message = STATUS_MESSAGES[err.status] ?? `Error ${err.status}`;
   }
-  return STATUS_MESSAGES[err.status] ?? `Error ${err.status}`;
+  if (requestId) {
+    return `${message} (Código: ${requestId})`;
+  }
+  return message;
 }
+

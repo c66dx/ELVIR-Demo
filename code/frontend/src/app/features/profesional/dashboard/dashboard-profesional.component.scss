@@ -80,6 +80,7 @@
   text-decoration: none;
   color: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
+  flex-wrap: wrap;
 
   &:hover {
     border-color: var(--color-primary);
@@ -87,11 +88,45 @@
   }
 }
 
+.recent-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  overflow: hidden;
+}
+
+.recent-avatar--image {
+  background: transparent;
+}
+
+.recent-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recent-youth-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+}
+
 .recent-youth {
-  min-width: 140px;
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--color-text);
+}
+
+.recent-rut {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
 }
 
 .recent-date {
@@ -106,6 +141,18 @@
   margin-left: auto;
 }
 
+@media (max-width: 720px) {
+  .recent-youth-info,
+  .recent-date {
+    min-width: 0;
+  }
+
+  .recent-meta {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
 .link-more {
   font-size: 0.9rem;
   font-weight: 500;
@@ -114,6 +161,12 @@
   &:hover {
     text-decoration: underline;
   }
+}
+
+.dashboard-links {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
 }
 
 .dashboard-section--empty {

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+﻿import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
@@ -80,3 +80,4 @@ export class SessionEndComponent implements OnInit {
 
   readonly formatDuration = formatDuration;
 }
+

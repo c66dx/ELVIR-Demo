@@ -1,0 +1,241 @@
+@if (loading()) {
+  <p>Cargando...</p>
+} @else if (notFound()) {
+  <div class="session-empty">
+    <h3>Sesión no encontrada</h3>
+    <p>Puede que la sesión no exista o no tengas acceso.</p>
+    <a [routerLink]="returnUrl() || '/profesional/jovenes'" class="btn-primary">Volver</a>
+  </div>
+} @else {
+  @let s = session();
+  <div class="session-view">
+    <header class="page-header session-header">
+      <div class="session-header-main">
+        <a [routerLink]="returnUrl() || '/profesional/jovenes'" class="back-link">← Volver</a>
+        <div class="session-title-row">
+          <h2>Sesión #{{ s?.id }}</h2>
+          @if (s) {
+            <app-status-badge [status]="s.status" />
+          }
+        </div>
+      </div>
+      <div class="session-header-actions">
+        @if (youth()) {
+          <a [routerLink]="['/profesional/jovenes', youth()!.id]" class="btn-secondary">Ir al perfil</a>
+        }
+      </div>
+    </header>
+
+    <section class="session-info-card">
+      <div class="session-profile">
+        <div class="avatar" [class.avatar--image]="youth()?.profile_photo_url">
+          @if (youth()?.profile_photo_url) {
+            <img [src]="youth()!.profile_photo_url!" alt="Foto del joven" />
+          } @else {
+            <span>{{ initials(youth()?.display_name) }}</span>
+          }
+        </div>
+        <div class="session-profile-info">
+          <h3>{{ youth()?.display_name ?? '-' }}</h3>
+          <p>RUT: {{ youth()?.rut ?? '-' }}</p>
+          <p>ID: {{ youth()?.identifier ?? '-' }}</p>
+        </div>
+      </div>
+      <dl class="session-info">
+        <dt>Fecha inicio</dt>
+        <dd>{{ formatDate(s?.started_at) }}</dd>
+        <dt>Duración</dt>
+        <dd>{{ s ? getDuration(s) : '-' }}</dd>
+        <dt>Modo</dt>
+        <dd>{{ s?.mode ?? '-' }}</dd>
+        <dt>Cargo / Caso</dt>
+        <dd>
+          @if (context()) {
+            {{ context()!.jobRoleName }} · {{ context()!.caseName }}
+          } @else {
+            -
+          }
+        </dd>
+        <dt>LiveAvatar</dt>
+        <dd>{{ s?.liveavatar_session_id ?? '-' }}</dd>
+        @if (s?.metrics?.['motivo']) {
+          <dt>Motivo</dt>
+          <dd>{{ s?.metrics?.['motivo'] }}</dd>
+        }
+      </dl>
+      @if (audio()) {
+        <div class="session-audio">
+          <h4>Grabación de audio</h4>
+          <audio controls [src]="audio()!.url"></audio>
+          @if (audio()!.duration_seconds) {
+            <p class="meta-small">Duración: {{ formatDuration(audio()!.duration_seconds!) }}</p>
+          }
+        </div>
+      } @else {
+        <p class="meta-small">Sin audio adjunto para esta sesión.</p>
+      }
+    </section>
+
+    <div class="viewer-grid">
+      <section class="transcript-panel">
+        <div class="panel-header">
+          <div>
+            <h3>Transcripción de la entrevista</h3>
+            <p class="panel-subtitle">Revisa el diálogo completo entre joven y avatar.</p>
+          </div>
+          <div class="transcript-meta">
+            @if (transcript()?.session_active) {
+              <span class="badge-live">Sesión en curso</span>
+            }
+            @if (transcript()?.fetched_at) {
+              <span class="meta-small">Actualizado: {{ formatDate(transcript()!.fetched_at) }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="transcript-filters">
+          <label class="filter-chip">
+            <input type="checkbox" [checked]="showUser()" (change)="toggleRole('user', $event)" />
+            Joven
+          </label>
+          <label class="filter-chip">
+            <input type="checkbox" [checked]="showAvatar()" (change)="toggleRole('avatar', $event)" />
+            Avatar
+          </label>
+        </div>
+
+        @if (!transcript()?.transcript_data?.length) {
+          <p class="empty-msg">Aún no hay transcripción disponible para esta sesión.</p>
+        } @else if (filteredTranscript().length === 0) {
+          <p class="empty-msg">No hay mensajes con los filtros actuales.</p>
+        } @else {
+          <div class="transcript-list">
+            @for (entry of filteredTranscript(); track $index) {
+              <div class="transcript-item" [class.role-user]="entry.role === 'user'" [class.role-avatar]="entry.role === 'avatar'">
+                <div class="transcript-item-meta">
+                  <span class="transcript-role">{{ entry.role === 'user' ? 'Joven' : 'Avatar' }}</span>
+                  @if (entry.relative_timestamp != null) {
+                    <span class="transcript-time">{{ formatRelativeTime(entry.relative_timestamp) }}</span>
+                  }
+                </div>
+                <p class="transcript-text">{{ entry.transcript }}</p>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <aside class="side-panel">
+        <nav class="side-tabs" role="tablist" aria-label="Panel de sesión">
+          <button
+            type="button"
+            class="side-tab"
+            [class.is-active]="sideTab() === 'resumen'"
+            (click)="setSideTab('resumen')"
+          >
+            Resumen
+          </button>
+          <button
+            type="button"
+            class="side-tab"
+            [class.is-active]="sideTab() === 'competencias'"
+            (click)="setSideTab('competencias')"
+          >
+            Competencias
+          </button>
+          <button
+            type="button"
+            class="side-tab"
+            [class.is-active]="sideTab() === 'eventos'"
+            (click)="setSideTab('eventos')"
+          >
+            Eventos
+          </button>
+        </nav>
+
+        <div class="side-content">
+          @if (sideTab() === 'resumen') {
+            @if (!editingSummary()) {
+              @if (summary()) {
+                <div class="summary-card">
+                  <h4>Resumen del profesional</h4>
+                  <p class="summary-text">{{ summary()!.summary_text }}</p>
+                  @if (summary()!.competency_tags?.length) {
+                    <div class="summary-tags">
+                      @for (tag of summary()!.competency_tags; track tag) {
+                        <span class="tag">{{ tag }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <button type="button" class="btn-secondary btn-sm" (click)="startEditSummary()">Editar resumen</button>
+              } @else {
+                <p class="empty-msg">Aún no hay resumen registrado para esta sesión.</p>
+                <button type="button" class="btn-primary btn-sm" (click)="startEditSummary()">Registrar resumen</button>
+              }
+            } @else {
+              <form class="summary-form" [formGroup]="summaryForm" (ngSubmit)="submitSummary()">
+                <div class="field">
+                  <label for="summary_text">Resumen *</label>
+                  <textarea id="summary_text" formControlName="summary_text" rows="5" placeholder="Escribe lo más relevante de la entrevista"></textarea>
+                  <p class="field-hint">Enfócate en desempeño, puntos fuertes y oportunidades de mejora.</p>
+                </div>
+                <div class="field">
+                  <label for="competency_tags">Etiquetas de competencia</label>
+                  <input id="competency_tags" type="text" formControlName="competency_tags" placeholder="comunicación, liderazgo" />
+                  <p class="field-hint">Sepáralas por coma para identificarlas rápido.</p>
+                </div>
+                <div class="summary-actions">
+                  <button type="submit" class="btn-primary btn-sm" [disabled]="summaryForm.invalid || submittingSummary()">
+                    {{ submittingSummary() ? 'Guardando...' : 'Guardar resumen' }}
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm" (click)="cancelEditSummary()" [disabled]="submittingSummary()">
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            }
+          }
+
+          @if (sideTab() === 'competencias') {
+            @if (competencies().length === 0) {
+              <p class="empty-msg">No hay evaluación por competencias registrada.</p>
+            } @else {
+              <div class="competency-list">
+                @for (item of competencies(); track item.competency) {
+                  <div class="competency-item">
+                    <div class="competency-name">{{ item.competency }}</div>
+                    <div class="competency-level">{{ item.level }}</div>
+                    @if (item.comment) {
+                      <p class="competency-comment">{{ item.comment }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          @if (sideTab() === 'eventos') {
+            @if (events().length === 0) {
+              <p class="empty-msg">No hay eventos registrados para esta sesión.</p>
+            } @else {
+              <ul class="event-list">
+                @for (ev of events(); track ev.id) {
+                  <li class="event-item">
+                    <div class="event-header">
+                      <span class="event-title">{{ eventLabel(ev.event_type) }}</span>
+                      <span class="event-time">{{ formatDate(ev.occurred_at) }}</span>
+                    </div>
+                    @if (eventDetail(ev)) {
+                      <p class="event-detail">{{ eventDetail(ev) }}</p>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          }
+        </div>
+      </aside>
+    </div>
+  </div>
+}

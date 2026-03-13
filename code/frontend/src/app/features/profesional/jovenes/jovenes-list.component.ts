@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+﻿import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
@@ -18,6 +18,9 @@ export class JovenesListComponent implements OnInit {
 
   youths: YouthWithLastSession[] = [];
   loading = true;
+  page = 1;
+  total = 0;
+  readonly pageSize = 20;
 
   filterSearch = '';
   filterStatus: '' | 'active' | 'inactive' = '';
@@ -36,9 +39,11 @@ export class JovenesListComponent implements OnInit {
     if (this.filterStatus === 'inactive') params.is_active = false;
     if (this.filterLogin === 'yes') params.login_enabled = true;
     if (this.filterLogin === 'no') params.login_enabled = false;
-    this.api.getYouths(Object.keys(params).length ? params : undefined).subscribe({
-      next: (y) => {
-        this.youths = y;
+    this.api.getYouthsPaged({ ...params, page: this.page, page_size: this.pageSize }).subscribe({
+      next: (paged) => {
+        this.youths = paged.items;
+        this.total = paged.total;
+        this.page = paged.page;
         this.loading = false;
       },
       error: () => (this.loading = false),
@@ -46,22 +51,45 @@ export class JovenesListComponent implements OnInit {
   }
 
   onFilterChange(): void {
+    this.page = 1;
     this.loadYouths();
   }
 
   onSearchInput(): void {
     if (this.searchDebounce) clearTimeout(this.searchDebounce);
-    this.searchDebounce = setTimeout(() => this.loadYouths(), 350);
+    this.searchDebounce = setTimeout(() => {
+      this.page = 1;
+      this.loadYouths();
+    }, 350);
   }
 
   clearFilters(): void {
     this.filterSearch = '';
     this.filterStatus = '';
     this.filterLogin = '';
+    this.page = 1;
     this.loadYouths();
   }
 
   readonly formatDate = formatDate;
+
+  totalPages(): number {
+    return Math.max(1, Math.ceil(this.total / this.pageSize));
+  }
+
+  prevPage(): void {
+    if (this.page > 1) {
+      this.page -= 1;
+      this.loadYouths();
+    }
+  }
+
+  nextPage(): void {
+    if (this.page < this.totalPages()) {
+      this.page += 1;
+      this.loadYouths();
+    }
+  }
 
   onDeactivate(youth: YouthWithLastSession): void {
     if (!confirm(`¿Desactivar a ${youth.display_name}?`)) return;
@@ -76,4 +104,13 @@ export class JovenesListComponent implements OnInit {
       next: () => this.loadYouths(),
     });
   }
+
+  initials(name?: string | null): string {
+    if (!name) return 'J';
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'J';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
 }
+

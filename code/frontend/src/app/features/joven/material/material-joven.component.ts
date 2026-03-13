@@ -1,6 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+﻿import { Component, inject, signal } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import { Observable, of } from 'rxjs';
+import { Observable, of, BehaviorSubject, combineLatest } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
 import { YouthService } from '../../../core/services/youth.service';
 import { ApiService } from '../../../core/services/api.service';
@@ -27,35 +27,44 @@ export class MaterialJovenComponent {
   private api = inject(ApiService);
 
   viewedMaterialIds = signal<Set<string>>(new Set());
+  private suggestedPage$ = new BehaviorSubject(1);
+  private catalogPage$ = new BehaviorSubject(1);
+  readonly suggestedPageSize = 6;
+  readonly catalogPageSize = 8;
+  private currentYouthId: string | null = null;
 
-  suggested$: Observable<SuggestionWithMaterial[]> = this.youthService.getCurrentYouthId().pipe(
-    switchMap((youthId) =>
-      youthId
-        ? this.api.getYouthMaterialSuggestions(youthId).pipe(
-            switchMap((suggestions) =>
-              this.api.getSupportMaterial().pipe(
-                map((materials) => {
-                  const matMap = new Map(materials.map((m) => [m.id, m]));
-                  return suggestions.map((s) => ({
-                    ...s,
-                    material: matMap.get(s.material_id),
-                  }));
-                })
-              )
-            )
+  suggested$ = combineLatest([this.youthService.getCurrentYouthId(), this.suggestedPage$]).pipe(
+    switchMap(([youthId, page]) => {
+      this.currentYouthId = youthId;
+      return youthId
+        ? this.api.getYouthMaterialSuggestionsPaged(youthId, { page, page_size: this.suggestedPageSize }).pipe(
+            map((paged) => ({
+              ...paged,
+              items: paged.items.map((s) => ({
+                ...s,
+                material: (s as SuggestionWithMaterial).material ?? undefined,
+              })),
+            }))
           )
-        : of([])
+        : of({ items: [], total: 0, page: 1, page_size: this.suggestedPageSize });
+    })
+  );
+
+  catalog$ = this.catalogPage$.pipe(
+    switchMap((page) =>
+      this.api.getSupportMaterialPaged({ page, page_size: this.catalogPageSize }).pipe(
+        map((paged) => ({ ...paged }))
+      )
     )
   );
 
-  catalog$: Observable<SupportMaterial[]> = this.api.getSupportMaterial();
-
   constructor() {
     this.youthService.getCurrentYouthId().subscribe((youthId) => {
+      this.currentYouthId = youthId;
       if (youthId) {
-        this.api.getYouthMaterialViews(youthId).subscribe({
+        this.api.getYouthMaterialViewsPaged(youthId, { page: 1, page_size: 200 }).subscribe({
           next: (views) => {
-            this.viewedMaterialIds.update((set) => new Set([...set, ...views.map((v) => v.material_id)]));
+            this.viewedMaterialIds.update((set) => new Set([...set, ...views.items.map((v) => v.material_id)]));
           },
         });
       }
@@ -67,15 +76,40 @@ export class MaterialJovenComponent {
   }
 
   openMaterial(materialId: string, url: string): void {
-    this.youthService.getCurrentYouthId().subscribe((youthId) => {
-      if (youthId) {
-        this.api.recordMaterialView(materialId, youthId).subscribe({
-          next: () => {
-            this.viewedMaterialIds.update((set) => new Set([...set, materialId]));
-          },
-        });
-      }
-      window.open(url, '_blank');
-    });
+    const youthId = this.currentYouthId;
+    if (youthId) {
+      this.api.recordMaterialView(materialId, youthId).subscribe({
+        next: () => {
+          this.viewedMaterialIds.update((set) => new Set([...set, materialId]));
+        },
+      });
+    }
+    window.open(url, '_blank');
+  }
+
+  totalPages(total: number, pageSize: number): number {
+    if (!pageSize) return 1;
+    return Math.max(1, Math.ceil(total / pageSize));
+  }
+
+  prevSuggested(): void {
+    const current = this.suggestedPage$.value;
+    if (current > 1) this.suggestedPage$.next(current - 1);
+  }
+
+  nextSuggested(total: number): void {
+    const current = this.suggestedPage$.value;
+    if (current < this.totalPages(total, this.suggestedPageSize)) this.suggestedPage$.next(current + 1);
+  }
+
+  prevCatalog(): void {
+    const current = this.catalogPage$.value;
+    if (current > 1) this.catalogPage$.next(current - 1);
+  }
+
+  nextCatalog(total: number): void {
+    const current = this.catalogPage$.value;
+    if (current < this.totalPages(total, this.catalogPageSize)) this.catalogPage$.next(current + 1);
   }
 }
+

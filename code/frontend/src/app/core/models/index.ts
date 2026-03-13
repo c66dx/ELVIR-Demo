@@ -8,6 +8,7 @@ export * from './case.model';
 export * from './simulation-template.model';
 export * from './session.model';
 export * from './session-event.model';
+export * from './session-audio.model';
 export * from './support-material.model';
 export * from './material-suggestion.model';
 export * from './material-view.model';

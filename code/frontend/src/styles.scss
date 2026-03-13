@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   // Colores
   --color-primary: #1b7f79;
   --color-primary-hover: #156560;
@@ -65,6 +65,7 @@ html,
 body {
   height: 100%;
   margin: 0;
+  overflow-x: hidden;
 }
 
 body {
@@ -139,6 +140,61 @@ a.btn-supervisada {
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+}
+
+// ============================================
+// Logos institucionales
+// ============================================
+.partner-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.partner-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.partner-logo {
+  height: 34px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.partner-logo--teleton {
+  height: 36px;
+}
+
+.partner-strip--login {
+  max-width: 560px;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: 1;
+  justify-content: center;
+}
+
+.partner-strip--footer {
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .partner-strip {
+    justify-content: center;
+  }
+
+  .partner-strip--login {
+    padding: var(--space-3);
   }
 }
 
@@ -481,3 +537,4 @@ a.btn-supervisada {
     flex-shrink: 0;
   }
 }
+

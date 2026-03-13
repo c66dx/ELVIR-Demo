@@ -1,6 +1,7 @@
-"""Configuración de la aplicación."""
+﻿"""Configuración de la aplicación."""
 from pathlib import Path
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 # .env en la raíz del backend (junto a app/)
@@ -10,6 +11,10 @@ _ENV_FILE = _BACKEND_ROOT / ".env"
 
 class Settings(BaseSettings):
     """Configuración cargada desde variables de entorno."""
+
+    # Entorno
+    ENV: str = "dev"  # dev, staging, prod
+    AUTO_CREATE_TABLES: bool = False
 
     # Base de datos (PostgreSQL)
     DATABASE_URL: str = "postgresql://elvir:elvir@localhost:5432/elvir"
@@ -25,12 +30,55 @@ class Settings(BaseSettings):
     # App
     APP_BASE_URL: str = "http://localhost:4200"  # Para activation_url
 
+    SECURITY_CSP: str = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+    AUTH_COOKIE_NAME: str = "elvir_access_token"
+    CSRF_COOKIE_NAME: str = "elvir_csrf_token"
+    CSRF_HEADER_NAME: str = "X-CSRF-Token"
+
     # LiveAvatar (Context Dinámico)
     LIVEAVATAR_API_KEY: str = ""
     LIVEAVATAR_AVATAR_ID: str = ""
     LIVEAVATAR_VOICE_ID: str = ""
     LIVEAVATAR_CONTEXT_ID: str = ""
     LIVEAVATAR_API_BASE: str = "https://api.liveavatar.com/v1"
+    LIVEAVATAR_WEBHOOK_SECRET: str = ""
+
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Orígenes CORS normalizados, deduplicados y sin entradas vacías."""
+        cleaned = [o.strip().rstrip("/") for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        # Dedupe preservando orden de primera aparición
+        return list(dict.fromkeys(cleaned))
+
+
+    @property
+    def is_production(self) -> bool:
+        """Indica si la app está corriendo en modo producción canónico."""
+        return self.ENV == "prod"
+
+    @model_validator(mode="after")
+    def validate_production_settings(self):
+        """Valida configuraciones críticas para producción."""
+        if not self.cors_origins_list:
+            raise ValueError("CORS_ORIGINS debe contener al menos un origen válido")
+
+        env = (self.ENV or "").strip().lower()
+        alias = {"production": "prod"}
+        env = alias.get(env, env)
+
+        allowed_envs = {"dev", "staging", "prod"}
+        if env not in allowed_envs:
+            raise ValueError("ENV inválido. Usa: dev, staging, prod o production")
+
+        self.ENV = env
+
+        if self.is_production and self.SECRET_KEY == "elvir-dev-secret-change-in-production":
+            raise ValueError("SECRET_KEY por defecto no permitido en producción")
+
+        if self.AUTO_CREATE_TABLES and self.ENV != "dev":
+            raise ValueError("AUTO_CREATE_TABLES solo puede ser True en entorno dev")
+        return self
 
     class Config:
         env_file = str(_ENV_FILE) if _ENV_FILE.exists() else ".env"
@@ -38,3 +86,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Utilidades de formato para fechas, duraciones y estados de sesión.
  * Centraliza la lógica compartida entre componentes.
  */
@@ -39,3 +39,4 @@ export const SESSION_STATUS_LABELS: Record<string, string> = {
 export function formatStatusLabel(status: string): string {
   return SESSION_STATUS_LABELS[status] ?? status;
 }
+

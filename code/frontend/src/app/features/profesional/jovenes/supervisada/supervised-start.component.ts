@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+﻿import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, EMPTY } from 'rxjs';
@@ -82,7 +82,7 @@ export class SupervisedStartComponent implements OnInit {
       .subscribe({
         next: (session) => {
           if (session) {
-            this.router.navigate(['/joven/simulacion', session.id], {
+            this.router.navigate(['/profesional/simulacion', session.id], {
               state: { returnUrl: `/profesional/jovenes/${this.youthId}` },
             });
           }
@@ -94,3 +94,4 @@ export class SupervisedStartComponent implements OnInit {
       });
   }
 }
+

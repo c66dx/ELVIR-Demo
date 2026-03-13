@@ -1,14 +1,17 @@
-"""Esquemas de jóvenes."""
+﻿"""Esquemas de jóvenes."""
 import json
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, EmailStr
 
 
 class YouthBase(BaseModel):
     display_name: str
+    rut: Optional[str] = None
     phone: Optional[str] = None
+    year_of_birth: Optional[int] = None
+    diagnosis: Optional[str] = None
     login_enabled: bool = False
     general_notes: Optional[str] = None
     profile_checklist: Optional[list[str]] = None
@@ -16,7 +19,7 @@ class YouthBase(BaseModel):
 
 class YouthCreate(YouthBase):
     """identifier lo genera el sistema (JOV-001, JOV-002, ...)."""
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
 
     @model_validator(mode="after")
     def email_required_if_login(self):
@@ -28,17 +31,18 @@ class YouthCreate(YouthBase):
 class YouthUpdate(BaseModel):
     display_name: Optional[str] = None
     # identifier no es editable
+    rut: Optional[str] = None
     phone: Optional[str] = None
     year_of_birth: Optional[int] = None
     diagnosis: Optional[str] = None
     login_enabled: Optional[bool] = None
     general_notes: Optional[str] = None
     profile_checklist: Optional[list[str]] = None
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
 
 
 class YouthChangeEmailRequest(BaseModel):
-    new_email: str
+    new_email: EmailStr
 
 
 def parse_profile_checklist(val) -> list[str]:
@@ -61,7 +65,9 @@ class YouthResponse(BaseModel):
     user_id: Optional[int] = None
     display_name: str
     identifier: Optional[str] = None
+    rut: Optional[str] = None
     email: Optional[str] = None  # del User cuando tiene user_id
+    profile_photo_url: Optional[str] = None
     phone: Optional[str] = None
     year_of_birth: Optional[int] = None
     diagnosis: Optional[str] = None
@@ -85,3 +91,4 @@ class LastSessionInfo(BaseModel):
 class YouthWithLastSession(YouthResponse):
     status_label: Optional[str] = None
     last_session: Optional[LastSessionInfo] = None
+

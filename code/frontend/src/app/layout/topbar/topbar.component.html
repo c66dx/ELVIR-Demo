@@ -1,4 +1,13 @@
 <div class="topbar">
-  <span class="role-badge">{{ role }}</span>
-  <button type="button" class="logout-btn" (click)="onLogout()">Cerrar sesión</button>
+  <div class="topbar-partners" aria-label="Instituciones asociadas">
+    <span class="topbar-partners-label">Instituciones</span>
+    <div class="topbar-partners-logos">
+      <img src="assets/logo-unab-sm.png" alt="UNAB" />
+      <img src="assets/logo-teleton.png" alt="Teletón" />
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <span class="role-badge">{{ role }}</span>
+    <button type="button" class="logout-btn" (click)="onLogout()">Cerrar sesión</button>
+  </div>
 </div>

@@ -1,4 +1,4 @@
-<div class="login-page">
+﻿<div class="login-page">
   <div class="login-bg">
     <div class="login-bg-shape login-bg-shape-1"></div>
     <div class="login-bg-shape login-bg-shape-2"></div>
@@ -88,7 +88,7 @@
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
               </span>
-              <input id="password" type="password" formControlName="password" placeholder="••••••••" autocomplete="current-password" />
+              <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" autocomplete="current-password" />
             </div>
           </div>
           @if (errorMessage) {
@@ -118,5 +118,14 @@
         </details>
       </div>
     }
+
+    <div class="login-partners" aria-label="Instituciones asociadas">
+      <span class="login-partners-label">Instituciones</span>
+      <div class="partner-group">
+        <img src="assets/logo-unab-md.png" alt="UNAB" class="partner-logo" />
+        <img src="assets/logo-teleton.png" alt="Teletón" class="partner-logo partner-logo--teleton" />
+      </div>
+    </div>
   </div>
 </div>
+

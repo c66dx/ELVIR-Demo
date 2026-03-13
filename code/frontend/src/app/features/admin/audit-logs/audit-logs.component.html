@@ -1,0 +1,134 @@
+<div class="page-header">
+  <div>
+    <h2>Auditoría</h2>
+    <p class="page-hint">Trazabilidad de acciones en el sistema (mutaciones).</p>
+  </div>
+</div>
+
+<div class="filters-bar">
+  <div class="filter-group">
+    <label for="filter-search">Buscar</label>
+    <input
+      id="filter-search"
+      type="text"
+      [ngModel]="filterSearch"
+      (ngModelChange)="filterSearch=$event; onSearchInput()"
+      placeholder="Request ID, ruta, entidad, email"
+    />
+  </div>
+  <div class="filter-group">
+    <label for="filter-action">Acción</label>
+    <select id="filter-action" [ngModel]="filterAction" (ngModelChange)="filterAction=$event; onFilterChange()">
+      <option value="">Todas</option>
+      <option value="create">Crear</option>
+      <option value="update">Actualizar</option>
+      <option value="delete">Eliminar</option>
+      <option value="login">Login</option>
+      <option value="logout">Logout</option>
+      <option value="activate">Activar</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label for="filter-entity">Entidad</label>
+    <select id="filter-entity" [ngModel]="filterEntity" (ngModelChange)="filterEntity=$event; onFilterChange()">
+      <option value="">Todas</option>
+      <option value="youth">Joven</option>
+      <option value="professional">Profesional</option>
+      <option value="session">Sesión</option>
+      <option value="assignment">Asignación</option>
+      <option value="material">Material</option>
+      <option value="summary">Resumen</option>
+      <option value="auth">Auth</option>
+      <option value="upload">Subida</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label for="filter-method">Método</label>
+    <select id="filter-method" [ngModel]="filterMethod" (ngModelChange)="filterMethod=$event; onFilterChange()">
+      <option value="">Todos</option>
+      <option value="POST">POST</option>
+      <option value="PUT">PUT</option>
+      <option value="PATCH">PATCH</option>
+      <option value="DELETE">DELETE</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label for="filter-status">Estado</label>
+    <input
+      id="filter-status"
+      type="number"
+      [ngModel]="filterStatus"
+      (ngModelChange)="filterStatus=$event; onFilterChange()"
+      placeholder="200, 400, 500"
+    />
+  </div>
+  @if (filterSearch || filterAction || filterEntity || filterStatus || filterMethod) {
+    <button type="button" class="btn-secondary btn-sm" (click)="clearFilters()">Limpiar filtros</button>
+  }
+</div>
+
+@if (loading) {
+  <p>Cargando...</p>
+} @else if (logs.length === 0) {
+  <p class="empty">No hay registros aún.</p>
+} @else {
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Acción</th>
+          <th>Entidad</th>
+          <th>Actor</th>
+          <th>Estado</th>
+          <th>Ruta</th>
+          <th>Request ID</th>
+          <th>IP</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (log of logs; track log.id) {
+          <tr>
+            <td>{{ formatDate(log.created_at) }}</td>
+            <td>
+              <span class="method-badge">{{ log.method }}</span>
+              <span class="action-label">{{ actionLabel(log.action) }}</span>
+            </td>
+            <td>
+              <div class="entity">
+                <span class="entity-type">{{ entityLabel(log.entity_type) }}</span>
+                <span class="entity-id">{{ log.entity_id || '-' }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="actor">
+                <span class="actor-email">{{ log.actor_email || '-' }}</span>
+                <span class="actor-role">{{ log.actor_role || '-' }}</span>
+              </div>
+            </td>
+            <td>
+              <span
+                class="status"
+                [class.status--ok]="log.status_code < 400"
+                [class.status--warn]="log.status_code >= 400 && log.status_code < 500"
+                [class.status--error]="log.status_code >= 500"
+              >
+                {{ log.status_code }}
+              </span>
+            </td>
+            <td><code class="mono">{{ log.path }}</code></td>
+            <td><code class="mono">{{ log.request_id || '-' }}</code></td>
+            <td>{{ log.ip_address || '-' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="pager">
+    <span>Página {{ page }} de {{ totalPages() }} · Total {{ total }}</span>
+    <div class="pager-actions">
+      <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="page <= 1">Anterior</button>
+      <button type="button" class="pager-btn" (click)="nextPage()" [disabled]="page >= totalPages()">Siguiente</button>
+    </div>
+  </div>
+}

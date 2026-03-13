@@ -1,4 +1,4 @@
-"""Router de catálogos: job-roles, cases, simulation-templates."""
+﻿"""Router de catálogos: job-roles, cases, simulation-templates."""
 import json
 from typing import Optional
 
@@ -69,7 +69,7 @@ def list_simulation_templates(
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Lista plantillas cargo×caso. Filtros opcionales: job_role_id, case_id."""
+    """Lista plantillas cargo-caso. Filtros opcionales: job_role_id, case_id."""
     q = db.query(SimulationTemplate).filter(SimulationTemplate.is_active == True)
     if job_role_id:
         q = q.filter(SimulationTemplate.job_role_id == job_role_id)
@@ -166,3 +166,5 @@ def get_simulation_template(
         liveavatar_voice_id=t.liveavatar_voice_id,
         is_active=t.is_active,
     )
+
+

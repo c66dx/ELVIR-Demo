@@ -1,4 +1,4 @@
-"""Router de resúmenes cualitativos."""
+﻿"""Router de resúmenes cualitativos."""
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -118,3 +118,4 @@ def get_session_summary(
         "created_at": summary.created_at.isoformat(),
         "updated_at": summary.updated_at.isoformat(),
     }
+

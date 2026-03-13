@@ -1,9 +1,9 @@
-# ELVIR – Entrenador Laboral Virtual con IA
+﻿# ELVIR — Entrenador Laboral Virtual con IA
 
 Plataforma web para simulaciones de entrevistas laborales asistidas por IA, que apoya a jóvenes de Teletón con discapacidad. Incluye documentación, frontend Angular y backend FastAPI, con integración al servicio externo LiveAvatar para el avatar conversacional.
 
 **Autora:** Catalina  
-**Contexto:** Práctica profesional – UNAB
+**Contexto:** Práctica profesional — UNAB
 
 ---
 
@@ -40,6 +40,7 @@ docker compose up -d
 # 2. Backend
 cd code/backend
 pip install -r requirements.txt
+python -m alembic upgrade head
 python seed.py
 python -m uvicorn app.main:app --reload --port 8000
 ```
@@ -93,9 +94,6 @@ Te explico cómo navegar todo esto para que no te pierdas. Yo lo organicé así 
 ### Paso 1: Empieza por la documentación
 
 Todo lo que diseñé está en `docs/`. Ahí está el “por qué” y el “cómo” antes de tocar una línea de código.
-
-- **`docs/CHANGELOG.md`** — Cambios recientes (alineación con Catalina, gestión de jóvenes, activación).
-- Ver **`docs/INDICE-LECTURA.md`** para una guía ordenada de lectura (si existe).
 
 **Orden que yo seguiría:**
 
@@ -155,7 +153,73 @@ El código está en `code/`:
 
 El frontend usa `ApiService` que llama al backend. La URL base se configura en `code/frontend/src/environments/environment.ts` (desarrollo: `http://localhost:8000/api/v1`).
 
+## Webhook de evaluacion (LiveAvatar u otro servicio)
+
+Endpoint para recibir evaluaciones externas y guardarlas en `sessions.metrics`:
+
+```
+POST /api/v1/sessions/evaluation
+Header opcional: X-ELVIR-Webhook-Secret: <token>
+Body: { session_id | liveavatar_session_id, evaluation, source? }
+```
+
+Si `LIVEAVATAR_WEBHOOK_SECRET` esta configurado en `.env`, el header es obligatorio.
+
+## Limpieza de datos (dev)
+
+```bash
+python code/backend/clean_user_data.py
+python code/backend/clean_user_data.py --delete-uploads
+python code/backend/clean_user_data.py --skip-reseed
+```
+
+
 ---
 
+## Quality gate (recomendado antes de push/PR)
 
+Para validar en un solo comando lo que más impacta la nota final (migraciones + tests backend + build frontend):
+
+```bash
+./scripts/quality_gate.sh
+```
+
+Si estás trabajando solo backend:
+
+```bash
+./scripts/quality_gate.sh --skip-frontend
+```
+
+Si quieres que falle explícitamente cuando no pueda validar migraciones:
+
+```bash
+./scripts/quality_gate.sh --require-migrations
+```
+
+Si además quieres correr unit tests frontend (cuando las dependencias de test estén instaladas):
+
+```bash
+./scripts/quality_gate.sh --frontend-unit-tests
+```
+
+Este gate replica los checks críticos de CI y facilita una evidencia reproducible de calidad.
+
+Verificación rápida de reproducibilidad frontend (package/lock):
+
+```bash
+python scripts/check_frontend_lock_sync.py
+```
+
+
+### Chequeo operacional externo rápido (alertas de salud)
+
+Para validar desde fuera del backend el estado operativo y alertas simples (`/health/metrics`):
+
+```bash
+python scripts/check_health_metrics.py --url http://localhost:8000/health/metrics --fail-on-alert
+```
+
+Esto sirve para integrarlo en un cron o monitor externo liviano y fallar cuando exista una alerta activa.
+
+---
 

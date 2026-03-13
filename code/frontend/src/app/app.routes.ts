@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Rutas de la app. Login es público (guestGuard). El resto requiere authGuard.
  * jovenGuard y profesionalGuard restringen por rol. Rutas hijas bajo AppShell.
  */
@@ -15,18 +15,24 @@ import { SimulacionDetailComponent } from './features/joven/simulacion/simulacio
 import { SessionEndComponent } from './features/joven/simulacion/session-end/session-end.component';
 import { HistorialJovenComponent } from './features/joven/historial/historial-joven.component';
 import { MaterialJovenComponent } from './features/joven/material/material-joven.component';
+import { MyAccountComponent } from './features/joven/account/account.component';
 import { DashboardProfesionalComponent } from './features/profesional/dashboard/dashboard-profesional.component';
 import { JovenesListComponent } from './features/profesional/jovenes/jovenes-list.component';
 import { JovenFormComponent } from './features/profesional/jovenes/joven-form.component';
 import { PerfilJovenComponent } from './features/profesional/jovenes/perfil-joven.component';
 import { JovenDetailWrapperComponent } from './features/profesional/jovenes/joven-detail-wrapper.component';
 import { SupervisedStartComponent } from './features/profesional/jovenes/supervisada/supervised-start.component';
+import { SessionViewComponent } from './features/profesional/sesiones/session-view.component';
+import { SessionsListComponent } from './features/profesional/sesiones/sessions-list.component';
+import { ProfessionalAccountComponent } from './features/profesional/account/professional-account.component';
 import { ActivateComponent } from './features/auth/activate/activate.component';
 import { ChangePasswordComponent } from './features/auth/change-password/change-password.component';
 import { DashboardAdminComponent } from './features/admin/dashboard/dashboard-admin.component';
 import { ProfesionalFormComponent } from './features/admin/profesional-form/profesional-form.component';
 import { ProfesionalesListComponent } from './features/admin/profesionales-list/profesionales-list.component';
 import { MaterialFormComponent } from './features/admin/material-form/material-form.component';
+import { UsuariosLogsComponent } from './features/admin/usuarios-logs/usuarios-logs.component';
+import { AuditLogsComponent } from './features/admin/audit-logs/audit-logs.component';
 import { RedirectPlaceholderComponent } from './core/components/redirect-placeholder/redirect-placeholder.component';
 
 export const routes: Routes = [
@@ -68,7 +74,7 @@ export const routes: Routes = [
       },
       {
         path: 'joven/simulacion/:sessionId',
-        canActivate: [authGuard],
+        canActivate: [jovenGuard],
         component: SimulacionDetailComponent,
       },
       {
@@ -78,6 +84,7 @@ export const routes: Routes = [
           { path: 'dashboard', component: DashboardJovenComponent },
           { path: 'historial', component: HistorialJovenComponent },
           { path: 'material', component: MaterialJovenComponent },
+          { path: 'cuenta', component: MyAccountComponent },
         ],
       },
       {
@@ -86,6 +93,10 @@ export const routes: Routes = [
         children: [
           { path: 'dashboard', component: DashboardProfesionalComponent },
           { path: 'material/nuevo', component: MaterialFormComponent },
+          { path: 'sesiones', component: SessionsListComponent },
+          { path: 'sesiones/:sessionId', component: SessionViewComponent },
+          { path: 'simulacion/:sessionId', component: SimulacionDetailComponent },
+          { path: 'cuenta', component: ProfessionalAccountComponent },
           {
             path: 'jovenes',
             children: [
@@ -110,6 +121,8 @@ export const routes: Routes = [
         children: [
           { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
           { path: 'dashboard', component: DashboardAdminComponent },
+          { path: 'usuarios', component: UsuariosLogsComponent },
+          { path: 'auditoria', component: AuditLogsComponent },
           {
             path: 'profesionales',
             children: [
@@ -126,3 +139,4 @@ export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' },
 ];
+

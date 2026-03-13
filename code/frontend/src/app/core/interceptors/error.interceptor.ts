@@ -18,7 +18,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((err) => {
       const skip = SKIP_TOAST_URLS.some((u) => req.url.includes(u));
       if (!skip) {
-        notification.error(extractErrorMessage(err));
+        const requestId = err?.headers?.get?.('X-Request-ID') ?? null;
+        notification.error(extractErrorMessage(err, requestId));
       }
       return throwError(() => err);
     })
