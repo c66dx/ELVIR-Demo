@@ -17,6 +17,8 @@ depends_on = None
 def upgrade() -> None:
     conn = op.get_bind()
     inspector = inspect(conn)
+    if not inspector.has_table("youths"):
+        return
     indexes = inspector.get_indexes("youths")
     if not any(idx.get("name") == "ix_youths_identifier" for idx in indexes):
         op.create_index("ix_youths_identifier", "youths", ["identifier"], unique=True)
@@ -25,6 +27,8 @@ def upgrade() -> None:
 def downgrade() -> None:
     conn = op.get_bind()
     inspector = inspect(conn)
+    if not inspector.has_table("youths"):
+        return
     indexes = inspector.get_indexes("youths")
     if any(idx.get("name") == "ix_youths_identifier" for idx in indexes):
         op.drop_index("ix_youths_identifier", table_name="youths")
