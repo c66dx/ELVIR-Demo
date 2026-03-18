@@ -45,8 +45,8 @@ Windows (PowerShell):
 ```powershell
 cd code/backend
 python -m pip install -r requirements.txt
-$env:ENV="dev"
-$env:DATABASE_URL="sqlite:///./elvir_demo.db"
+# Crear .env demo (solo una vez)
+"ENV=dev`nDATABASE_URL=sqlite:///./elvir_demo.db" | Out-File -Encoding utf8 .env
 python seed.py
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
@@ -56,8 +56,8 @@ Linux/Mac:
 ```bash
 cd code/backend
 python -m pip install -r requirements.txt
-export ENV="dev"
-export DATABASE_URL="sqlite:///./elvir_demo.db"
+# Crear .env demo (solo una vez)
+printf "ENV=dev\nDATABASE_URL=sqlite:///./elvir_demo.db\n" > .env
 python seed.py
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
