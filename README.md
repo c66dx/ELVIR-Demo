@@ -20,29 +20,7 @@ cd ELVIR-Demo
 git checkout preview-seed
 ```
 
-### Backend (SQLite)
-
-Windows (PowerShell):
-
-```powershell
-cd code/backend
-python -m pip install -r requirements.txt
-cd ../..
-.\scripts\run_demo.ps1
-```
-
-Linux/Mac:
-
-```bash
-cd code/backend
-python -m pip install -r requirements.txt
-cd ../..
-./scripts/run_demo.sh
-```
-
-El backend queda en `http://localhost:8000`.
-
-### Todo en un comando (backend + frontend)
+### Opción A (recomendada): un comando
 
 Windows (PowerShell):
 
@@ -56,9 +34,37 @@ Linux/Mac / Git Bash:
 ./scripts/run_preview.sh
 ```
 
-Esto abre dos terminales o procesos: backend en `http://localhost:8000` y frontend en `http://localhost:4200`.
+Esto abre backend en `http://localhost:8000` y frontend en `http://localhost:4200`.
 
-### Frontend
+### Opción B (manual, sin scripts)
+
+Backend (SQLite + seed):
+
+Windows (PowerShell):
+
+```powershell
+cd code/backend
+python -m pip install -r requirements.txt
+$env:ENV="dev"
+$env:DATABASE_URL="sqlite:///./elvir_demo.db"
+python seed.py
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Linux/Mac:
+
+```bash
+cd code/backend
+python -m pip install -r requirements.txt
+export ENV="dev"
+export DATABASE_URL="sqlite:///./elvir_demo.db"
+python seed.py
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+El backend queda en `http://localhost:8000`.
+
+Frontend:
 
 ```bash
 cd code/frontend
