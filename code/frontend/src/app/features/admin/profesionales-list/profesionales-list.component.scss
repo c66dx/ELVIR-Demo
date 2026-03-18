@@ -1,5 +1,9 @@
-.list-page {
+﻿.list-page {
   padding: var(--space-6);
+}
+
+:host ::ng-deep .content-inner {
+  max-width: 100%;
 }
 
 .page-header {
@@ -118,3 +122,4 @@
     align-items: flex-start;
   }
 }
+

@@ -53,3 +53,46 @@
   font-size: 0.875rem;
 }
 
+.interview-context {
+  margin: var(--space-6) 0 var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #f8fafc;
+  color: var(--color-text);
+  box-shadow: 0 12px 30px -24px rgba(15, 23, 42, 0.3);
+
+  p {
+    margin: 0 0 var(--space-3);
+    line-height: 1.5;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.context-label {
+  display: inline-block;
+  margin-bottom: var(--space-3);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.context-case {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.context-goodluck {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.context-empty {
+  color: var(--color-text-muted);
+}
+

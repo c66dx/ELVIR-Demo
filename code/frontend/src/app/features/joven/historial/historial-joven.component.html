@@ -4,7 +4,7 @@
 
 @if (data$ | async; as data) {
   @if (data.items.length === 0) {
-    <p>Sin sesiones registradas.</p>
+    <p>Sin entrevistas registradas.</p>
   } @else {
     <div class="table-wrap">
       <table class="data-table">
@@ -15,7 +15,6 @@
             <th>Modo</th>
             <th>Duración</th>
             <th>Plantilla</th>
-            <th>Resumen</th>
           </tr>
         </thead>
         <tbody>
@@ -26,25 +25,6 @@
               <td>{{ s.mode }}</td>
               <td>{{ formatDuration(s.duration_seconds) }}</td>
               <td>{{ s.templateLabel }}</td>
-              <td (click)="$event.stopPropagation()">
-                @if (s.summary) {
-                  <details class="summary-details">
-                    <summary>Ver resumen</summary>
-                    <div class="summary-content">
-                      <p>{{ s.summary.summary_text }}</p>
-                      @if (s.summary.competency_tags?.length) {
-                        <p class="summary-tags">
-                          @for (tag of s.summary.competency_tags; track tag) {
-                            <span class="tag">{{ tag }}</span>
-                          }
-                        </p>
-                      }
-                    </div>
-                  </details>
-                } @else {
-                  <span class="no-summary">-</span>
-                }
-              </td>
             </tr>
           }
         </tbody>

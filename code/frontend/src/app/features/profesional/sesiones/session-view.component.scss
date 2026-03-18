@@ -181,6 +181,15 @@
   border-radius: 999px;
 }
 
+.badge-ended {
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
 .meta-small {
   font-size: 0.75rem;
   color: var(--color-text-muted);
@@ -299,6 +308,68 @@
   }
 }
 
+.summary-card--ai {
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  background: #f8fafc;
+}
+
+.summary-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.summary-pill {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #0f172a;
+  background: #e2e8f0;
+}
+
+.summary-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.summary-details {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-2);
+  font-size: 0.85rem;
+
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+}
+
+.summary-raw {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.summary-meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
 .summary-text {
   margin: 0;
   font-size: 0.9rem;
@@ -329,21 +400,24 @@
   .field {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: 0.35rem;
 
     label {
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--color-text-muted);
     }
 
     textarea,
     input {
       width: 100%;
-      padding: 0.5rem 0.75rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--color-border);
-      font-size: 0.9rem;
-      background: var(--color-card);
+      padding: 0.65rem 0.85rem;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      font-size: 0.95rem;
+      background: #ffffff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
   }
 }

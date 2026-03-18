@@ -8,7 +8,7 @@
   <div class="login-card" [class.login-card--form]="selectedRole">
     <div class="login-brand">
       <h1>ELVIR</h1>
-      <p class="login-tagline">Simulaciones de entrevistas laborales</p>
+      <p class="login-tagline">Entrenador Laboral Virtual</p>
     </div>
 
     @if (!selectedRole) {
@@ -33,17 +33,21 @@
                 <path d="M12 34c0-4 4-8 6-8h16c2 0 6 4 6 8"/>
               </svg>
             </span>
-            <span class="role-card-title">Soy profesional</span>
+            <span class="role-card-title">Soy tutor</span>
             <span class="role-card-desc">Acompaño a jóvenes en su proceso</span>
           </button>
-          <button type="button" class="role-card role-card--admin" (click)="selectRole('admin')">
-            <span class="role-card-icon">
+        </div>
+        <div class="role-admin">
+          <button type="button" class="role-admin-btn" (click)="selectRole('admin')">
+            <span class="role-admin-icon" aria-hidden="true">
               <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 20h24M12 28h16M8 8h32v32H8z"/>
               </svg>
             </span>
-            <span class="role-card-title">Soy administrador</span>
-            <span class="role-card-desc">Crear profesionales y material</span>
+            <span class="role-admin-text">
+              <span class="role-admin-title">Soy administrador</span>
+              <span class="role-admin-desc">Crear tutores y material</span>
+            </span>
           </button>
         </div>
       </div>
@@ -58,7 +62,7 @@
 
         <div class="form-context">
           @if (selectedRole === 'joven') {
-            <p class="form-context-msg">Ingresa tus datos para acceder a tus simulaciones.</p>
+            <p class="form-context-msg">Ingresa tus datos para acceder a tus entrevistas.</p>
           } @else if (selectedRole === 'admin') {
             <p class="form-context-msg">Ingresa tus credenciales de administrador.</p>
           } @else {
@@ -111,8 +115,9 @@
           <summary>Credenciales de prueba</summary>
           <div class="demo-content">
             <p><strong>Joven:</strong> joven1&#64;test.cl</p>
-            <p><strong>Profesional:</strong> prof&#64;test.cl</p>
+            <p><strong>Tutor:</strong> prof&#64;test.cl</p>
             <p><strong>Admin:</strong> admin&#64;test.cl</p>
+            <p><strong>Clave:</strong> test123</p>
             <p class="demo-note">joven2&#64;test.cl tiene login deshabilitado.</p>
           </div>
         </details>

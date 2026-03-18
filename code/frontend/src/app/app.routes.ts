@@ -9,13 +9,13 @@ import { redirectToDashboardGuard } from './core/guards/redirect-dashboard.guard
 import { jovenGuard, profesionalGuard, adminGuard } from './core/guards/role.guard';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { LoginComponent } from './features/auth/login/login.component';
-import { DashboardJovenComponent } from './features/joven/dashboard/dashboard-joven.component';
 import { NuevaSimulacionComponent } from './features/joven/simulacion/nueva-simulacion.component';
 import { SimulacionDetailComponent } from './features/joven/simulacion/simulacion-detail.component';
 import { SessionEndComponent } from './features/joven/simulacion/session-end/session-end.component';
 import { HistorialJovenComponent } from './features/joven/historial/historial-joven.component';
 import { MaterialJovenComponent } from './features/joven/material/material-joven.component';
 import { MyAccountComponent } from './features/joven/account/account.component';
+import { RetroalimentacionJovenComponent } from './features/joven/retroalimentacion/retroalimentacion.component';
 import { DashboardProfesionalComponent } from './features/profesional/dashboard/dashboard-profesional.component';
 import { JovenesListComponent } from './features/profesional/jovenes/jovenes-list.component';
 import { JovenFormComponent } from './features/profesional/jovenes/joven-form.component';
@@ -81,8 +81,9 @@ export const routes: Routes = [
         path: 'joven',
         canActivate: [jovenGuard],
         children: [
-          { path: 'dashboard', component: DashboardJovenComponent },
+          { path: '', redirectTo: '/joven/simulacion/nueva', pathMatch: 'full' },
           { path: 'historial', component: HistorialJovenComponent },
+          { path: 'retroalimentacion', component: RetroalimentacionJovenComponent },
           { path: 'material', component: MaterialJovenComponent },
           { path: 'cuenta', component: MyAccountComponent },
         ],

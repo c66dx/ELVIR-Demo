@@ -143,11 +143,6 @@
     .role-card-icon { color: var(--color-accent); }
     &:hover { border-color: var(--color-accent); box-shadow: 0 8px 24px rgba(209, 122, 82, 0.2); }
   }
-
-  &--admin {
-    .role-card-icon { color: #6b7280; }
-    &:hover { border-color: #6b7280; box-shadow: 0 8px 24px rgba(107, 114, 128, 0.2); }
-  }
 }
 
 .role-card-icon {
@@ -169,6 +164,60 @@
   font-weight: 700;
   color: var(--color-text);
   margin-bottom: 0.25rem;
+}
+
+// Acceso admin discreto bajo las tarjetas principales
+.role-admin {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: center;
+}
+
+.role-admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px dashed var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+
+  &:hover {
+    border-color: #6b7280;
+    color: var(--color-text);
+    background: #f8fafc;
+  }
+}
+
+.role-admin-icon {
+  width: 24px;
+  height: 24px;
+  color: #6b7280;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.role-admin-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.role-admin-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.role-admin-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
 }
 
 .role-card-desc {

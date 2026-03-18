@@ -59,7 +59,7 @@ export class LoginComponent {
         }
         this.auth.setSession(result.access_token, result.role);
         const redirect =
-          result.role === 'JOVEN' ? '/joven/dashboard' :
+          result.role === 'JOVEN' ? '/joven/simulacion/nueva' :
           result.role === 'ADMIN' ? '/admin/dashboard' : '/profesional/dashboard';
         this.router.navigate([redirect]);
       },

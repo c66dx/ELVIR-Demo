@@ -1257,7 +1257,7 @@ export class ApiService {
         })),
         catchError((err) => {
           const d = err.error?.detail;
-          const msg = typeof d === 'string' ? d : 'Error al crear profesional';
+          const msg = typeof d === 'string' ? d : 'Error al crear tutor';
           return of({ error: withRequestId(msg, err) });
         })
       );
@@ -1277,7 +1277,7 @@ export class ApiService {
         })),
         catchError((err) => {
           const d = err.error?.detail;
-          const msg = typeof d === 'string' ? d : 'Error al actualizar profesional';
+          const msg = typeof d === 'string' ? d : 'Error al actualizar tutor';
           return of({ error: withRequestId(msg, err) });
         })
       );

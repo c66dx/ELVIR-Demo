@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h2>Sesiones</h2>
+  <h2>Entrevistas</h2>
 </div>
 
 <div class="filters-bar">
@@ -61,7 +61,7 @@
   <p>Cargando...</p>
 } @else {
   @if (sessions.length === 0) {
-    <p>Sin sesiones registradas.</p>
+    <p>Sin entrevistas registradas.</p>
   } @else {
     <div class="table-wrap">
       <table class="data-table">
@@ -101,7 +101,7 @@
               <td>{{ formatDuration(s.duration_seconds) }}</td>
               <td>{{ s.templateLabel ?? '-' }}</td>
               <td class="actions">
-                <a [routerLink]="['/profesional/sesiones', s.id]" class="btn-sm btn-primary">Ver sesión</a>
+                <a [routerLink]="['/profesional/sesiones', s.id]" class="btn-sm btn-primary">Ver entrevista</a>
                 <a [routerLink]="['/profesional/jovenes', s.youth_id]" class="btn-sm btn-secondary">Perfil</a>
               </td>
             </tr>

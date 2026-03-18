@@ -32,6 +32,24 @@ export class NuevaSimulacionComponent implements OnInit {
   loading = true;
   submitting = false;
   errorMessage = '';
+  private readonly companyContexts: Record<string, { name: string; description: string }> = {
+    operario: {
+      name: 'Logistica Andina',
+      description: 'una empresa dedicada a la distribucion y apoyo en bodegas.',
+    },
+    'atencion-publico': {
+      name: 'Centro Ciudadano',
+      description: 'una organizacion que orienta a personas en servicios y tramites.',
+    },
+    administrativo: {
+      name: 'Clinica Horizonte',
+      description: 'un centro de salud que coordina agenda y documentacion interna.',
+    },
+    'tecnico-profesional': {
+      name: 'TecnoSoluciones',
+      description: 'una empresa que implementa soporte y servicios tecnicos a clientes.',
+    },
+  };
 
   ngOnInit(): void {
     this.form = this.fb.nonNullable.group({
@@ -50,6 +68,28 @@ export class NuevaSimulacionComponent implements OnInit {
       },
       error: () => (this.loading = false),
     });
+  }
+
+  selectedJobRole(): JobRole | null {
+    if (!this.form) return null;
+    const id = this.form.get('job_role_id')?.value;
+    if (!id) return null;
+    return this.jobRoles.find((jr) => String(jr.id) === String(id)) ?? null;
+  }
+
+  selectedCase(): Case | null {
+    if (!this.form) return null;
+    const id = this.form.get('case_id')?.value;
+    if (!id) return null;
+    return this.cases.find((c) => String(c.id) === String(id)) ?? null;
+  }
+
+  getCompanyContext(role: JobRole | null): { name: string; description: string } {
+    if (!role) return { name: 'una empresa', description: 'una organizacion del sector laboral.' };
+    return this.companyContexts[role.slug] ?? {
+      name: 'una empresa',
+      description: 'una organizacion del sector laboral.',
+    };
   }
 
   onSubmit(): void {

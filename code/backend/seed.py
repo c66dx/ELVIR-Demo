@@ -23,6 +23,81 @@ from app.models.platform_session import PlatformSession  # noqa: F401 - asegurar
 from app.core.security import get_password_hash
 
 
+def _fix_mojibake(text: str | None) -> str | None:
+    if not text:
+        return text
+    if "Ã" in text or "Â" in text:
+        try:
+            return text.encode("latin1").decode("utf-8")
+        except UnicodeDecodeError:
+            return text
+    return text
+
+
+def _get_or_create_user(db: Session, email: str, role: str, is_active: bool = True) -> User:
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        user = User(email=email, password_hash=get_password_hash("test123"), role=role, is_active=is_active)
+        db.add(user)
+        db.flush()
+    return user
+
+
+def _get_or_create_professional(db: Session, user: User | None, display_name: str) -> Professional | None:
+    if not user:
+        return None
+    prof = db.query(Professional).filter(Professional.user_id == user.id).first()
+    if not prof:
+        prof = Professional(user_id=user.id, display_name=display_name, is_active=True)
+        db.add(prof)
+        db.flush()
+    return prof
+
+
+def _get_or_create_youth(
+    db: Session,
+    *,
+    user: User | None,
+    identifier: str | None,
+    display_name: str,
+    login_enabled: bool,
+    phone: str | None = None,
+    general_notes: str | None = None,
+) -> Youth:
+    youth = None
+    if user:
+        youth = db.query(Youth).filter(Youth.user_id == user.id).first()
+    if not youth and identifier:
+        youth = db.query(Youth).filter(Youth.identifier == identifier).first()
+    if not youth:
+        youth = Youth(
+            user_id=user.id if user else None,
+            login_enabled=login_enabled,
+            display_name=display_name,
+            identifier=identifier,
+            phone=phone,
+            is_active=True,
+            general_notes=general_notes,
+        )
+        db.add(youth)
+        db.flush()
+    return youth
+
+
+def _ensure_assignment(db: Session, youth: Youth | None, prof: Professional | None) -> None:
+    if not youth or not prof:
+        return
+    active = (
+        db.query(Assignment)
+        .filter(Assignment.youth_id == youth.id, Assignment.status == "ACTIVO")
+        .order_by(Assignment.assigned_at.desc())
+        .first()
+    )
+    if active:
+        return
+    db.add(Assignment(youth_id=youth.id, professional_id=prof.id, status="ACTIVO"))
+
+
 def seed(db: Session):
     """Ejecuta la carga inicial."""
     # Usuarios
@@ -72,6 +147,46 @@ def seed(db: Session):
         for y in youths:
             if prof:
                 db.add(Assignment(youth_id=y.id, professional_id=prof.id, status="ACTIVO"))
+
+    # Asegurar seeds y asignaciones aunque la BD ya tenga datos
+    seed_joven1 = _get_or_create_user(db, "joven1@test.cl", "JOVEN", is_active=True)
+    seed_joven2 = _get_or_create_user(db, "joven2@test.cl", "JOVEN", is_active=True)
+    seed_prof_user = _get_or_create_user(db, "prof@test.cl", "PROFESIONAL", is_active=True)
+    _get_or_create_user(db, "admin@test.cl", "ADMIN", is_active=True)
+
+    seed_prof = _get_or_create_professional(db, seed_prof_user, "Profesional Test")
+    y1 = _get_or_create_youth(
+        db,
+        user=seed_joven1,
+        identifier="JOV-001",
+        display_name="Maria Gonzalez",
+        login_enabled=True,
+        phone="+56912345678",
+        general_notes="Notas generales",
+    )
+    y2 = _get_or_create_youth(
+        db,
+        user=seed_joven2,
+        identifier="JOV-002",
+        display_name="Juan Rodriguez",
+        login_enabled=False,
+    )
+    y3 = _get_or_create_youth(
+        db,
+        user=None,
+        identifier="JOV-003",
+        display_name="Carolina Flores",
+        login_enabled=True,
+    )
+    y4 = _get_or_create_youth(
+        db,
+        user=None,
+        identifier="JOV-004",
+        display_name="Roberto Diaz",
+        login_enabled=True,
+    )
+    for y in (y1, y2, y3, y4):
+        _ensure_assignment(db, y, seed_prof)
 # Cargos (contenido de Catalina - cargos.json + Context Dinamico roles-data)
     if db.query(JobRole).count() == 0:
         roles = [
@@ -163,18 +278,27 @@ def seed(db: Session):
         jr1 = db.query(JobRole).filter(JobRole.slug == "operario").first()
         c1 = db.query(Case).filter(Case.slug == "normal").first()
         materials = [
-            SupportMaterial(title="TÃ©cnicas de comunicaciÃ³n", description="GuÃ­a bÃ¡sica", type="VIDEO",
+            SupportMaterial(title="Técnicas de comunicación", description="Guía básica", type="VIDEO",
                             url="https://example.com/v1", job_role_id=jr1.id if jr1 else None,
                             case_id=c1.id if c1 else None, active=True),
             SupportMaterial(title="Lenguaje corporal", type="PDF", url="https://example.com/p1",
                             job_role_id=jr1.id if jr1 else None, active=True),
             SupportMaterial(title="Preguntas frecuentes retail", type="VIDEO", url="https://example.com/v2",
                             case_id=c1.id if c1 else None, active=True),
-            SupportMaterial(title="IntroducciÃ³n a entrevistas", type="LINK", url="https://example.com/l1",
+            SupportMaterial(title="Introducción a entrevistas", type="LINK", url="https://example.com/l1",
                             active=True),
         ]
         for m in materials:
             db.add(m)
+
+    # Reparar textos con encoding incorrecto en materiales existentes
+    for material in db.query(SupportMaterial).all():
+        new_title = _fix_mojibake(material.title)
+        new_description = _fix_mojibake(material.description)
+        if new_title != material.title:
+            material.title = new_title
+        if new_description != material.description:
+            material.description = new_description
 
     db.commit()
     print("Seed completado correctamente.")

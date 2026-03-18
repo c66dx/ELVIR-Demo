@@ -7,6 +7,38 @@ Plataforma web para simulaciones de entrevistas laborales asistidas por IA, que 
 
 ---
 
+## Modo demo rápido (sin Docker, solo seed)
+
+Pensado para mostrar la interfaz con datos de prueba sin instalar PostgreSQL ni correr migraciones.
+
+### Backend (SQLite)
+
+Windows (PowerShell):
+
+```powershell
+.\scripts\run_demo.ps1
+```
+
+Linux/Mac:
+
+```bash
+./scripts/run_demo.sh
+```
+
+El backend queda en `http://localhost:8000`.
+
+### Frontend
+
+```bash
+cd code/frontend
+npm install
+npm start
+```
+
+La app queda en `http://localhost:4200`.
+
+> Nota: `seed.py` crea tablas y carga datos de prueba; se puede ejecutar más de una vez sin duplicar.
+
 ## Ejecutar en otro PC (pasos completos)
 
 Para clonar y ejecutar el proyecto en cualquier Windows, Mac o Linux.
@@ -222,4 +254,3 @@ python scripts/check_health_metrics.py --url http://localhost:8000/health/metric
 Esto sirve para integrarlo en un cron o monitor externo liviano y fallar cuando exista una alerta activa.
 
 ---
-

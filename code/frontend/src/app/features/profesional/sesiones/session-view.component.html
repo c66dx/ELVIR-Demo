@@ -2,8 +2,8 @@
   <p>Cargando...</p>
 } @else if (notFound()) {
   <div class="session-empty">
-    <h3>Sesión no encontrada</h3>
-    <p>Puede que la sesión no exista o no tengas acceso.</p>
+    <h3>Entrevista no encontrada</h3>
+    <p>Puede que la entrevista no exista o no tengas acceso.</p>
     <a [routerLink]="returnUrl() || '/profesional/jovenes'" class="btn-primary">Volver</a>
   </div>
 } @else {
@@ -13,7 +13,7 @@
       <div class="session-header-main">
         <a [routerLink]="returnUrl() || '/profesional/jovenes'" class="back-link">← Volver</a>
         <div class="session-title-row">
-          <h2>Sesión #{{ s?.id }}</h2>
+          <h2>Entrevista #{{ s?.id }}</h2>
           @if (s) {
             <app-status-badge [status]="s.status" />
           }
@@ -72,7 +72,7 @@
           }
         </div>
       } @else {
-        <p class="meta-small">Sin audio adjunto para esta sesión.</p>
+        <p class="meta-small">Sin audio adjunto para esta entrevista.</p>
       }
     </section>
 
@@ -84,8 +84,10 @@
             <p class="panel-subtitle">Revisa el diálogo completo entre joven y avatar.</p>
           </div>
           <div class="transcript-meta">
-            @if (transcript()?.session_active) {
-              <span class="badge-live">Sesión en curso</span>
+            @if (s?.status === 'EN_CURSO') {
+              <span class="badge-live">Entrevista en curso</span>
+            } @else if (s?.status) {
+              <span class="badge-ended">Entrevista finalizada</span>
             }
             @if (transcript()?.fetched_at) {
               <span class="meta-small">Actualizado: {{ formatDate(transcript()!.fetched_at) }}</span>
@@ -105,7 +107,7 @@
         </div>
 
         @if (!transcript()?.transcript_data?.length) {
-          <p class="empty-msg">Aún no hay transcripción disponible para esta sesión.</p>
+          <p class="empty-msg">Aún no hay transcripción disponible para esta entrevista.</p>
         } @else if (filteredTranscript().length === 0) {
           <p class="empty-msg">No hay mensajes con los filtros actuales.</p>
         } @else {
@@ -126,14 +128,14 @@
       </section>
 
       <aside class="side-panel">
-        <nav class="side-tabs" role="tablist" aria-label="Panel de sesión">
+        <nav class="side-tabs" role="tablist" aria-label="Panel de entrevista">
           <button
             type="button"
             class="side-tab"
             [class.is-active]="sideTab() === 'resumen'"
             (click)="setSideTab('resumen')"
           >
-            Resumen
+            Retroalimentacion
           </button>
           <button
             type="button"
@@ -158,7 +160,7 @@
             @if (!editingSummary()) {
               @if (summary()) {
                 <div class="summary-card">
-                  <h4>Resumen del profesional</h4>
+                  <h4>Retroalimentacion del tutor</h4>
                   <p class="summary-text">{{ summary()!.summary_text }}</p>
                   @if (summary()!.competency_tags?.length) {
                     <div class="summary-tags">
@@ -168,15 +170,41 @@
                     </div>
                   }
                 </div>
-                <button type="button" class="btn-secondary btn-sm" (click)="startEditSummary()">Editar resumen</button>
+                <button type="button" class="btn-secondary btn-sm" (click)="startEditSummary()">Editar retroalimentacion</button>
               } @else {
-                <p class="empty-msg">Aún no hay resumen registrado para esta sesión.</p>
-                <button type="button" class="btn-primary btn-sm" (click)="startEditSummary()">Registrar resumen</button>
+                <p class="empty-msg">Aun no hay retroalimentacion registrada para esta entrevista.</p>
+                <button type="button" class="btn-primary btn-sm" (click)="startEditSummary()">Registrar retroalimentacion</button>
+              }
+
+              @if (aiEvaluation(); as ai) {
+                <div class="summary-card summary-card--ai">
+                  <div class="summary-card-head">
+                    <div>
+                      <h4>Resumen IA</h4>
+                      <p class="summary-hint">Uso interno del tutor.</p>
+                    </div>
+                    <span class="summary-pill">IA</span>
+                  </div>
+                  @if (ai.summary) {
+                    <p class="summary-text">{{ ai.summary }}</p>
+                  } @else {
+                    <p class="summary-text muted">Resumen IA disponible en detalle técnico.</p>
+                  }
+                  <details class="summary-details">
+                    <summary>Ver detalle tecnico</summary>
+                    <pre class="summary-raw">{{ ai.raw }}</pre>
+                  </details>
+                  @if (aiProvider() || aiVersion()) {
+                    <p class="summary-meta">
+                      Proveedor: {{ aiProvider() ?? '-' }} · Version: {{ aiVersion() ?? '-' }}
+                    </p>
+                  }
+                </div>
               }
             } @else {
               <form class="summary-form" [formGroup]="summaryForm" (ngSubmit)="submitSummary()">
                 <div class="field">
-                  <label for="summary_text">Resumen *</label>
+                  <label for="summary_text">Retroalimentacion *</label>
                   <textarea id="summary_text" formControlName="summary_text" rows="5" placeholder="Escribe lo más relevante de la entrevista"></textarea>
                   <p class="field-hint">Enfócate en desempeño, puntos fuertes y oportunidades de mejora.</p>
                 </div>
@@ -187,7 +215,7 @@
                 </div>
                 <div class="summary-actions">
                   <button type="submit" class="btn-primary btn-sm" [disabled]="summaryForm.invalid || submittingSummary()">
-                    {{ submittingSummary() ? 'Guardando...' : 'Guardar resumen' }}
+                    {{ submittingSummary() ? 'Guardando...' : 'Guardar retroalimentacion' }}
                   </button>
                   <button type="button" class="btn-secondary btn-sm" (click)="cancelEditSummary()" [disabled]="submittingSummary()">
                     Cancelar
@@ -217,7 +245,7 @@
 
           @if (sideTab() === 'eventos') {
             @if (events().length === 0) {
-              <p class="empty-msg">No hay eventos registrados para esta sesión.</p>
+              <p class="empty-msg">No hay eventos registrados para esta entrevista.</p>
             } @else {
               <ul class="event-list">
                 @for (ev of events(); track ev.id) {

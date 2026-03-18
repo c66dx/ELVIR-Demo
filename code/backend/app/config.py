@@ -43,6 +43,24 @@ class Settings(BaseSettings):
     LIVEAVATAR_API_BASE: str = "https://api.liveavatar.com/v1"
     LIVEAVATAR_WEBHOOK_SECRET: str = ""
 
+    # Prompt dinámico (endpoint externo)
+    PROMPT_PROVIDER: str = "local"  # local | endpoint | script
+    PROMPT_ENDPOINT_BASE: str = ""
+    PROMPT_ENDPOINT_INTERVENIR_PATH: str = "prompt/generate"
+    PROMPT_ENDPOINT_EVALUAR_PATH: str = "prompt/evaluate"
+    PROMPT_ENDPOINT_INTERVENIR_URL: str = ""
+    PROMPT_ENDPOINT_EVALUAR_URL: str = ""
+    PROMPT_ENDPOINT_API_KEY: str = ""
+    PROMPT_ENDPOINT_API_KEY_HEADER: str = "Authorization"
+    PROMPT_ENDPOINT_API_KEY_PREFIX: str = "Bearer"
+    PROMPT_ENDPOINT_TIMEOUT_S: int = 15
+    PROMPT_STORE_RAW: bool = False
+
+    # Prompt dinámico (script local)
+    PROMPT_SCRIPT_INTERVENIR_CMD: str = ""
+    PROMPT_SCRIPT_EVALUAR_CMD: str = ""
+    PROMPT_SCRIPT_TIMEOUT_S: int = 15
+
 
     @property
     def cors_origins_list(self) -> list[str]:

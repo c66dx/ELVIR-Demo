@@ -17,7 +17,7 @@ export function createRoleGuard(allowedRole: UserRole): CanActivateFn {
     const role = auth.getRole();
     if (role !== allowedRole) {
       const redirect =
-        role === 'JOVEN' ? '/joven/dashboard' :
+        role === 'JOVEN' ? '/joven/simulacion/nueva' :
         role === 'ADMIN' ? '/admin/dashboard' : '/profesional/dashboard';
       router.navigate([redirect]);
       return false;

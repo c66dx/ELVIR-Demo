@@ -1,12 +1,10 @@
 <div class="app-shell">
-  <aside class="sidebar">
-    <div class="logo-block">
-      <img src="assets/logo-unab-md.png" alt="UNAB" class="logo-mark" />
-      <div class="logo-text">
-        <h1 class="logo">ELVIR</h1>
-        <p class="logo-subtitle">Plataforma de Simulaciones</p>
-      </div>
-    </div>
+  <aside class="sidebar" [class.sidebar--collapsed]="isSidebarCollapsed">
+    <button class="sidebar-toggle" type="button" (click)="toggleSidebar()" [attr.aria-label]="isSidebarCollapsed ? 'Expandir menú' : 'Contraer menú'">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
     <app-sidebar></app-sidebar>
   </aside>
   <main class="main">

@@ -6,7 +6,8 @@ from app.config import settings
 from app.models.job_role import JobRole
 from app.models.case import Case
 from app.models.simulation_template import SimulationTemplate
-from app.services.prompt_builder import build_prompt
+from app.services.prompt_engine import get_prompt, PromptProviderError
+from app.schemas.prompt import PromptInput
 
 
 DEFAULT_OPENING_TEXT = "Hola, soy Javiera y estaré a cargo de esta entrevista."
@@ -103,6 +104,7 @@ def start_liveavatar_session(
     case: Case,
     template: SimulationTemplate,
     request_id: str | None = None,
+    prompt_input: PromptInput | None = None,
 ) -> dict:
     """
     Arma el prompt, actualiza el contexto en LiveAvatar y crea la sesión.
@@ -121,8 +123,14 @@ def start_liveavatar_session(
     if not _is_valid_id(voice_id):
         raise LiveAvatarError("LIVEAVATAR_VOICE_ID no configurado o invalido", 503)
 
-    prompt = build_prompt(job_role, case)
-    opening_text = getattr(case, "opening_text", None) or DEFAULT_OPENING_TEXT
+    try:
+        prompt_result = get_prompt(job_role, case, prompt_input=prompt_input, request_id=request_id)
+    except PromptProviderError as e:
+        raise LiveAvatarError(f"Prompt provider: {e}", 502)
+
+    prompt = prompt_result.prompt
+    opening_text = prompt_result.opening_text or getattr(case, "opening_text", None) or DEFAULT_OPENING_TEXT
+    context_name = prompt_result.name or "elvir_context_dinamico"
     base_url = settings.LIVEAVATAR_API_BASE.rstrip("/")
 
     try:
@@ -130,7 +138,7 @@ def start_liveavatar_session(
             # 1. PATCH contexto (con reintentos en 5xx/tiempo de espera)
             patch_url = f"{base_url}/contexts/{context_id}"
             patch_body = {
-                "name": "elvir_context_dinamico",
+                "name": context_name,
                 "prompt": prompt,
                 "opening_text": opening_text,
             }

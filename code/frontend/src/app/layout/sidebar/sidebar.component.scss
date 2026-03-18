@@ -7,10 +7,91 @@
 }
 
 .sidebar-nav {
-  padding: var(--space-3) var(--space-3);
+  padding: var(--space-2) var(--space-3);
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+}
+
+.sidebar-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: var(--space-6) var(--space-3) var(--space-5);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin-bottom: var(--space-2);
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  transition: border-width 0.2s ease, font-size 0.2s ease;
+}
+
+.profile-avatar--image {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.online-dot {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-success);
+  border: 2px solid var(--color-sidebar);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+  transition: width 0.2s ease, height 0.2s ease, right 0.2s ease, bottom 0.2s ease;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.profile-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.profile-role {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.profile-divider {
+  height: 1px;
+  margin: 0 var(--space-3) var(--space-3);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nav-list {
@@ -66,4 +147,23 @@
 .nav-label {
   flex: 1;
   min-width: 0;
+}
+
+:host-context(.sidebar--collapsed) .sidebar-nav {
+  padding: var(--space-2) var(--space-2);
+}
+
+:host-context(.sidebar--collapsed) .profile-info,
+:host-context(.sidebar--collapsed) .profile-divider,
+:host-context(.sidebar--collapsed) .nav-label {
+  display: none;
+}
+
+:host-context(.sidebar--collapsed) .sidebar-profile {
+  padding: var(--space-2) var(--space-2) var(--space-2);
+}
+
+:host-context(.sidebar--collapsed) .nav-link {
+  justify-content: center;
+  padding: var(--space-2);
 }

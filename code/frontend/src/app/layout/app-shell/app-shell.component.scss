@@ -2,6 +2,7 @@
   display: flex;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
 .sidebar {
@@ -12,7 +13,15 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
+  transition: width 0.2s ease, min-width 0.2s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.sidebar--collapsed {
+  width: 96px;
+  min-width: 96px;
 }
 
 .logo-block {
@@ -61,6 +70,37 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  z-index: 5;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(6px) saturate(140%);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.32);
+    border-color: rgba(255, 255, 255, 0.36);
+  }
+}
+
+.sidebar--collapsed .sidebar-toggle svg {
+  transform: rotate(180deg);
 }
 
 .content {

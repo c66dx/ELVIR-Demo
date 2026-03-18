@@ -6,15 +6,7 @@
 <div class="filters-bar">
   <div class="filter-group">
     <label for="filter-search">Buscar</label>
-    <input id="filter-search" type="text" [ngModel]="filterSearch" (ngModelChange)="filterSearch=$event; onSearchInput()" placeholder="Nombre, identificador o RUT" />
-  </div>
-  <div class="filter-group">
-    <label for="filter-status">Estado</label>
-    <select id="filter-status" [ngModel]="filterStatus" (ngModelChange)="filterStatus=$event; onFilterChange()">
-      <option value="">Todos</option>
-      <option value="active">Activo</option>
-      <option value="inactive">Inactivo</option>
-    </select>
+    <input id="filter-search" type="text" [ngModel]="filterSearch" (ngModelChange)="filterSearch=$event; onSearchInput()" placeholder="Nombre o RUT" />
   </div>
   <div class="filter-group">
     <label for="filter-login">Login</label>
@@ -24,7 +16,7 @@
       <option value="no">Sin login</option>
     </select>
   </div>
-  @if (filterSearch || filterStatus || filterLogin) {
+  @if (filterSearch || filterLogin) {
     <button type="button" class="btn-secondary btn-sm" (click)="clearFilters()">Limpiar filtros</button>
   }
 </div>
@@ -39,9 +31,11 @@
           <th>Foto</th>
           <th>Nombre</th>
           <th>RUT</th>
-          <th>Identificador</th>
-          <th>Estado</th>
           <th>Último intento</th>
+          <th>Desempeño actual</th>
+          <th>Actividad (último mes)</th>
+          <th>Entrevistas (último mes)</th>
+          <th>Retroalimentación</th>
           <th>Login</th>
           <th class="col-actions">Acciones</th>
         </tr>
@@ -60,13 +54,60 @@
             </td>
             <td>{{ y.display_name }}</td>
             <td>{{ y.rut ?? '-' }}</td>
-            <td>{{ y.identifier ?? '-' }}</td>
             <td>
-              <span class="badge" [class.badge-active]="y.is_active" [class.badge-inactive]="!y.is_active">
-                {{ y.is_active ? 'Activo' : 'Inactivo' }}
+              @if (y.last_session?.started_at) {
+                <div class="last-attempt">
+                  <span class="last-date">{{ formatDate(y.last_session?.started_at) }}</span>
+                  @if (y.last_session?.status) {
+                    <span class="status-pill">{{ formatStatusLabel(y.last_session?.status ?? '') }}</span>
+                  }
+                </div>
+              } @else {
+                <span class="muted">Sin entrevistas</span>
+              }
+            </td>
+            <td>
+              <div class="metric">
+                <span class="metric-value">{{ y.performanceLabel }}</span>
+                @if (y.performanceNote) {
+                  <span class="metric-note">{{ y.performanceNote }}</span>
+                }
+              </div>
+            </td>
+            <td>
+              <span
+                class="progress-chip"
+                [class.progress-chip--up]="y.progressTrend === 'up'"
+                [class.progress-chip--down]="y.progressTrend === 'down'"
+                [class.progress-chip--flat]="y.progressTrend === 'flat'"
+                [class.progress-chip--none]="y.progressTrend === 'none'"
+              >
+                {{ y.progressLabel }}
               </span>
             </td>
-            <td>{{ formatDate(y.last_session?.started_at) }}</td>
+            <td class="count-cell">{{ y.interviewsLastMonth }}</td>
+            <td>
+              <div class="action-cell">
+                <span
+                  class="pending-badge"
+                  [class.pending-badge--warn]="y.pendingFeedback"
+                  [class.pending-badge--ok]="!y.pendingFeedback"
+                >
+                  {{ y.pendingFeedback ? 'Pendiente' : 'Al día' }}
+                </span>
+                @if (y.pendingFeedback && y.pendingSessionId) {
+                  <a
+                    [routerLink]="['/profesional/sesiones', y.pendingSessionId]"
+                    [queryParams]="{ returnUrl: '/profesional/jovenes' }"
+                    class="btn-secondary btn-sm"
+                  >
+                    Registrar
+                  </a>
+                } @else {
+                  <a [routerLink]="['/profesional/jovenes', y.id]" class="link-more">Ver perfil</a>
+                }
+              </div>
+            </td>
             <td>{{ y.login_enabled ? 'Sí' : 'No' }}</td>
             <td class="actions">
               <div class="actions-wrap">
@@ -107,4 +148,3 @@
     </div>
   </div>
 }
-

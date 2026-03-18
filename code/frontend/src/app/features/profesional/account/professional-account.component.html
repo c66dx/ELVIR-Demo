@@ -1,7 +1,7 @@
 <div class="account-page">
   <header class="account-header">
     <h2>Mi Cuenta</h2>
-    <p>Administra tu perfil profesional y seguridad.</p>
+    <p>Administra tu perfil de tutor y seguridad.</p>
   </header>
 
   @if (loading()) {
@@ -10,7 +10,7 @@
     <div class="account-grid">
       <section class="account-card">
         <div class="card-title">
-          <h3>Perfil profesional</h3>
+          <h3>Perfil de tutor</h3>
           <p class="card-subtitle">Tu información principal y foto de perfil.</p>
         </div>
         <div class="profile-row">
@@ -22,7 +22,7 @@
             }
           </div>
           <div class="profile-info">
-            <div class="profile-name">{{ professional()?.display_name || 'Profesional' }}</div>
+            <div class="profile-name">{{ professional()?.display_name || 'Tutor' }}</div>
             <div class="profile-email">{{ me()?.email }}</div>
           </div>
           <label class="btn-secondary btn-sm btn-file">

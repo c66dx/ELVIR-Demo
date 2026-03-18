@@ -1,6 +1,6 @@
 ﻿<div class="form-page">
   <div class="page-header">
-    <h2>{{ isEdit ? 'Editar profesional' : 'Crear profesional' }}</h2>
+    <h2>{{ isEdit ? 'Editar tutor' : 'Crear tutor' }}</h2>
     <a routerLink="/admin/profesionales" class="btn-link">← Volver</a>
   </div>
 
@@ -8,7 +8,7 @@
     @if (!isEdit) {
       <div class="field">
         <label for="email">Email *</label>
-        <input id="email" type="email" formControlName="email" placeholder="profesional&#64;institucion.cl" />
+        <input id="email" type="email" formControlName="email" placeholder="tutor&#64;institucion.cl" />
       </div>
       <div class="field">
         <label for="password">Contraseña inicial *</label>
@@ -17,7 +17,7 @@
     }
     <div class="field">
       <label for="display_name">Nombre *</label>
-      <input id="display_name" type="text" formControlName="display_name" placeholder="Nombre del profesional" />
+      <input id="display_name" type="text" formControlName="display_name" placeholder="Nombre del tutor" />
     </div>
     <div class="field">
       <label for="specialty">Especialidad</label>
@@ -32,7 +32,7 @@
     }
     <div class="form-actions actions">
       <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary">
-        {{ isEdit ? 'Guardar cambios' : 'Crear profesional' }}
+        {{ isEdit ? 'Guardar cambios' : 'Crear tutor' }}
       </button>
       <a routerLink="/admin/profesionales" class="btn-link">Cancelar</a>
     </div>

@@ -123,7 +123,7 @@ export class UsuariosLogsComponent implements OnInit {
   onHardDeleteYouth(youth: AdminYouthLogRow): void {
     const confirmText = prompt(
       `Eliminar definitivamente a ${youth.display_name}.` +
-        `\\nSe borrará toda su data (sesiones, logs, invitaciones) y no se puede deshacer.` +
+        `\\nSe borrará toda su data (entrevistas, logs, invitaciones) y no se puede deshacer.` +
         `\\nEscribe ELIMINAR para confirmar.`
     );
     if (confirmText !== 'ELIMINAR') return;

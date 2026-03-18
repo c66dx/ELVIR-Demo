@@ -80,7 +80,7 @@ export class ProfesionalFormComponent implements OnInit {
             this.errorMessage = result.error;
             return;
           }
-          this.notification.success('Profesional actualizado correctamente');
+          this.notification.success('Tutor actualizado correctamente');
           this.router.navigate(['/admin/profesionales']);
         },
         error: () => {
@@ -101,7 +101,7 @@ export class ProfesionalFormComponent implements OnInit {
             this.errorMessage = result.error;
             return;
           }
-          this.notification.success('Profesional creado correctamente');
+          this.notification.success('Tutor creado correctamente');
           this.router.navigate(['/admin/profesionales']);
         },
         error: () => {

@@ -5,7 +5,7 @@
 <div class="tabs">
   <button type="button" class="tab-btn" [class.active]="activeTab === 'youths'" (click)="setTab('youths')">Jóvenes</button>
   <button type="button" class="tab-btn" [class.active]="activeTab === 'professionals'" (click)="setTab('professionals')">
-    Profesionales
+    Tutores
   </button>
 </div>
 
@@ -17,54 +17,60 @@
       <p class="empty">No hay jóvenes registrados.</p>
     } @else {
       <div class="table-wrap">
-        <div class="logs-grid logs-grid--youths">
-          <div class="logs-row logs-row--head">
-            <div class="cell">Foto</div>
-            <div class="cell">Nombre</div>
-            <div class="cell">RUT</div>
-            <div class="cell">ID</div>
-            <div class="cell">Email</div>
-            <div class="cell">Login</div>
-            <div class="cell">Últ. login</div>
-            <div class="cell">Últ. intento</div>
-            <div class="cell">Prof.</div>
-            <div class="cell cell--actions">Acciones</div>
-          </div>
-          @for (y of youths; track y.id) {
-            <div class="logs-row" [class.inactive]="!y.is_active">
-              <div class="cell cell--photo">
-                <div class="avatar" [class.avatar--image]="y.profile_photo_url">
-                  @if (y.profile_photo_url) {
-                    <img [src]="y.profile_photo_url" alt="Foto del joven" />
-                  } @else {
-                    <span>{{ initials(y.display_name) }}</span>
-                  }
-                </div>
-              </div>
-              <div class="cell cell--name">{{ y.display_name }}</div>
-              <div class="cell">{{ y.rut ?? '-' }}</div>
-              <div class="cell cell--id">{{ y.identifier ?? '-' }}</div>
-              <div class="cell">{{ y.email ?? '-' }}</div>
-              <div class="cell">{{ loginTypeLabel(y.login_type) }}</div>
-              <div class="cell">{{ formatDateCompact(y.last_login_at) }}</div>
-              <div class="cell">
-                {{ formatDateCompact(y.last_interview_at) }}
-                <span class="muted">
-                  {{ y.last_interview_status ? formatStatusLabel(y.last_interview_status) : '' }}
-                </span>
-              </div>
-              <div class="cell">
-                {{ y.assigned_professional?.display_name ?? '-' }}
-                <span class="muted">{{ y.assigned_professional?.email ?? '' }}</span>
-              </div>
-              <div class="cell cell--actions">
-                <button type="button" (click)="openLogs(y)" class="action-btn action-btn--view">Ver</button>
-                <button type="button" (click)="onDeleteYouth(y)" class="action-btn action-btn--delete">Desactivar</button>
-                <button type="button" (click)="onHardDeleteYouth(y)" class="action-btn action-btn--hard">Eliminar definitivo</button>
-              </div>
-            </div>
-          }
-        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Foto</th>
+              <th>Nombre</th>
+              <th>RUT</th>
+              <th>ID</th>
+              <th>Email</th>
+              <th>Login</th>
+              <th>Últ. login</th>
+              <th>Últ. intento</th>
+              <th>Tutor</th>
+              <th class="col-actions">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (y of youths; track y.id) {
+              <tr [class.inactive]="!y.is_active">
+                <td>
+                  <div class="avatar" [class.avatar--image]="y.profile_photo_url">
+                    @if (y.profile_photo_url) {
+                      <img [src]="y.profile_photo_url" alt="Foto del joven" />
+                    } @else {
+                      <span>{{ initials(y.display_name) }}</span>
+                    }
+                  </div>
+                </td>
+                <td class="cell--name">{{ y.display_name }}</td>
+                <td>{{ y.rut ?? '-' }}</td>
+                <td class="cell--id">{{ y.identifier ?? '-' }}</td>
+                <td>{{ y.email ?? '-' }}</td>
+                <td>{{ loginTypeLabel(y.login_type) }}</td>
+                <td>{{ formatDateCompact(y.last_login_at) }}</td>
+                <td>
+                  {{ formatDateCompact(y.last_interview_at) }}
+                  <span class="muted">
+                    {{ y.last_interview_status ? formatStatusLabel(y.last_interview_status) : '' }}
+                  </span>
+                </td>
+                <td>
+                  {{ y.assigned_professional?.display_name ?? '-' }}
+                  <span class="muted">{{ y.assigned_professional?.email ?? '' }}</span>
+                </td>
+                <td class="actions">
+                  <div class="actions-wrap">
+                    <button type="button" (click)="openLogs(y)" class="action-btn action-btn--view">Ver</button>
+                    <button type="button" (click)="onDeleteYouth(y)" class="action-btn action-btn--delete">Desactivar</button>
+                    <button type="button" (click)="onHardDeleteYouth(y)" class="action-btn action-btn--hard">Eliminar definitivo</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
       <div class="pager">
         <span>
@@ -82,31 +88,35 @@
     }
   } @else {
     @if (!professionals.length) {
-      <p class="empty">No hay profesionales registrados.</p>
+      <p class="empty">No hay tutores registrados.</p>
     } @else {
       <div class="table-wrap">
-        <div class="logs-grid logs-grid--pros">
-          <div class="logs-row logs-row--head">
-            <div class="cell">Nombre</div>
-            <div class="cell">Email</div>
-            <div class="cell">Login</div>
-            <div class="cell">Últ. login</div>
-            <div class="cell">Estado</div>
-          </div>
-          @for (p of professionals; track p.id) {
-            <div class="logs-row" [class.inactive]="!p.is_active">
-              <div class="cell cell--name">{{ p.display_name }}</div>
-              <div class="cell">{{ p.email ?? '-' }}</div>
-              <div class="cell">{{ loginTypeLabel(p.login_type) }}</div>
-              <div class="cell">{{ formatDateCompact(p.last_login_at) }}</div>
-              <div class="cell">
-                <span class="badge" [class.badge-active]="p.is_active" [class.badge-inactive]="!p.is_active">
-                  {{ p.is_active ? 'Activo' : 'Inactivo' }}
-                </span>
-              </div>
-            </div>
-          }
-        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Login</th>
+              <th>Últ. login</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of professionals; track p.id) {
+              <tr [class.inactive]="!p.is_active">
+                <td class="cell--name">{{ p.display_name }}</td>
+                <td>{{ p.email ?? '-' }}</td>
+                <td>{{ loginTypeLabel(p.login_type) }}</td>
+                <td>{{ formatDateCompact(p.last_login_at) }}</td>
+                <td>
+                  <span class="badge" [class.badge-active]="p.is_active" [class.badge-inactive]="!p.is_active">
+                    {{ p.is_active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
       <div class="pager">
         <span>
@@ -181,16 +191,16 @@
           </section>
 
           <section class="logs-section">
-            <h4>Sesiones de entrevista</h4>
+            <h4>Entrevistas</h4>
             @if (youthLogs.interviews.length === 0) {
-              <p class="empty">Sin sesiones registradas.</p>
+              <p class="empty">Sin entrevistas registradas.</p>
             } @else {
               <div class="mini-table">
                 <div class="mini-row mini-row--head">
                   <div>Inicio</div>
                   <div>Estado</div>
                   <div>Modo</div>
-                  <div>Profesional</div>
+                  <div>Tutor</div>
                   <div>Cierre</div>
                 </div>
                 @for (s of youthLogs.interviews; track s.id) {
@@ -223,5 +233,3 @@
     </div>
   </div>
 }
-
-

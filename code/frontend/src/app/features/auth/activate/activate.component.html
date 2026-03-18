@@ -74,13 +74,13 @@
           <p class="activate-error-title">Enlace no válido</p>
           @switch (errorCode()) {
             @case ('TOKEN_EXPIRED') {
-              <p class="activate-error-msg">Este enlace ha expirado. Pide a tu profesional que genere uno nuevo.</p>
+              <p class="activate-error-msg">Este enlace ha expirado. Pide a tu tutor que genere uno nuevo.</p>
             }
             @case ('TOKEN_USED') {
               <p class="activate-error-msg">Este enlace ya fue utilizado. Si ya activaste tu cuenta, puedes iniciar sesión.</p>
             }
             @default {
-              <p class="activate-error-msg">El enlace no es válido o ha expirado. Pide a tu profesional que te envíe uno nuevo.</p>
+              <p class="activate-error-msg">El enlace no es válido o ha expirado. Pide a tu tutor que te envíe uno nuevo.</p>
             }
           }
           <a routerLink="/login" class="btn-link">Volver al login</a>
@@ -91,7 +91,7 @@
           <p class="activate-error-title">No se pudo completar</p>
           @switch (errorCode()) {
             @case ('TOKEN_EXPIRED') {
-              <p class="activate-error-msg">Este enlace ha expirado. Pide a tu profesional que genere uno nuevo.</p>
+              <p class="activate-error-msg">Este enlace ha expirado. Pide a tu tutor que genere uno nuevo.</p>
             }
             @case ('TOKEN_USED') {
               <p class="activate-error-msg">Este enlace ya fue utilizado. Si ya activaste tu cuenta, puedes iniciar sesión.</p>
@@ -106,7 +106,7 @@
               <p class="activate-error-msg">Debes ingresar tu contraseña actual para confirmar el cambio.</p>
             }
             @default {
-              <p class="activate-error-msg">El enlace no es válido o ha expirado. Pide a tu profesional que te envíe uno nuevo.</p>
+              <p class="activate-error-msg">El enlace no es válido o ha expirado. Pide a tu tutor que te envíe uno nuevo.</p>
             }
           }
           <a routerLink="/login" class="btn-link">Volver al login</a>

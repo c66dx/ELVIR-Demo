@@ -2,7 +2,7 @@
   <header class="dashboard-header page-header">
     <h2>Mi Dashboard</h2>
     <div class="page-header-actions">
-      <a routerLink="/joven/simulacion/nueva" class="btn-primary">Nueva Simulación</a>
+      <a routerLink="/joven/simulacion/nueva" class="btn-primary">Nueva Entrevista</a>
       <a routerLink="/joven/historial" class="btn-secondary">Historial</a>
       <a routerLink="/joven/material" class="btn-secondary">Material</a>
     </div>
@@ -12,15 +12,15 @@
     <div class="kpis">
       <div class="kpi-card">
         <span class="kpi-value">{{ data.totalSessions }}</span>
-        <span class="kpi-label">Total sesiones</span>
+        <span class="kpi-label">Total entrevistas</span>
       </div>
       <div class="kpi-card">
         <span class="kpi-value">{{ data.completedSessions }}</span>
-        <span class="kpi-label">Sesiones completadas</span>
+        <span class="kpi-label">Entrevistas completadas</span>
       </div>
       <div class="kpi-card">
         <span class="kpi-value">{{ formatStatus(data.lastSession?.status) }}</span>
-        <span class="kpi-label">Última sesión</span>
+        <span class="kpi-label">Última entrevista</span>
       </div>
       @if (data.materialSuggestionsCount > 0) {
         <div class="kpi-card kpi-card--highlight">
@@ -32,7 +32,7 @@
 
     @if (data.recentSessions.length > 0) {
       <section class="dashboard-section">
-        <h3>Últimas sesiones</h3>
+        <h3>Últimas entrevistas</h3>
         <div class="recent-list">
           @for (s of data.recentSessions; track s.id) {
             <a [routerLink]="['/joven/simulacion', s.id]" class="recent-item">
@@ -46,8 +46,8 @@
       </section>
     } @else if (data.totalSessions === 0) {
       <section class="dashboard-section dashboard-section--empty">
-        <p class="empty-msg">Aún no tienes sesiones. ¡Comienza tu primera simulación de entrevista!</p>
-        <a routerLink="/joven/simulacion/nueva" class="btn-primary">Iniciar primera simulación</a>
+        <p class="empty-msg">Aún no tienes entrevistas. ¡Comienza tu primera entrevista!</p>
+        <a routerLink="/joven/simulacion/nueva" class="btn-primary">Iniciar primera entrevista</a>
       </section>
     }
   } @else {

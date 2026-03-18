@@ -31,6 +31,8 @@ from app.schemas.session import (
     SessionEventResponse,
     TranscriptResponse,
 )
+from app.schemas.prompt import PromptInput, EvaluationInput
+from app.services.prompt_engine import evaluate, PromptProviderError
 from app.schemas.session_audio import SessionAudioResponse
 from app.core.dependencies import get_current_user, get_current_professional
 from app.config import settings
@@ -66,6 +68,17 @@ def _save_audio_stream(file: UploadFile, destination: Path) -> int:
                 )
             out.write(chunk)
     return total_written
+
+
+def _transcript_to_text(transcript_data: list[dict] | None) -> str:
+    """Convierte transcript_data (lista de turnos) a texto plano."""
+    lines: list[str] = []
+    for item in transcript_data or []:
+        role = (item.get("role") or "speaker").strip()
+        text = (item.get("transcript") or "").strip()
+        if text:
+            lines.append(f"{role}: {text}")
+    return "\n".join(lines).strip()
 
 
 class SessionCompetencyItem(BaseModel):
@@ -400,7 +413,24 @@ def start_session(
     # Integración LiveAvatar si está configurada
     if is_liveavatar_configured(template):
         try:
-            result = start_liveavatar_session(job_role, case, template, request_id=request_id)
+            # Payload minimo para el generador de prompt dinamico
+            prompt_input = PromptInput(
+                alumno_id=str(session.youth_id),
+                cargo_id=job_role.slug,
+                case_id=case.slug,
+                session_id=session.id,
+                metadata={
+                    "mode": session.mode,
+                    "simulation_template_id": session.simulation_template_id,
+                },
+            )
+            result = start_liveavatar_session(
+                job_role,
+                case,
+                template,
+                request_id=request_id,
+                prompt_input=prompt_input,
+            )
             live_id = result.get("session_id") or f"live-{session_id}"
             session.liveavatar_session_id = str(live_id)
             db.add(SessionEvent(
@@ -521,6 +551,41 @@ def close_session(
                     transcript_data=transcript_data.get("transcript_data", []),
                     session_active=transcript_data.get("session_active"),
                 ))
+
+            # Evaluar transcripción con IA externa (no bloquea el cierre si falla)
+            transcript_text = _transcript_to_text(transcript_data.get("transcript_data", []))
+            if transcript_text:
+                try:
+                    eval_input = EvaluationInput(
+                        alumno_id=str(session.youth_id),
+                        session_id=session.id,
+                        transcript=transcript_text,
+                    )
+                    eval_result = evaluate(eval_input, request_id=request_id)
+                    if eval_result.snapshot:
+                        metrics = dict(session.metrics) if session.metrics else {}
+                        metrics["prompt_evaluation"] = eval_result.snapshot
+                        metrics["prompt_evaluation_provider"] = eval_result.provider
+                        if eval_result.version:
+                            metrics["prompt_evaluation_version"] = eval_result.version
+                        session.metrics = metrics
+                        db.add(SessionEvent(
+                            session_id=session.id,
+                            event_type="PROMPT_EVALUATED",
+                            payload={"provider": eval_result.provider, "request_id": request_id},
+                        ))
+                except PromptProviderError as e:
+                    logger.warning(
+                        "request_id=%s prompt_evaluation_error detail=%s",
+                        request_id,
+                        str(e),
+                    )
+                except Exception as e:
+                    logger.warning(
+                        "request_id=%s prompt_evaluation_unexpected detail=%s",
+                        request_id,
+                        str(e),
+                    )
 
     payload = {"status": data.status, "request_id": request_id}
     if data.motivo:

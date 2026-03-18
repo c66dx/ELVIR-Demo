@@ -1,13 +1,13 @@
 ﻿<div class="list-page">
   <header class="page-header">
-    <h2>Profesionales</h2>
-    <a routerLink="/admin/profesionales/nuevo" class="btn-primary">Crear profesional</a>
+    <h2>Tutores</h2>
+    <a routerLink="/admin/profesionales/nuevo" class="btn-primary">Crear tutor</a>
   </header>
 
   @if (loading) {
     <p class="loading">Cargando...</p>
   } @else if (total === 0) {
-    <p class="empty">No hay profesionales registrados. <a routerLink="/admin/profesionales/nuevo">Crear el primero</a></p>
+    <p class="empty">No hay tutores registrados. <a routerLink="/admin/profesionales/nuevo">Crear el primero</a></p>
   } @else {
     <div class="table-wrap">
       <table class="data-table">

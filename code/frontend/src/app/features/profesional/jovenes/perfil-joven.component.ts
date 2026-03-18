@@ -15,6 +15,50 @@ import type { SessionWithTemplateLabel, PlatformSessionItem } from '../../../cor
 
 type ProfileTab = 'perfil' | 'accesos' | 'desempeno' | 'sesiones';
 
+interface ChartSeries {
+  name: string;
+  data: number[];
+}
+
+interface ChartDefinition {
+  id: string;
+  title: string;
+  description?: string;
+  unit?: string;
+  x: string[];
+  series: ChartSeries[];
+}
+
+const MOCK_CHARTS: ChartDefinition[] = [
+  {
+    id: 'comunicacion',
+    title: 'Comunicación',
+    description: 'Claridad y estructura al expresar ideas durante la entrevista.',
+    unit: '%',
+    x: ['Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'],
+    series: [{ name: 'Puntaje', data: [48, 55, 61, 66, 70, 74] }],
+  },
+  {
+    id: 'empatia',
+    title: 'Empatía',
+    description: 'Capacidad de conectar con el entrevistador en contextos sensibles.',
+    unit: '%',
+    x: ['Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'],
+    series: [{ name: 'Puntaje', data: [38, 46, 52, 58, 63, 68] }],
+  },
+  {
+    id: 'autogestion',
+    title: 'Autogestión',
+    description: 'Manejo emocional y organización durante la entrevista.',
+    unit: '%',
+    x: ['Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'],
+    series: [
+      { name: 'Autogestionada', data: [42, 50, 57, 60, 66, 71] },
+      { name: 'Supervisada', data: [35, 44, 49, 55, 59, 64] },
+    ],
+  },
+];
+
 /**
  * Perfil del joven: datos, historial de sesiones, resúmenes, sugerir material.
  * El profesional puede registrar resúmenes cualitativos e iniciar simulación supervisada.
@@ -192,9 +236,7 @@ export class PerfilJovenComponent implements OnInit {
       });
   }
 
-  chartData = signal<{ month: string; count: number; maxCount: number }[]>([]);
-  /** Puntos para la curva SVG: { x, y } en coordenadas 0-100 */
-  chartLinePoints = signal<{ x: number; y: number }[]>([]);
+  charts = signal<ChartDefinition[]>(MOCK_CHARTS);
   /** Métricas de desempeño: total, completadas, tasa */
   metricsSummary = signal<{ total: number; completed: number; cancelled: number; error: number; completionRate: number } | null>(null);
   readonly checklistItems = PROFILE_CHECKLIST_ITEMS;
@@ -206,29 +248,6 @@ export class PerfilJovenComponent implements OnInit {
       .filter((l): l is string => !!l);
   }
 
-  private buildChartDataFromMonthly(monthly: { month: string; count: number }[]): { month: string; count: number; maxCount: number }[] {
-    const labels: Record<string, string> = {
-      '01': 'Ene', '02': 'Feb', '03': 'Mar', '04': 'Abr', '05': 'May', '06': 'Jun',
-      '07': 'Jul', '08': 'Ago', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic',
-    };
-    const rows = (monthly || []).map((row) => {
-      const [, month] = row.month.split('-');
-      return { month: labels[month] ?? month, count: row.count };
-    });
-    const maxCount = Math.max(1, ...rows.map((r) => r.count));
-    return rows.map((r) => ({ ...r, maxCount }));
-  }
-
-  private buildLinePoints(chart: { count: number; maxCount: number }[]): { x: number; y: number }[] {
-    if (chart.length === 0) return [];
-    const maxCount = Math.max(1, ...chart.map((r) => r.count));
-    return chart.map((item, i) => {
-      const x = (i / (chart.length - 1 || 1)) * 100;
-      const y = 100 - (item.count / maxCount) * 100;
-      return { x, y };
-    });
-  }
-
   private applyStats(stats: {
     total: number;
     completed: number;
@@ -238,9 +257,6 @@ export class PerfilJovenComponent implements OnInit {
     monthly: { month: string; count: number }[];
   }): void {
     this.sessionStats.set(stats);
-    const chart = this.buildChartDataFromMonthly(stats.monthly || []);
-    this.chartData.set(chart);
-    this.chartLinePoints.set(this.buildLinePoints(chart));
     this.metricsSummary.set(this.buildMetricsSummaryFromStats(stats));
   }
 
@@ -286,10 +302,25 @@ export class PerfilJovenComponent implements OnInit {
     });
   }
 
-  getLinePath(): string {
-    const points = this.chartLinePoints();
-    if (points.length === 0) return '';
+  getSeriesPath(chart: ChartDefinition, series: ChartSeries): string {
+    if (!series.data.length) return '';
+    const max = this.getChartMax(chart);
+    const points = series.data.map((value, i) => {
+      const x = series.data.length === 1 ? 50 : (i / (series.data.length - 1)) * 100;
+      const y = 100 - (value / max) * 100;
+      return { x, y };
+    });
     return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  }
+
+  getSeriesColor(index: number): string {
+    const palette = ['#1b7f79', '#4f6ef7', '#f59e0b', '#ec4899'];
+    return palette[index % palette.length];
+  }
+
+  private getChartMax(chart: ChartDefinition): number {
+    const values = chart.series.flatMap((s) => s.data);
+    return Math.max(1, ...values);
   }
 
   private buildMetricsSummaryFromStats(stats: {

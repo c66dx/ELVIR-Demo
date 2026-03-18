@@ -110,8 +110,8 @@ export class SessionsListComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          const msg = err?.error?.detail ?? 'No se pudieron cargar las sesiones.';
-          this.errorMessage = typeof msg === 'string' ? msg : 'No se pudieron cargar las sesiones.';
+          const msg = err?.error?.detail ?? 'No se pudieron cargar las entrevistas.';
+          this.errorMessage = typeof msg === 'string' ? msg : 'No se pudieron cargar las entrevistas.';
           this.sessions = [];
           this.total = 0;
           this.loading = false;

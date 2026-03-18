@@ -3,15 +3,54 @@
 } @else {
   @let y = youth();
   @if (y) {
-    <div class="header page-header">
-      <a routerLink="/profesional/jovenes" class="back-link">← Volver a Jóvenes</a>
-      <h2>Perfil: {{ y.display_name }}</h2>
-      <div class="header-actions">
-        <button type="button" class="btn-suggest" (click)="openSuggestMaterialPanel()">Sugerir material</button>
-        <a [routerLink]="['/profesional/jovenes', youthId, 'supervisada', 'nueva']" class="btn-supervisada">Iniciar simulación supervisada</a>
-        <a [routerLink]="['/profesional/jovenes', youthId, 'editar']" class="btn-primary">Editar</a>
+    <section class="profile-hero">
+      <div class="hero-top">
+        <a routerLink="/profesional/jovenes" class="back-link">← Volver a Jóvenes</a>
+        <div class="header-actions">
+          <button type="button" class="btn-suggest" (click)="openSuggestMaterialPanel()">Sugerir material</button>
+          <a [routerLink]="['/profesional/jovenes', youthId, 'supervisada', 'nueva']" class="btn-supervisada">Iniciar entrevista supervisada</a>
+          <a [routerLink]="['/profesional/jovenes', youthId, 'editar']" class="btn-primary">Editar</a>
+        </div>
       </div>
-    </div>
+      <div class="hero-main">
+        <div class="hero-identity">
+          <div class="hero-avatar" [class.hero-avatar--image]="y.profile_photo_url">
+            @if (y.profile_photo_url) {
+              <img [src]="y.profile_photo_url" alt="Foto del joven" />
+            } @else {
+              <span>{{ initials(y.display_name) }}</span>
+            }
+          </div>
+          <div class="hero-text">
+            <h2 class="hero-name">{{ y.display_name }}</h2>
+            <div class="hero-meta">
+              <span>{{ y.email ?? 'Sin correo' }}</span>
+              <span>RUT: {{ y.rut ?? '-' }}</span>
+              <span>ID: {{ y.identifier ?? '-' }}</span>
+            </div>
+            <div class="hero-tags">
+              <span class="hero-tag" [class.is-active]="y.login_enabled">{{ y.login_enabled ? 'Login habilitado' : 'Login deshabilitado' }}</span>
+              <span class="hero-tag" [class.is-active]="y.is_active">{{ y.is_active ? 'Activo' : 'Inactivo' }}</span>
+            </div>
+          </div>
+        </div>
+        @let metrics = metricsSummary();
+        <div class="hero-metrics">
+          <div class="hero-metric">
+            <span class="metric-value">{{ metrics?.total ?? 0 }}</span>
+            <span class="metric-label">Entrevistas</span>
+          </div>
+          <div class="hero-metric">
+            <span class="metric-value">{{ metrics?.completed ?? 0 }}</span>
+            <span class="metric-label">Completadas</span>
+          </div>
+          <div class="hero-metric">
+            <span class="metric-value">{{ metrics?.completionRate ?? 0 }}%</span>
+            <span class="metric-label">Tasa de éxito</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <nav class="profile-tabs" role="tablist" aria-label="Secciones del perfil">
       <button
@@ -53,7 +92,7 @@
         [attr.aria-selected]="activeTab() === 'sesiones'"
         (click)="setTab('sesiones')"
       >
-        Sesiones
+        Entrevistas
       </button>
     </nav>
 
@@ -184,7 +223,7 @@
             <div class="metrics-grid">
               <div class="metric-card">
                 <span class="metric-value">{{ metrics.total }}</span>
-                <span class="metric-label">Total sesiones</span>
+                <span class="metric-label">Total entrevistas</span>
               </div>
               <div class="metric-card">
                 <span class="metric-value">{{ metrics.completed }}</span>
@@ -212,36 +251,52 @@
           <p>Sin datos de desempeño todavía.</p>
         }
 
-        @let chart = chartData();
-        @if (chart.length > 0) {
-          <section class="chart-section">
-            <h3>Curva de seguimiento (últimos 6 meses)</h3>
-            <div class="chart-container">
-              <div class="chart-bars">
-                @for (item of chart; track item.month) {
-                  <div class="chart-bar-wrap">
-                    <div
-                      class="chart-bar"
-                      [style.height.%]="(item.count / item.maxCount) * 100"
-                    ></div>
-                    <span class="chart-value">{{ item.count }}</span>
-                    <span class="chart-label">{{ item.month }}</span>
+        @let chartsData = charts();
+        @if (chartsData.length > 0) {
+          <section class="charts-section">
+            <h3>Curvas de seguimiento</h3>
+            <div class="charts-grid">
+              @for (chart of chartsData; track chart.id) {
+                <article class="chart-card">
+                  <div class="chart-card-header">
+                    <div>
+                      <h4>{{ chart.title }}</h4>
+                      <p>{{ chart.description }}</p>
+                    </div>
+                    @if (chart.unit) {
+                      <span class="chart-unit">{{ chart.unit }}</span>
+                    }
                   </div>
-                }
-              </div>
-              <div class="chart-line-wrap">
-                <svg class="chart-line-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  <path
-                    class="chart-line-path"
-                    [attr.d]="getLinePath()"
-                    fill="none"
-                    stroke="var(--color-primary)"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </div>
+                  <div class="chart-card-body">
+                    <svg class="chart-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      @for (series of chart.series; track series.name; let i = $index) {
+                        <path
+                          class="chart-path"
+                          [attr.d]="getSeriesPath(chart, series)"
+                          [attr.stroke]="getSeriesColor(i)"
+                          fill="none"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      }
+                    </svg>
+                    <div class="chart-axis">
+                      @for (label of chart.x; track label) {
+                        <span>{{ label }}</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="chart-legend">
+                    @for (series of chart.series; track series.name; let i = $index) {
+                      <div class="legend-item">
+                        <span class="legend-dot" [style.background]="getSeriesColor(i)"></span>
+                        <span>{{ series.name }}</span>
+                      </div>
+                    }
+                  </div>
+                </article>
+              }
             </div>
           </section>
         }
@@ -249,23 +304,10 @@
 
       @if (activeTab() === 'sesiones') {
         <section class="sessions-section">
-          <h3>Historial de sesiones</h3>
-          <div class="session-identity">
-            <div class="avatar" [class.avatar--image]="y.profile_photo_url">
-              @if (y.profile_photo_url) {
-                <img [src]="y.profile_photo_url" alt="Foto del joven" />
-              } @else {
-                <span>{{ initials(y.display_name) }}</span>
-              }
-            </div>
-            <div class="session-identity-info">
-              <span class="identity-name">{{ y.display_name }}</span>
-              <span class="identity-meta">RUT: {{ y.rut ?? '-' }}</span>
-            </div>
-          </div>
+          <h3>Historial de entrevistas</h3>
           @let sess = sessions();
           @if (sess.length === 0) {
-            <p>Sin sesiones registradas.</p>
+            <p>Sin entrevistas registradas.</p>
           } @else {
             <div class="table-wrap">
               <table class="data-table">
@@ -302,7 +344,7 @@
                           [queryParams]="{ returnUrl: '/profesional/jovenes/' + youthId, summary: 1 }"
                           class="btn-sm btn-secondary"
                         >
-                          Ver resumen
+                          Ver retroalimentacion
                         </a>
                       } @else {
                         <a
@@ -310,7 +352,7 @@
                           [queryParams]="{ returnUrl: '/profesional/jovenes/' + youthId, summary: 1, editSummary: 1 }"
                           class="btn-sm"
                         >
-                          Registrar resumen
+                          Registrar retroalimentacion
                         </a>
                       }
                     </div>
@@ -353,14 +395,14 @@
                   <p class="field-help">Elige el recurso que mejor apoye al joven.</p>
                 </div>
                 <div class="field">
-                  <label for="session_id">Asociar a sesión</label>
+                  <label for="session_id">Asociar a entrevista</label>
                   <select id="session_id" formControlName="session_id">
                     <option value="">Ninguna</option>
                     @for (s of sessions(); track s.id) {
                       <option [value]="s.id">{{ formatDate(s.started_at) }} - {{ s.status }}</option>
                     }
                   </select>
-                  <p class="field-help">Opcional: vincula la sugerencia a una sesión.</p>
+                  <p class="field-help">Opcional: vincula la sugerencia a una entrevista.</p>
                 </div>
                 <div class="field field-wide">
                   <label for="reason">Razón</label>
@@ -378,7 +420,7 @@
 
         @if (showSummaryForm()) {
           <section id="registrar-resumen" class="summary-form-section">
-            <h3>Registrar resumen</h3>
+            <h3>Registrar retroalimentacion</h3>
             @let transcript = sessionTranscript();
             @if (loadingTranscript()) {
               <p class="transcript-loading">Cargando transcripción...</p>
@@ -397,7 +439,7 @@
             }
             <form [formGroup]="summaryForm" (ngSubmit)="submitSummary()">
               <div class="field">
-                <label for="summary_text">Resumen *</label>
+                <label for="summary_text">Retroalimentacion *</label>
                 <textarea id="summary_text" formControlName="summary_text" rows="4"></textarea>
               </div>
               <div class="field">

@@ -6,7 +6,7 @@
   <h3>Sugerido para ti</h3>
   @if (suggested$ | async; as suggested) {
     @if (suggested.items.length === 0) {
-      <p class="empty-hint">No hay material sugerido. Tu profesional puede sugerirte material desde tu perfil (asociado a una sesión o en general).</p>
+      <p class="empty-hint">No hay material sugerido. Tu tutor puede sugerirte material desde tu perfil (asociado a una entrevista o en general).</p>
     } @else {
       <ul class="material-list">
         @for (s of suggested.items; track s.id) {

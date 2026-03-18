@@ -48,7 +48,7 @@ class LiveAvatarServiceTestCase(unittest.TestCase):
             mock_httpx_cm.__enter__.return_value = mock_client
             mock_httpx_cm.__exit__.return_value = False
 
-            with patch("app.services.liveavatar.build_prompt", return_value="PROMPT"),                 patch("app.services.liveavatar._patch_context", return_value=patch_resp),                 patch("app.services.liveavatar.httpx.Client", return_value=mock_httpx_cm):
+            with patch("app.services.liveavatar.get_prompt", return_value=SimpleNamespace(prompt="PROMPT", opening_text=None, name=None)),                 patch("app.services.liveavatar._patch_context", return_value=patch_resp),                 patch("app.services.liveavatar.httpx.Client", return_value=mock_httpx_cm):
                 with self.assertRaises(LiveAvatarError) as ctx:
                     start_liveavatar_session(job_role, case, template)
 

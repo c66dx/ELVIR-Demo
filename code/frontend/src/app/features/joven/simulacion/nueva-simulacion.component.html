@@ -1,6 +1,6 @@
 ﻿<div class="form-page">
   <div class="page-header">
-    <h2>Nueva Simulación</h2>
+    <h2>Entrevista</h2>
   </div>
 
   @if (loading) {
@@ -26,12 +26,34 @@
       </select>
     </div>
 
+    <div class="interview-context">
+      @if (selectedJobRole()) {
+        <span class="context-label">Contexto de la entrevista</span>
+        <p>
+          Te uniras a una videollamada de
+          <strong>{{ getCompanyContext(selectedJobRole()).name }}</strong>,
+          {{ getCompanyContext(selectedJobRole()).description }}
+        </p>
+        <p>
+          Desde su oficina central, el evaluador se conectara para conversar sobre tu postulacion al cargo de
+          <strong>{{ selectedJobRole()!.name }}</strong>.
+        </p>
+        @if (selectedCase()) {
+          <p class="context-case">Escenario: {{ selectedCase()!.name }}.</p>
+        }
+        <p class="context-goodluck">¡Mucho exito en tu entrevista!</p>
+      } @else {
+        <span class="context-label">Contexto de la entrevista</span>
+        <p class="context-empty">Selecciona un cargo para ver el contexto de la entrevista.</p>
+      }
+    </div>
+
     @if (errorMessage) {
       <p class="error">{{ errorMessage }}</p>
     }
 
     <div class="form-actions">
-      <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary">Iniciar simulación</button>
+      <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary">Iniciar entrevista</button>
     </div>
     </form>
   }

@@ -1,7 +1,7 @@
 ﻿<div class="simulacion-page">
   <div class="simulacion-main">
     <div class="simulacion-header">
-      <h2>Simulación</h2>
+      <h2>Entrevista</h2>
       @if (sessionMode() === 'SUPERVISADA') {
         <span class="badge-supervisada">Modo: SUPERVISADA</span>
       }
@@ -23,8 +23,8 @@
 
         <div class="completed-grid">
           @if (completedSessionData(); as data) {
-            <div class="session-completed-card">
-              <h4>Resumen de la sesión</h4>
+          <div class="session-completed-card">
+              <h4>Resumen de la entrevista</h4>
               <div class="session-completed-list">
                 @if (data.jobRoleName || data.caseName) {
                   <div class="session-row">
@@ -51,18 +51,26 @@
           }
 
           <div class="session-summary-block">
-            <h4>{{ summaryTitle() }}</h4>
-            @if (completedSessionSummary(); as summary) {
-              <p class="session-summary-text">{{ summary.summary_text }}</p>
-              @if (summary.competency_tags?.length) {
-                <p class="session-summary-tags">
-                  @for (tag of summary.competency_tags; track tag) {
-                    <span class="tag">{{ tag }}</span>
-                  }
-                </p>
+            @if (isProfessionalView()) {
+              <h4>{{ summaryTitle() }}</h4>
+              @if (completedSessionSummary(); as summary) {
+                <p class="session-summary-text">{{ summary.summary_text }}</p>
+                @if (summary.competency_tags?.length) {
+                  <p class="session-summary-tags">
+                    @for (tag of summary.competency_tags; track tag) {
+                      <span class="tag">{{ tag }}</span>
+                    }
+                  </p>
+                }
+              } @else {
+                <p class="session-summary-empty">{{ summaryEmptyText() }}</p>
               }
             } @else {
-              <p class="session-summary-empty">{{ summaryEmptyText() }}</p>
+              <h4>Retroalimentacion del tutor</h4>
+              <p class="session-summary-empty">
+                Tu tutor podra dejarte comentarios escritos luego de revisar tu entrevista.
+              </p>
+              <a routerLink="/joven/retroalimentacion" class="btn-secondary">Ir a retroalimentacion</a>
             }
           </div>
         </div>
@@ -72,10 +80,10 @@
           <a [routerLink]="secondaryReturnLink()" class="btn-secondary">{{ secondaryReturnLabel() }}</a>
         </div>
       </div>
-    } @else if (sessionNotFound()) {
+} @else if (sessionNotFound()) {
   <div class="banner-session-not-found">
-    <p>Esta sesión no existe o expiró.</p>
-    <p class="banner-hint">Para iniciar una simulación, primero debes elegir cargo y caso.</p>
+    <p>Esta entrevista no existe o expiró.</p>
+    <p class="banner-hint">Para iniciar una entrevista, primero debes elegir cargo y caso.</p>
     <div class="banner-actions">
       <button type="button" class="btn-primary" (click)="goToElegirCargo()">Elegir cargo y caso</button>
     </div>
@@ -137,6 +145,9 @@
           </div>
         }
       </div>
+      @if (useLiveKit() && audioHintVisible()) {
+        <div class="audio-hint">Activa el audio para escuchar la entrevista.</div>
+      }
     @if (useLiveKit()) {
       <div class="embed-wrap livekit-wrap">
         <video #avatarVideo autoplay playsinline class="avatar-video"></video>

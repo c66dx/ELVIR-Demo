@@ -53,6 +53,8 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
   private avatarIsSpeaking = false;
   /** Verdadero si el navegador bloqueó el audio (politica de autoplay) y el usuario debe hacer clic. */
   audioBlocked = signal(false);
+  /** Muestra una guía inicial para activar audio (solo al inicio). */
+  audioHintVisible = signal(false);
   audioReady = signal(false);
   volume = signal(0.8);
   muted = signal(false);
@@ -124,9 +126,11 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
         }
       },
     });
-    this.api.getSessionSummary(this.sessionId).subscribe({
-      next: (summary) => summary && this.completedSessionSummary.set(summary),
-    });
+    if (this.isProfessionalView()) {
+      this.api.getSessionSummary(this.sessionId).subscribe({
+        next: (summary) => summary && this.completedSessionSummary.set(summary),
+      });
+    }
   }
 
   doStartSession(): void {
@@ -142,14 +146,16 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
           this.startTimer();
           this.startAudioRecording();
 
-          if (result.livekit_url && result.access_token) {
-            this.useLiveKit.set(true);
-            this.embedUrl.set(null);
-            setTimeout(() => this.connectToLiveKit(result.livekit_url!, result.access_token!), 150);
-          } else if (result.embed?.url) {
-            this.useLiveKit.set(false);
-            this.embedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(result.embed.url));
-          } else {
+        if (result.livekit_url && result.access_token) {
+          this.useLiveKit.set(true);
+          this.audioHintVisible.set(true);
+          this.embedUrl.set(null);
+          setTimeout(() => this.connectToLiveKit(result.livekit_url!, result.access_token!), 150);
+        } else if (result.embed?.url) {
+          this.useLiveKit.set(false);
+          this.audioHintVisible.set(false);
+          this.embedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(result.embed.url));
+        } else {
             this.connectionErrorBanner.set(true);
             this.error.set('Respuesta inválida del servidor');
           }
@@ -162,7 +168,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
       error: () => {
         this.loading.set(false);
         this.retrying.set(false);
-        this.error.set('Error al iniciar la sesión');
+        this.error.set('Error al iniciar la entrevista');
         this.connectionErrorBanner.set(true);
       },
     });
@@ -190,16 +196,19 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
           audioEl.srcObject = stream;
           this.audioReady.set(true);
           this.applyAudioVolume();
-          const checkAndPlay = () => {
-            if (audioEl.readyState >= 2) {
-              audioEl.play().then(() => this.audioBlocked.set(false)).catch(() => {
-                this.audioBlocked.set(true);
-              });
-            } else {
-              setTimeout(checkAndPlay, 100);
+          // Intentar autoplay; si el navegador lo bloquea, mostramos el botón de activación.
+          this.audioBlocked.set(true);
+          audioEl.play().then(() => {
+            this.audioBlocked.set(false);
+            this.audioHintVisible.set(false);
+          }).catch(() => {
+            this.audioBlocked.set(true);
+          });
+          setTimeout(() => {
+            if (audioEl.paused) {
+              this.audioBlocked.set(true);
             }
-          };
-          checkAndPlay();
+          }, 1500);
         }
       });
 
@@ -242,7 +251,12 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
   onActivarAudio(): void {
     const audioEl = this.avatarAudioRef?.nativeElement;
     if (audioEl?.srcObject) {
-      audioEl.play().then(() => this.audioBlocked.set(false)).catch(() => {});
+      this.muted.set(false);
+      this.applyAudioVolume();
+      audioEl.play().then(() => this.audioBlocked.set(false)).catch(() => {
+        this.audioBlocked.set(true);
+      });
+      this.audioHintVisible.set(false);
     }
   }
 
@@ -316,7 +330,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
   }
 
   onSalirConnectionError(): void {
-    if (!confirm('¿Salir sin completar la simulación? Se registrará como error de conexión.')) return;
+    if (!confirm('¿Salir sin completar la entrevista? Se registrará como error de conexión.')) return;
     this.stopAudioRecording(true);
     const youthId = this.youthId();
     this.api.closeSession(this.sessionId, { status: 'ERROR', motivo: 'LIVEAVATAR_CONNECTION' }).subscribe({
@@ -358,7 +372,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
     if (this.isProfessionalView()) {
       return this.returnUrl() ?? '/profesional/jovenes';
     }
-    return '/joven/dashboard';
+    return '/joven/simulacion/nueva';
   }
 
   secondaryReturnLink(): string {
@@ -372,11 +386,11 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
     if (this.isProfessionalView()) {
       return this.returnUrl() ? 'Volver a ficha' : 'Volver al listado';
     }
-    return 'Volver al dashboard';
+    return 'Volver a entrevista';
   }
 
   secondaryReturnLabel(): string {
-    return this.isProfessionalView() ? 'Ver sesiones' : 'Ver historial';
+    return this.isProfessionalView() ? 'Ver entrevistas' : 'Ver historial';
   }
 
   completedTitle(): string {
@@ -385,22 +399,22 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
 
   completedSubtitle(): string {
     return this.isProfessionalView()
-      ? 'Revisa el detalle de la sesión o vuelve a la ficha del joven.'
-      : 'Revisa el feedback del profesional y el detalle de la sesión.';
+      ? 'Revisa el detalle de la entrevista o vuelve a la ficha del joven.'
+      : 'Revisa el detalle de la entrevista y la retroalimentacion del tutor cuando este disponible.';
   }
 
   summaryTitle(): string {
-    return this.isProfessionalView() ? 'Resumen profesional' : 'Feedback del profesional';
+    return this.isProfessionalView() ? 'Resumen del tutor' : 'Feedback del tutor';
   }
 
   summaryEmptyText(): string {
     return this.isProfessionalView()
-      ? 'Aún no se registra feedback para esta sesión.'
-      : 'Tu profesional aún no deja feedback para esta sesión.';
+      ? 'Aún no se registra feedback para esta entrevista.'
+      : 'Tu tutor aún no deja feedback para esta entrevista.';
   }
 
   closeSession(status: 'COMPLETADA' | 'CANCELADA', motivo?: string): void {
-    if (status === 'CANCELADA' && !confirm('¿Estás seguro de que quieres cancelar esta simulación? Se registrará como cancelada.')) {
+    if (status === 'CANCELADA' && !confirm('¿Estás seguro de que quieres cancelar esta entrevista? Se registrará como cancelada.')) {
       return;
     }
     this.stopAudioRecording(true);

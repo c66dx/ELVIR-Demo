@@ -1,68 +1,67 @@
 ﻿<div class="dashboard">
   <header class="dashboard-header page-header">
-    <h2>Dashboard Profesional</h2>
+    <h2>Dashboard Tutor</h2>
     <div class="page-header-actions">
       <a routerLink="/profesional/jovenes" class="btn-primary">Ir a Jóvenes</a>
-      <a routerLink="/profesional/jovenes/nuevo" class="btn-secondary">Crear Joven</a>
+      <a routerLink="/profesional/jovenes/nuevo" class="btn-secondary">Crear joven</a>
     </div>
   </header>
 
   @if (data$ | async; as data) {
-    <div class="kpis">
-      <div class="kpi-card">
-        <span class="kpi-value">{{ data.youthsCount }}</span>
-        <span class="kpi-label">Jóvenes</span>
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h3>Nuevas entrevistas</h3>
+        <a routerLink="/profesional/sesiones" class="link-more">Ver todas</a>
       </div>
-      <div class="kpi-card">
-        <span class="kpi-value">{{ data.activeYouthsCount }}</span>
-        <span class="kpi-label">Jóvenes activos</span>
-      </div>
-      <div class="kpi-card">
-        <span class="kpi-value">{{ data.sessionsCount }}</span>
-        <span class="kpi-label">Sesiones totales</span>
-      </div>
-      <div class="kpi-card">
-        <span class="kpi-value">{{ data.completedSessionsCount }}</span>
-        <span class="kpi-label">Sesiones completadas</span>
-      </div>
-    </div>
-
-    @if (data.recentSessions.length > 0) {
-      <section class="dashboard-section">
-        <h3>Últimas sesiones</h3>
-        <div class="recent-list">
-          @for (s of data.recentSessions; track s.id) {
-            <a [routerLink]="['/profesional/jovenes', s.youth_id]" class="recent-item">
-              <div class="recent-avatar" [class.recent-avatar--image]="s.youthPhotoUrl">
-                @if (s.youthPhotoUrl) {
-                  <img [src]="s.youthPhotoUrl" alt="Foto del joven" />
-                } @else {
-                  <span>{{ initials(s.youthName) }}</span>
-                }
+      @if (data.pendingSessions.length === 0) {
+        <p class="empty-state">No hay entrevistas pendientes de retroalimentación.</p>
+      } @else {
+        <div class="session-list">
+          @for (s of data.pendingSessions; track s.id) {
+            <div class="session-card">
+              <div class="session-info">
+                <div class="youth-avatar" [class.youth-avatar--image]="s.youthPhotoUrl">
+                  @if (s.youthPhotoUrl) {
+                    <img [src]="s.youthPhotoUrl" alt="Foto del joven" />
+                  } @else {
+                    <span>{{ initials(s.youthName) }}</span>
+                  }
+                </div>
+                <div class="session-text">
+                  <a [routerLink]="['/profesional/jovenes', s.youthId]" class="youth-name">{{ s.youthName }}</a>
+                  <div class="session-meta">
+                    <span>{{ formatDate(s.started_at) }}</span>
+                    <span>·</span>
+                    <span>{{ s.mode }}</span>
+                  </div>
+                  <div class="session-template">{{ s.templateLabel ?? '-' }}</div>
+                </div>
               </div>
-              <div class="recent-youth-info">
-                <span class="recent-youth">{{ s.youthName }}</span>
-                <span class="recent-rut">RUT: {{ s.youthRut ?? '-' }}</span>
+              <div class="session-actions">
+                <app-status-badge [status]="s.status" />
+                <div class="action-links">
+                  <a
+                    [routerLink]="['/profesional/sesiones', s.id]"
+                    [queryParams]="{ returnUrl: '/profesional/dashboard' }"
+                    class="btn-sm"
+                  >
+                    Ver entrevista
+                  </a>
+                  <a
+                    [routerLink]="['/profesional/sesiones', s.id]"
+                    [queryParams]="{ returnUrl: '/profesional/dashboard', summary: 1, editSummary: 1 }"
+                    class="btn-sm btn-secondary"
+                  >
+                    Registrar retroalimentación
+                  </a>
+                </div>
               </div>
-              <span class="recent-date">{{ formatDate(s.started_at) }}</span>
-              <app-status-badge [status]="s.status" />
-              <span class="recent-meta">{{ s.mode }} · {{ formatDuration(s.duration_seconds) }}</span>
-            </a>
-        }
-      </div>
-        <div class="dashboard-links">
-          <a routerLink="/profesional/jovenes" class="link-more">Ver todos los jóvenes</a>
-          <a routerLink="/profesional/sesiones" class="link-more">Ver todas las sesiones</a>
+            </div>
+          }
         </div>
-      </section>
-    } @else {
-      <section class="dashboard-section dashboard-section--empty">
-        <p class="empty-msg">No hay sesiones registradas. Los jóvenes pueden iniciar simulaciones desde su dashboard.</p>
-        <a routerLink="/profesional/jovenes" class="btn-primary">Ir a Jóvenes</a>
-      </section>
-    }
+      }
+    </section>
   } @else {
     <p class="loading">Cargando...</p>
   }
 </div>
-

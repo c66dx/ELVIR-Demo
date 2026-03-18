@@ -53,6 +53,7 @@ export class SessionViewComponent implements OnInit {
   events = signal<SessionEvent[]>([]);
   competencies = signal<{ competency: string; level: string; comment: string | null }[]>([]);
   audio = signal<SessionAudio | null>(null);
+  aiEvaluation = signal<{ summary: string | null; raw: string } | null>(null);
 
   sideTab = signal<SideTab>('resumen');
   showUser = signal(true);
@@ -90,6 +91,7 @@ export class SessionViewComponent implements OnInit {
           return;
         }
         this.session.set(session);
+        this.setAiEvaluation(session);
         this.loadSessionExtras(session);
       },
       error: () => {
@@ -120,6 +122,7 @@ export class SessionViewComponent implements OnInit {
         this.transcript.set(transcript);
         this.summary.set(summary);
         this.audio.set(audio);
+        this.setAiEvaluation(session);
         this.applySummaryForm(summary);
         if (this.editSummaryRequested) {
           this.editingSummary.set(true);
@@ -139,10 +142,37 @@ export class SessionViewComponent implements OnInit {
 
   private applySummaryForm(summary: InterviewSummary | null): void {
     const tags = summary?.competency_tags?.length ? summary.competency_tags.join(', ') : '';
+    const aiDraft = this.aiEvaluation()?.summary ?? '';
+    const summaryText = summary?.summary_text ?? aiDraft;
     this.summaryForm.reset({
-      summary_text: summary?.summary_text ?? '',
+      summary_text: summaryText,
       competency_tags: tags,
     });
+  }
+
+  private setAiEvaluation(session: Session): void {
+    const evalData = session.metrics?.['prompt_evaluation'];
+    if (!evalData) {
+      this.aiEvaluation.set(null);
+      return;
+    }
+    const raw = typeof evalData === 'string' ? evalData : JSON.stringify(evalData, null, 2);
+    const summary = this.extractAiSummary(evalData);
+    this.aiEvaluation.set({ summary, raw });
+  }
+
+  private extractAiSummary(evalData: unknown): string | null {
+    if (!evalData) return null;
+    if (typeof evalData === 'string') return evalData.trim() || null;
+    if (typeof evalData === 'object') {
+      const obj = evalData as Record<string, unknown>;
+      const candidates = ['summary', 'resumen', 'overall_feedback', 'overall', 'feedback', 'comentarios'];
+      for (const key of candidates) {
+        const value = obj[key];
+        if (typeof value === 'string' && value.trim()) return value.trim();
+      }
+    }
+    return null;
   }
 
   setSideTab(tab: SideTab): void {
@@ -185,10 +215,10 @@ export class SessionViewComponent implements OnInit {
 
   eventLabel(eventType: string): string {
     const labels: Record<string, string> = {
-      CREATED: 'Sesión creada',
+      CREATED: 'Entrevista creada',
       LIVEAVATAR_STARTED: 'LiveAvatar iniciado',
       LIVEAVATAR_FALLBACK: 'Fallback LiveAvatar',
-      ENDED: 'Sesión finalizada',
+      ENDED: 'Entrevista finalizada',
     };
     return labels[eventType] ?? eventType;
   }
@@ -227,15 +257,25 @@ export class SessionViewComponent implements OnInit {
           this.summary.set(summary);
           this.applySummaryForm(summary);
           this.editingSummary.set(false);
-          this.notification.success('Resumen guardado correctamente.');
+          this.notification.success('Retroalimentacion guardada correctamente.');
         }
         this.submittingSummary.set(false);
       },
       error: () => {
-        this.notification.error('No se pudo guardar el resumen.');
+        this.notification.error('No se pudo guardar la retroalimentacion.');
         this.submittingSummary.set(false);
       },
     });
+  }
+
+  aiProvider(): string | null {
+    const value = this.session()?.metrics?.['prompt_evaluation_provider'];
+    return typeof value === 'string' && value.trim() ? value : null;
+  }
+
+  aiVersion(): string | null {
+    const value = this.session()?.metrics?.['prompt_evaluation_version'];
+    return typeof value === 'string' && value.trim() ? value : null;
   }
 
   initials(name?: string | null): string {

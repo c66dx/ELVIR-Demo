@@ -10,7 +10,7 @@
         @if (isProfesional && youthId && status === 'COMPLETADA') {
           <a [routerLink]="['/profesional/jovenes', youthId]" (click)="sessionEndService.clear()" class="btn-primary">Ir al perfil del joven</a>
         }
-        <button type="button" class="btn-secondary" (click)="onVolver()">Volver al dashboard</button>
+        <button type="button" class="btn-secondary" (click)="onVolver()">Volver a entrevista</button>
       </div>
     </div>
     @if (status === 'ERROR' && motivo) {
@@ -19,7 +19,7 @@
     @if (status === 'COMPLETADA' && isJoven) {
       @if (sessionSummary && (sessionSummary.duration_seconds || sessionSummary.jobRoleName || sessionSummary.caseName)) {
         <div class="session-summary">
-          <p class="session-summary-intro">¡Bien hecho! Completaste la simulación.</p>
+          <p class="session-summary-intro">¡Bien hecho! Completaste la entrevista.</p>
           <ul class="session-summary-list">
             @if (sessionSummary.jobRoleName || sessionSummary.caseName) {
               <li>
@@ -33,7 +33,7 @@
               <li><strong>Duración:</strong> {{ formatDuration(sessionSummary.duration_seconds) }}</li>
             }
           </ul>
-          <p class="session-summary-note">Tu profesional puede revisar esta sesión y preparar un resumen con feedback. Revisa tu historial más adelante o el material de apoyo sugerido.</p>
+          <p class="session-summary-note">Tu tutor puede revisar esta entrevista y dejar retroalimentacion escrita. Revisa tu historial mas adelante o el material de apoyo sugerido.</p>
         </div>
       } @else {
         <p class="session-end-hint">Revisa el material de apoyo sugerido para seguir preparándote.</p>

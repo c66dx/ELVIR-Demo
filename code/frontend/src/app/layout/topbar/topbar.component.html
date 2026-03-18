@@ -1,13 +1,45 @@
 <div class="topbar">
-  <div class="topbar-partners" aria-label="Instituciones asociadas">
-    <span class="topbar-partners-label">Instituciones</span>
-    <div class="topbar-partners-logos">
-      <img src="assets/logo-unab-sm.png" alt="UNAB" />
-      <img src="assets/logo-teleton.png" alt="Teletón" />
+  <div class="topbar-brand">
+    <div class="brand-row">
+      <span class="brand-title">ELVIR</span>
+      <div class="brand-logos" aria-label="Instituciones asociadas">
+        <img src="assets/logo-unab-sm.png" alt="UNAB" />
+        <img src="assets/logo-teleton.png" alt="Teleton" />
+      </div>
     </div>
+    <span class="brand-subtitle">Entrenador Laboral Virtual</span>
   </div>
   <div class="topbar-actions">
-    <span class="role-badge">{{ role }}</span>
-    <button type="button" class="logout-btn" (click)="onLogout()">Cerrar sesión</button>
+    <div class="user-menu" [class.open]="isMenuOpen">
+      <button type="button" class="user-chip" (click)="toggleMenu()">
+        <div class="user-avatar-wrap">
+          <div class="user-avatar" [class.user-avatar--image]="avatarUrl">
+            @if (avatarUrl) {
+              <img [src]="avatarUrl" alt="Foto de perfil" />
+            } @else {
+              <span>{{ initials(displayName || roleLabel) }}</span>
+            }
+          </div>
+          <span class="online-dot" aria-hidden="true"></span>
+        </div>
+        <div class="user-meta">
+          <span class="user-name">{{ displayName || roleLabel || 'Usuario' }}</span>
+          @if (roleLabel) {
+            <span class="user-role">{{ roleLabel }}</span>
+          }
+        </div>
+        <svg class="user-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      @if (isMenuOpen) {
+        <div class="user-dropdown" role="menu">
+          @if (accountRoute) {
+            <a class="menu-item" [routerLink]="accountRoute" (click)="closeMenu()">{{ accountLabel }}</a>
+          }
+          <button type="button" class="menu-item menu-item--danger" (click)="onLogout()">Cerrar sesión</button>
+        </div>
+      }
+    </div>
   </div>
 </div>

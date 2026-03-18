@@ -1,8 +1,12 @@
-.page-header {
+﻿.page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-6);
+}
+
+:host ::ng-deep .content-inner {
+  max-width: 100%;
 }
 
 .filters-bar {
@@ -211,3 +215,4 @@
     align-items: flex-start;
   }
 }
+

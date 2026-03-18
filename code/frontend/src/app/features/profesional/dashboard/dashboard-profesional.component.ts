@@ -1,28 +1,34 @@
 ﻿import { Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
-import { StatusBadgeComponent } from '../../../shared/status-badge/status-badge.component';
 import type { Session } from '../../../core/models/session.model';
-import { formatDate, formatDuration } from '../../../shared/utils/date-format.util';
+import type { Youth } from '../../../core/models/youth.model';
+import type { SessionWithTemplateLabel } from '../../../core/services/api.service';
+import { StatusBadgeComponent } from '../../../shared/status-badge/status-badge.component';
+import { formatDate } from '../../../shared/utils/date-format.util';
 
-export interface RecentSessionWithYouth extends Session {
+export interface DashboardSessionItem {
+  id: string;
+  youthId: string;
   youthName: string;
   youthRut?: string;
   youthPhotoUrl?: string;
+  status: Session['status'];
+  mode: Session['mode'];
+  started_at: string;
+  templateLabel?: string;
+  pendingFeedback?: boolean;
 }
 
 export interface DashboardProfesionalData {
-  youthsCount: number;
-  activeYouthsCount: number;
-  sessionsCount: number;
-  completedSessionsCount: number;
-  recentSessions: RecentSessionWithYouth[];
+  latestSessions: DashboardSessionItem[];
+  pendingSessions: DashboardSessionItem[];
 }
 
-/** Dashboard del profesional: conteo de jóvenes, sesiones y últimas simulaciones. */
+/** Dashboard del profesional: nuevas entrevistas y ultimas sesiones. */
 @Component({
   selector: 'app-dashboard-profesional',
   standalone: true,
@@ -34,36 +40,59 @@ export class DashboardProfesionalComponent {
   private api = inject(ApiService);
 
   data$: Observable<DashboardProfesionalData> = forkJoin({
-    youthsMeta: this.api.getYouthsPaged({ page: 1, page_size: 1 }),
-    activeMeta: this.api.getYouthsPaged({ page: 1, page_size: 1, is_active: true }),
-    sessionsPage: this.api.getSessionsPaged({ page: 1, page_size: 8 }),
-    stats: this.api.getSessionStats({ months: 6 }),
+    youths: this.api.getYouths(),
+    sessions: this.api.getSessionsWithTemplateLabel(),
   }).pipe(
-    switchMap(({ youthsMeta, activeMeta, sessionsPage, stats }) => {
-      const youthIds = Array.from(new Set(sessionsPage.items.map((s) => s.youth_id)));
-      return this.api.getYouthLookup(youthIds).pipe(
-        map((lookup) => {
-          const youthMap = new Map(lookup.map((y) => [y.id, y]));
-          const recent = sessionsPage.items.map((s) => ({
-            ...s,
-            youthName: youthMap.get(s.youth_id)?.display_name ?? 'Desconocido',
-            youthRut: youthMap.get(s.youth_id)?.rut,
-            youthPhotoUrl: youthMap.get(s.youth_id)?.profile_photo_url,
-          }));
+    switchMap(({ youths, sessions }) => {
+      const youthMap = new Map<string, Youth>(youths.map((y) => [y.id, y]));
+      const ordered = [...sessions].sort((a, b) => this.sessionTimestamp(b) - this.sessionTimestamp(a));
+
+      const recentCompleted = ordered.filter((s) => s.status === 'COMPLETADA').slice(0, 8);
+      const summaries$ = recentCompleted.length
+        ? forkJoin(recentCompleted.map((session) => this.api.getSessionSummary(session.id)))
+        : of([]);
+
+      return summaries$.pipe(
+        map((summaries) => {
+          const pendingSessions = recentCompleted
+            .filter((session, index) => !summaries[index])
+            .map((s) => ({ ...this.buildSessionItem(s, youthMap), pendingFeedback: true }));
+          const pendingIds = new Set(pendingSessions.map((s) => s.id));
+          const latestSessions = ordered
+            .filter((s) => !pendingIds.has(s.id))
+            .slice(0, 8)
+            .map((s) => this.buildSessionItem(s, youthMap));
+
           return {
-            youthsCount: youthsMeta.total,
-            activeYouthsCount: activeMeta.total,
-            sessionsCount: stats.total,
-            completedSessionsCount: stats.completed,
-            recentSessions: recent,
+            latestSessions,
+            pendingSessions,
           };
         })
       );
     })
   );
 
-  readonly formatDate = formatDate;
-  readonly formatDuration = formatDuration;
+  private buildSessionItem(session: SessionWithTemplateLabel, youthMap: Map<string, Youth>): DashboardSessionItem {
+    const youth = youthMap.get(session.youth_id);
+    return {
+      id: session.id,
+      youthId: session.youth_id,
+      youthName: youth?.display_name ?? 'Joven',
+      youthRut: youth?.rut,
+      youthPhotoUrl: youth?.profile_photo_url,
+      status: session.status,
+      mode: session.mode,
+      started_at: session.started_at,
+      templateLabel: session.templateLabel,
+    };
+  }
+
+  private sessionTimestamp(session: Session): number {
+    const iso = session.ended_at || session.started_at;
+    if (!iso) return 0;
+    const ts = new Date(iso).getTime();
+    return Number.isNaN(ts) ? 0 : ts;
+  }
 
   initials(name?: string | null): string {
     if (!name) return 'J';
@@ -72,5 +101,6 @@ export class DashboardProfesionalComponent {
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
-}
 
+  readonly formatDate = formatDate;
+}

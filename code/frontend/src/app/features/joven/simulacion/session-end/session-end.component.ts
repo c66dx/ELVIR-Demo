@@ -40,20 +40,20 @@ export class SessionEndComponent implements OnInit {
     this.isJoven = role === 'JOVEN';
     this.isProfesional = role === 'PROFESIONAL';
     if (!this.status) {
-      this.router.navigateByUrl(this.isProfesional ? '/profesional/dashboard' : '/joven/dashboard');
+      this.router.navigateByUrl(this.isProfesional ? '/profesional/dashboard' : '/joven/simulacion/nueva');
     }
   }
 
   get title(): string {
     switch (this.status) {
       case 'COMPLETADA':
-        return 'Sesión completada';
+        return 'Entrevista completada';
       case 'CANCELADA':
-        return 'Sesión cancelada';
+        return 'Entrevista cancelada';
       case 'ERROR':
-        return 'Sesión finalizada con error';
+        return 'Entrevista finalizada con error';
       default:
-        return 'Sesión finalizada';
+        return 'Entrevista finalizada';
     }
   }
 
@@ -73,7 +73,7 @@ export class SessionEndComponent implements OnInit {
   onVolver(): void {
     const data = this.sessionEndService.get();
     const returnUrl = data?.returnUrl;
-    const target = returnUrl ?? (this.isProfesional ? '/profesional/dashboard' : '/joven/dashboard');
+    const target = returnUrl ?? (this.isProfesional ? '/profesional/dashboard' : '/joven/simulacion/nueva');
     this.sessionEndService.clear();
     this.router.navigateByUrl(target);
   }
