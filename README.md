@@ -42,6 +42,22 @@ cd ../..
 
 El backend queda en `http://localhost:8000`.
 
+### Todo en un comando (backend + frontend)
+
+Windows (PowerShell):
+
+```powershell
+.\scripts\run_preview.ps1
+```
+
+Linux/Mac / Git Bash:
+
+```bash
+./scripts/run_preview.sh
+```
+
+Esto abre dos terminales o procesos: backend en `http://localhost:8000` y frontend en `http://localhost:4200`.
+
 ### Frontend
 
 ```bash
