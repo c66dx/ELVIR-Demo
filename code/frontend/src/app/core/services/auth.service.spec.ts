@@ -12,10 +12,10 @@ describe('AuthService', () => {
     window.sessionStorage.clear();
   });
 
-  it('stores and returns valid role', () => {
+  it('stores and returns valid role and token', () => {
     service.setSession('ignored-token', 'JOVEN');
 
-    expect(service.getToken()).toBeNull();
+    expect(service.getToken()).toBe('ignored-token');
     expect(service.getRole()).toBe('JOVEN');
     expect(service.isLoggedIn()).toBeTrue();
   });
@@ -32,6 +32,7 @@ describe('AuthService', () => {
     service.logout();
 
     expect(window.sessionStorage.getItem('elvir_role')).toBeNull();
+    expect(window.sessionStorage.getItem('elvir_token')).toBeNull();
     expect(service.isLoggedIn()).toBeFalse();
   });
 });
