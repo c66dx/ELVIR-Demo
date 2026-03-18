@@ -10,18 +10,33 @@ Plataforma web para simulaciones de entrevistas laborales asistidas por IA, que 
 ## Modo demo rápido (sin Docker, solo seed)
 
 Pensado para mostrar la interfaz con datos de prueba sin instalar PostgreSQL ni correr migraciones.
+Si solo quieres demo, usa la branch `preview-seed`.
+
+Requisitos mínimos: Python 3.11+ y Node.js 18+.
+
+```bash
+git clone https://github.com/c66dx/ELVIR-Demo.git
+cd ELVIR-Demo
+git checkout preview-seed
+```
 
 ### Backend (SQLite)
 
 Windows (PowerShell):
 
 ```powershell
+cd code/backend
+python -m pip install -r requirements.txt
+cd ../..
 .\scripts\run_demo.ps1
 ```
 
 Linux/Mac:
 
 ```bash
+cd code/backend
+python -m pip install -r requirements.txt
+cd ../..
 ./scripts/run_demo.sh
 ```
 
@@ -57,8 +72,8 @@ Para clonar y ejecutar el proyecto en cualquier Windows, Mac o Linux.
 ### 2. Clonar el repositorio
 
 ```bash
-git clone https://github.com/c66dx/ELVIR-Platform
-cd ELVIR-Platform
+git clone https://github.com/c66dx/ELVIR-Demo.git
+cd ELVIR-Demo
 ```
 
 ### 3. Configurar y ejecutar el backend
