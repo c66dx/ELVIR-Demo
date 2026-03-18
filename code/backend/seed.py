@@ -129,17 +129,17 @@ def seed(db: Session):
     elif prof_user:
         prof = db.query(Professional).filter(Professional.user_id == prof_user.id).first()
 
-    # JÃ³venes
+    # Jóvenes
     if db.query(Youth).count() == 0:
         u1 = db.query(User).filter(User.email == "joven1@test.cl").first()
         u2 = db.query(User).filter(User.email == "joven2@test.cl").first()
         youths = [
-            Youth(user_id=u1.id, login_enabled=True, display_name="MarÃ­a GonzÃ¡lez", identifier="JOV-001",
+            Youth(user_id=u1.id, login_enabled=True, display_name="María González", identifier="JOV-001",
                   phone="+56912345678", is_active=True, general_notes="Notas generales"),
-            Youth(user_id=u2.id, login_enabled=False, display_name="Juan RodrÃ­guez", identifier="JOV-002",
+            Youth(user_id=u2.id, login_enabled=False, display_name="Juan Rodríguez", identifier="JOV-002",
                   is_active=True),
             Youth(login_enabled=True, display_name="Carolina Flores", identifier="JOV-003", is_active=True),
-            Youth(login_enabled=True, display_name="Roberto DÃ­az", identifier="JOV-004", is_active=True),
+            Youth(login_enabled=True, display_name="Roberto Díaz", identifier="JOV-004", is_active=True),
         ]
         for y in youths:
             db.add(y)
@@ -159,7 +159,7 @@ def seed(db: Session):
         db,
         user=seed_joven1,
         identifier="JOV-001",
-        display_name="Maria Gonzalez",
+        display_name="María González",
         login_enabled=True,
         phone="+56912345678",
         general_notes="Notas generales",
@@ -168,7 +168,7 @@ def seed(db: Session):
         db,
         user=seed_joven2,
         identifier="JOV-002",
-        display_name="Juan Rodriguez",
+        display_name="Juan Rodríguez",
         login_enabled=False,
     )
     y3 = _get_or_create_youth(
@@ -182,7 +182,7 @@ def seed(db: Session):
         db,
         user=None,
         identifier="JOV-004",
-        display_name="Roberto Diaz",
+        display_name="Roberto Díaz",
         login_enabled=True,
     )
     for y in (y1, y2, y3, y4):
@@ -191,24 +191,24 @@ def seed(db: Session):
     if db.query(JobRole).count() == 0:
         roles = [
             JobRole(slug="operario", name="Operario",
-                    description="El cargo de Operario estÃ¡ orientado a la realizaciÃ³n de tareas operativas bÃ¡sicas dentro de la organizaciÃ³n, siguiendo instrucciones y procedimientos definidos. El rol requiere responsabilidad, cumplimiento de normas y capacidad para trabajar de manera organizada y colaborativa.",
+                    description="El cargo de Operario está orientado a la realización de tareas operativas básicas dentro de la organización, siguiendo instrucciones y procedimientos definidos. El rol requiere responsabilidad, cumplimiento de normas y capacidad para trabajar de manera organizada y colaborativa.",
                     objetivo="Ejecutar tareas operativas conforme a procedimientos establecidos, asegurando eficiencia, seguridad y calidad en los procesos productivos o de servicio.",
-                    competencias=json.dumps(["Responsabilidad", "Trabajo en equipo", "Cumplimiento de normas y procedimientos", "GestiÃ³n del tiempo", "AtenciÃ³n al detalle"]),
+                    competencias=json.dumps(["Responsabilidad", "Trabajo en equipo", "Cumplimiento de normas y procedimientos", "Gestión del tiempo", "Atención al detalle"]),
                     is_active=True),
-            JobRole(slug="atencion-publico", name="AtenciÃ³n de PÃºblico",
-                    description="El cargo de AtenciÃ³n de PÃºblico tiene como objetivo atender y orientar a personas usuarias o clientes, brindando respuestas claras y oportunas segÃºn los lineamientos establecidos. El rol demanda habilidades de comunicaciÃ³n, trato cordial y adecuada gestiÃ³n de situaciones diversas.",
+            JobRole(slug="atencion-publico", name="Atención de Público",
+                    description="El cargo de Atención de Público tiene como objetivo atender y orientar a personas usuarias o clientes, brindando respuestas claras y oportunas según los lineamientos establecidos. El rol demanda habilidades de comunicación, trato cordial y adecuada gestión de situaciones diversas.",
                     objetivo="Atender y orientar a clientes o usuarios, gestionando consultas, reclamos y solicitudes de manera eficiente y cordial, contribuyendo a una experiencia de servicio de calidad.",
-                    competencias=json.dumps(["ComunicaciÃ³n efectiva", "EmpatÃ­a", "OrientaciÃ³n al cliente", "ResoluciÃ³n de conflictos", "Manejo del estrÃ©s"]),
+                    competencias=json.dumps(["Comunicación efectiva", "Empatía", "Orientación al cliente", "Resolución de conflictos", "Manejo del estrés"]),
                     is_active=True),
             JobRole(slug="administrativo", name="Administrativo",
-                    description="El cargo Administrativo se enfoca en apoyar la gestiÃ³n interna de la organizaciÃ³n mediante la ejecuciÃ³n de tareas administrativas y de apoyo documental. El rol requiere organizaciÃ³n, orden, cumplimiento de procedimientos y manejo bÃ¡sico de herramientas de oficina.",
-                    objetivo="Gestionar y ejecutar procesos administrativos y documentales, brindando soporte operativo a las distintas Ã¡reas de la organizaciÃ³n.",
-                    competencias=json.dumps(["OrganizaciÃ³n", "GestiÃ³n documental", "ComunicaciÃ³n formal", "PlanificaciÃ³n", "AtenciÃ³n al detalle"]),
+                    description="El cargo Administrativo se enfoca en apoyar la gestión interna de la organización mediante la ejecución de tareas administrativas y de apoyo documental. El rol requiere organización, orden, cumplimiento de procedimientos y manejo básico de herramientas de oficina.",
+                    objetivo="Gestionar y ejecutar procesos administrativos y documentales, brindando soporte operativo a las distintas áreas de la organización.",
+                    competencias=json.dumps(["Organización", "Gestión documental", "Comunicación formal", "Planificación", "Atención al detalle"]),
                     is_active=True),
-            JobRole(slug="tecnico-profesional", name="TÃ©cnico-Profesional",
-                    description="El cargo TÃ©cnico Profesional estÃ¡ orientado al desarrollo de funciones tÃ©cnicas o especializadas dentro de un Ã¡rea especÃ­fica. El rol implica aplicar conocimientos profesionales, cumplir estÃ¡ndares definidos y aportar al correcto funcionamiento de los procesos del Ã¡rea.",
-                    objetivo="Desarrollar funciones tÃ©cnicas especializadas, aplicando conocimientos profesionales para resolver problemas operativos y asegurar el cumplimiento de estÃ¡ndares tÃ©cnicos y normativos.",
-                    competencias=json.dumps(["Pensamiento analÃ­tico", "ResoluciÃ³n de problemas tÃ©cnicos", "AutonomÃ­a", "Responsabilidad profesional", "Mejora continua"]),
+            JobRole(slug="tecnico-profesional", name="Técnico-Profesional",
+                    description="El cargo Técnico Profesional está orientado al desarrollo de funciones técnicas o especializadas dentro de un área específica. El rol implica aplicar conocimientos profesionales, cumplir estándares definidos y aportar al correcto funcionamiento de los procesos del área.",
+                    objetivo="Desarrollar funciones técnicas especializadas, aplicando conocimientos profesionales para resolver problemas operativos y asegurar el cumplimiento de estándares técnicos y normativos.",
+                    competencias=json.dumps(["Pensamiento analítico", "Resolución de problemas técnicos", "Autonomía", "Responsabilidad profesional", "Mejora continua"]),
                     is_active=True),
         ]
         for r in roles:
@@ -218,16 +218,16 @@ def seed(db: Session):
     if db.query(Case).count() == 0:
         cases = [
             Case(slug="normal", name="Entrevista Normal", difficulty="NORMAL",
-                 prompt_instructions="Realiza preguntas abiertas y complejas. Invita a profundizar y a reflexionar, manteniendo el foco en el mensaje central. MantÃ©n un estilo de entrevista normal. Introduce referencias a la discapacidad de manera acotada. Refuerza las respuestas adecuadas y ayuda a reformular cuando la presentaciÃ³n pierde foco o impacto.",
+                 prompt_instructions="Realiza preguntas abiertas y complejas. Invita a profundizar y a reflexionar, manteniendo el foco en el mensaje central. Mantén un estilo de entrevista normal. Introduce referencias a la discapacidad de manera acotada. Refuerza las respuestas adecuadas y ayuda a reformular cuando la presentación pierde foco o impacto.",
                  is_active=True),
-            Case(slug="baja", name="Dificultad Baja (empÃ¡tico)", difficulty="BAJA",
-                 prompt_instructions="Adopta un tono muy acogedor y contenedor. Valida explÃ­citamente cÃ³mo se puede estar sintiendo la persona. Realiza preguntas muy simples y concretas. Da tiempo suficiente para responder y ofrece pausas. Refuerza cualquier intento de respuesta. Prioriza la sensaciÃ³n de seguridad y contenciÃ³n por sobre el contenido de la entrevista.",
+            Case(slug="baja", name="Dificultad Baja (empático)", difficulty="BAJA",
+                 prompt_instructions="Adopta un tono muy acogedor y contenedor. Valida explícitamente cómo se puede estar sintiendo la persona. Realiza preguntas muy simples y concretas. Da tiempo suficiente para responder y ofrece pausas. Refuerza cualquier intento de respuesta. Prioriza la sensación de seguridad y contención por sobre el contenido de la entrevista.",
                  is_active=True),
             Case(slug="media", name="Dificultad Media (guiada)", difficulty="MEDIA",
-                 prompt_instructions="Formula preguntas muy guiadas y acotadas. Repite o reformula la pregunta si es necesario. Ayuda explÃ­citamente a ordenar la respuesta, indicando quÃ© tipo de informaciÃ³n se espera. MantÃ©n un estilo de entrevista normal. Introduce referencias a la discapacidad de manera acotada. Refuerza las respuestas adecuadas y ayuda a reformular cuando la presentaciÃ³n pierde foco o impacto.",
+                 prompt_instructions="Formula preguntas muy guiadas y acotadas. Repite o reformula la pregunta si es necesario. Ayuda explícitamente a ordenar la respuesta, indicando qué tipo de información se espera. Mantén un estilo de entrevista normal. Introduce referencias a la discapacidad de manera acotada. Refuerza las respuestas adecuadas y ayuda a reformular cuando la presentación pierde foco o impacto.",
                  is_active=True),
-            Case(slug="alta", name="Dificultad Alta (poco empÃ¡tico)", difficulty="ALTA",
-                 prompt_instructions="Realiza preguntas abiertas y complejas. Invita a profundizar y a reflexionar, manteniendo el foco en el mensaje central. Utiliza un estilo de entrevista realista. Introduce preguntas o comentarios directos y poco empÃ¡ticos sobre la discapacidad cuando corresponda y evalÃºa la capacidad de sostener una presentaciÃ³n estratÃ©gica sin intervenir. Debes ser poco empÃ¡tico, muy serio y con poco tino.",
+            Case(slug="alta", name="Dificultad Alta (poco empático)", difficulty="ALTA",
+                 prompt_instructions="Realiza preguntas abiertas y complejas. Invita a profundizar y a reflexionar, manteniendo el foco en el mensaje central. Utiliza un estilo de entrevista realista. Introduce preguntas o comentarios directos y poco empáticos sobre la discapacidad cuando corresponda y evalúa la capacidad de sostener una presentación estratégica sin intervenir. Debes ser poco empático, muy serio y con poco tino.",
                  is_active=True),
         ]
         for c in cases:
@@ -255,11 +255,11 @@ def seed(db: Session):
     # Competencias y niveles
     if db.query(Competency).count() == 0:
         competencies = [
-            Competency(slug="comunicacion", name="ComunicaciÃ³n", is_active=True),
-            Competency(slug="regulacion_emocional", name="RegulaciÃ³n emocional", is_active=True),
+            Competency(slug="comunicacion", name="Comunicación", is_active=True),
+            Competency(slug="regulacion_emocional", name="Regulación emocional", is_active=True),
             Competency(slug="trabajo_equipo", name="Trabajo en equipo", is_active=True),
-            Competency(slug="organizacion", name="OrganizaciÃ³n", is_active=True),
-            Competency(slug="autonomia", name="AutonomÃ­a", is_active=True),
+            Competency(slug="organizacion", name="Organización", is_active=True),
+            Competency(slug="autonomia", name="Autonomía", is_active=True),
         ]
         for c in competencies:
             db.add(c)
@@ -299,6 +299,39 @@ def seed(db: Session):
             material.title = new_title
         if new_description != material.description:
             material.description = new_description
+
+    # Reparar textos con encoding incorrecto en tablas principales
+    for youth in db.query(Youth).all():
+        new_name = _fix_mojibake(youth.display_name)
+        if new_name != youth.display_name:
+            youth.display_name = new_name
+
+    for role in db.query(JobRole).all():
+        new_name = _fix_mojibake(role.name)
+        new_desc = _fix_mojibake(role.description)
+        new_obj = _fix_mojibake(role.objetivo)
+        new_comp = _fix_mojibake(role.competencias)
+        if new_name != role.name:
+            role.name = new_name
+        if new_desc != role.description:
+            role.description = new_desc
+        if new_obj != role.objetivo:
+            role.objetivo = new_obj
+        if new_comp != role.competencias:
+            role.competencias = new_comp
+
+    for case in db.query(Case).all():
+        new_name = _fix_mojibake(case.name)
+        new_prompt = _fix_mojibake(case.prompt_instructions)
+        if new_name != case.name:
+            case.name = new_name
+        if new_prompt != case.prompt_instructions:
+            case.prompt_instructions = new_prompt
+
+    for comp in db.query(Competency).all():
+        new_name = _fix_mojibake(comp.name)
+        if new_name != comp.name:
+            comp.name = new_name
 
     db.commit()
     print("Seed completado correctamente.")
