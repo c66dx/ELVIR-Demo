@@ -45,7 +45,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (!existingRequestId) headers[REQUEST_ID_HEADER] = requestId;
 
   const cloned = req.clone({
-    withCredentials: true,
+    withCredentials: false,
     setHeaders: headers,
   });
 

@@ -2,6 +2,7 @@
 import { UserRole } from '../models/user.model';
 
 const ROLE_KEY = 'elvir_role';
+const TOKEN_KEY = 'elvir_token';
 
 /**
  * Servicio de autenticación.
@@ -14,7 +15,7 @@ export class AuthService {
   private storage = window.sessionStorage;
 
   getToken(): string | null {
-    return null;
+    return this.storage.getItem(TOKEN_KEY);
   }
 
   getRole(): UserRole | null {
@@ -27,11 +28,15 @@ export class AuthService {
   }
 
   setSession(_token: string, role: UserRole): void {
+    if (_token) {
+      this.storage.setItem(TOKEN_KEY, _token);
+    }
     this.storage.setItem(ROLE_KEY, role);
   }
 
   logout(): void {
     this.storage.removeItem(ROLE_KEY);
+    this.storage.removeItem(TOKEN_KEY);
   }
 }
 
