@@ -121,6 +121,13 @@ export class PerfilJovenComponent implements OnInit {
     this.youthId = this.route.snapshot.paramMap.get('youthId') ?? '';
     if (!this.youthId) return;
 
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      if (tab === 'perfil' || tab === 'accesos' || tab === 'desempeno' || tab === 'sesiones') {
+        this.activeTab.set(tab);
+      }
+    });
+
     forkJoin({
       youth: this.api.getYouth(this.youthId),
       competencies: this.api.getCompetencies(),

@@ -93,16 +93,30 @@
                   [class.pending-badge--warn]="y.pendingFeedback"
                   [class.pending-badge--ok]="!y.pendingFeedback"
                 >
-                  {{ y.pendingFeedback ? 'Pendiente' : 'Al día' }}
+                  @if (y.pendingFeedback) {
+                    {{ y.pendingFeedbackCount > 1 ? 'Pendientes (' + y.pendingFeedbackCount + ')' : 'Pendiente' }}
+                  } @else {
+                    Al día
+                  }
                 </span>
-                @if (y.pendingFeedback && y.pendingSessionId) {
-                  <a
-                    [routerLink]="['/profesional/sesiones', y.pendingSessionId]"
-                    [queryParams]="{ returnUrl: '/profesional/jovenes' }"
-                    class="btn-secondary btn-sm"
-                  >
-                    Registrar
-                  </a>
+                @if (y.pendingFeedback) {
+                  @if (y.pendingSessionId) {
+                    <a
+                      [routerLink]="['/profesional/sesiones', y.pendingSessionId]"
+                      [queryParams]="{ returnUrl: '/profesional/jovenes' }"
+                      class="btn-secondary btn-sm"
+                    >
+                      Registrar
+                    </a>
+                  } @else {
+                    <a
+                      [routerLink]="['/profesional/jovenes', y.id]"
+                      [queryParams]="{ tab: 'sesiones' }"
+                      class="btn-secondary btn-sm"
+                    >
+                      Ver pendientes
+                    </a>
+                  }
                 } @else {
                   <a [routerLink]="['/profesional/jovenes', y.id]" class="link-more">Ver perfil</a>
                 }

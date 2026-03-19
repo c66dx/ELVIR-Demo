@@ -15,6 +15,7 @@ type YouthRow = YouthWithLastSession & {
   progressTrend: 'up' | 'down' | 'flat' | 'none';
   interviewsLastMonth: number;
   pendingFeedback: boolean;
+  pendingFeedbackCount: number;
   pendingSessionId?: string;
 };
 
@@ -62,8 +63,7 @@ export class JovenesListComponent implements OnInit {
               const youthIds = new Set(paged.items.map((y) => y.id));
               const sessionsForPage = sessions.filter((s) => youthIds.has(s.youth_id));
               const sessionsByYouth = this.groupSessionsByYouth(sessionsForPage);
-              const latestCompletedByYouth = this.latestCompletedByYouth(sessionsByYouth);
-              const summaryTargets = Array.from(latestCompletedByYouth.values());
+              const summaryTargets = sessionsForPage.filter((s) => s.status === 'COMPLETADA');
               const summaries$ = summaryTargets.length
                 ? forkJoin(summaryTargets.map((session) => this.api.getSessionSummary(session.id)))
                 : of([]);
@@ -195,7 +195,12 @@ export class JovenesListComponent implements OnInit {
       const prevMonthCount = completed.filter((s) => this.isBetween(s, prevMonthStart, lastMonthStart)).length;
       const progress = this.buildProgress(lastMonthCount, prevMonthCount);
       const performance = this.buildPerformance(latestCompleted, completed, sessions);
-      const pendingFeedback = latestCompleted ? !summaryMap.has(latestCompleted.id) : false;
+      const pendingSessions = completed
+        .filter((s) => !summaryMap.has(s.id))
+        .sort((a, b) => this.sessionTimestamp(b) - this.sessionTimestamp(a));
+      const pendingFeedbackCount = pendingSessions.length;
+      const pendingFeedback = pendingFeedbackCount > 0;
+      const pendingSessionId = pendingFeedbackCount === 1 ? pendingSessions[0]?.id : undefined;
 
       return {
         ...youth,
@@ -205,7 +210,8 @@ export class JovenesListComponent implements OnInit {
         progressTrend: progress.trend,
         interviewsLastMonth: lastMonthCount,
         pendingFeedback,
-        pendingSessionId: pendingFeedback ? latestCompleted?.id : undefined,
+        pendingFeedbackCount,
+        pendingSessionId,
       };
     });
   }
