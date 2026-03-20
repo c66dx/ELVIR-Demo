@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ApiService } from '../../../core/services/api.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 export type LoginRole = 'joven' | 'profesional' | 'admin' | null;
 
@@ -23,6 +24,8 @@ export class LoginComponent {
   private auth = inject(AuthService);
   private api = inject(ApiService);
   private router = inject(Router);
+  private themeService = inject(ThemeService);
+  theme = this.themeService.theme;
 
   form: FormGroup = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -67,6 +70,10 @@ export class LoginComponent {
         this.loading = false;
       },
     });
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 }
 

@@ -10,6 +10,14 @@
     <span class="brand-subtitle">Entrenador Laboral Virtual</span>
   </div>
   <div class="topbar-actions">
+    <button type="button" class="theme-switch" [class.is-dark]="theme() === 'dark'" (click)="toggleTheme()" [attr.aria-pressed]="theme() === 'dark'">
+      <span class="theme-switch-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.8A8.6 8.6 0 1111.2 3a6.5 6.5 0 009.8 9.8z"></path>
+        </svg>
+      </span>
+      <span class="theme-switch-label">{{ theme() === 'dark' ? 'Tema claro' : 'Tema oscuro' }}</span>
+    </button>
     <div class="user-menu" [class.open]="isMenuOpen">
       <button type="button" class="user-chip" (click)="toggleMenu()">
         <div class="user-avatar-wrap">

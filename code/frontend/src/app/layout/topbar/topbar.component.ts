@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, inject, OnInit } from '@angular/co
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-topbar',
@@ -15,6 +16,7 @@ export class TopbarComponent implements OnInit {
   private api = inject(ApiService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
+  private themeService = inject(ThemeService);
   role = this.auth.getRole();
   roleLabel = '';
   displayName = '';
@@ -22,6 +24,7 @@ export class TopbarComponent implements OnInit {
   isMenuOpen = false;
   accountRoute = '';
   accountLabel = 'Mi Cuenta';
+  theme = this.themeService.theme;
 
   ngOnInit(): void {
     this.roleLabel = this.mapRoleLabel(this.role);
@@ -88,6 +91,10 @@ export class TopbarComponent implements OnInit {
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 
   closeMenu(): void {

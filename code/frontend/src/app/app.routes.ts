@@ -12,6 +12,8 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { NuevaSimulacionComponent } from './features/joven/simulacion/nueva-simulacion.component';
 import { SimulacionDetailComponent } from './features/joven/simulacion/simulacion-detail.component';
 import { SessionEndComponent } from './features/joven/simulacion/session-end/session-end.component';
+import { InterviewWaitingRoomComponent } from './core/components/interview-waiting-room/interview-waiting-room.component';
+import { InterviewPreparationComponent } from './core/components/interview-preparation/interview-preparation.component';
 import { HistorialJovenComponent } from './features/joven/historial/historial-joven.component';
 import { MaterialJovenComponent } from './features/joven/material/material-joven.component';
 import { MyAccountComponent } from './features/joven/account/account.component';
@@ -73,6 +75,18 @@ export const routes: Routes = [
         component: NuevaSimulacionComponent,
       },
       {
+        path: 'joven/simulacion/:sessionId/preparacion',
+        canActivate: [jovenGuard],
+        component: InterviewPreparationComponent,
+        data: { target: 'joven' },
+      },
+      {
+        path: 'joven/simulacion/:sessionId/espera',
+        canActivate: [jovenGuard],
+        component: InterviewWaitingRoomComponent,
+        data: { target: 'joven' },
+      },
+      {
         path: 'joven/simulacion/:sessionId',
         canActivate: [jovenGuard],
         component: SimulacionDetailComponent,
@@ -96,6 +110,16 @@ export const routes: Routes = [
           { path: 'material/nuevo', component: MaterialFormComponent },
           { path: 'sesiones', component: SessionsListComponent },
           { path: 'sesiones/:sessionId', component: SessionViewComponent },
+          {
+            path: 'simulacion/:sessionId/preparacion',
+            component: InterviewPreparationComponent,
+            data: { target: 'profesional' },
+          },
+          {
+            path: 'simulacion/:sessionId/espera',
+            component: InterviewWaitingRoomComponent,
+            data: { target: 'profesional' },
+          },
           { path: 'simulacion/:sessionId', component: SimulacionDetailComponent },
           { path: 'cuenta', component: ProfessionalAccountComponent },
           {

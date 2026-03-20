@@ -82,8 +82,14 @@ export class SupervisedStartComponent implements OnInit {
       .subscribe({
         next: (session) => {
           if (session) {
-            this.router.navigate(['/profesional/simulacion', session.id], {
-              state: { returnUrl: `/profesional/jovenes/${this.youthId}` },
+            const role = this.jobRoles.find((jr) => String(jr.id) === String(job_role_id));
+            const caseItem = this.cases.find((c) => String(c.id) === String(case_id));
+            this.router.navigate(['/profesional/simulacion', session.id, 'preparacion'], {
+              state: {
+                returnUrl: `/profesional/jovenes/${this.youthId}`,
+                jobRoleName: role?.name ?? '',
+                caseName: caseItem?.name ?? '',
+              },
             });
           }
           this.submitting = false;

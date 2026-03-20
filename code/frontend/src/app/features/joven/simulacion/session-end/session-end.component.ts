@@ -1,4 +1,5 @@
-﻿import { Component, inject, OnInit } from '@angular/core';
+﻿import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
@@ -14,7 +15,7 @@ type SessionSummary = NonNullable<SessionEndData['sessionSummary']>;
 @Component({
   selector: 'app-session-end',
   standalone: true,
-  imports: [RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './session-end.component.html',
   styleUrl: './session-end.component.scss',
 })
@@ -57,6 +58,61 @@ export class SessionEndComponent implements OnInit {
     }
   }
 
+  get statusLabel(): string {
+    switch (this.status) {
+      case 'COMPLETADA':
+        return 'Completada';
+      case 'CANCELADA':
+        return 'Cancelada';
+      case 'ERROR':
+        return 'Con error';
+      default:
+        return 'Finalizada';
+    }
+  }
+
+  get heroTitle(): string {
+    switch (this.status) {
+      case 'COMPLETADA':
+        return '¡Entrevista completada!';
+      case 'CANCELADA':
+        return 'Entrevista pausada';
+      case 'ERROR':
+        return 'Tuvimos un problema técnico';
+      default:
+        return 'Entrevista finalizada';
+    }
+  }
+
+  get heroSubtitle(): string {
+    switch (this.status) {
+      case 'COMPLETADA':
+        return 'Buen trabajo. Tu esfuerzo queda registrado y es parte de tu progreso.';
+      case 'CANCELADA':
+        return 'No pasa nada. Puedes retomarla cuando estés listo/a.';
+      case 'ERROR':
+        return 'Tu avance quedó guardado. Te recomendamos reintentar cuando estés listo/a.';
+      default:
+        return 'Gracias por participar en la simulación.';
+    }
+  }
+
+  get feedbackMessage(): string {
+    if (this.status === 'COMPLETADA' && this.isJoven) {
+      return 'Recibirás retroalimentación de tu tutor. Mientras tanto, revisa material sugerido para seguir mejorando.';
+    }
+    if (this.status === 'COMPLETADA' && this.isProfesional) {
+      return 'Puedes registrar un resumen y dejar retroalimentación para el joven.';
+    }
+    if (this.status === 'CANCELADA') {
+      return 'Cuando quieras, vuelve a intentarlo para completar tu práctica.';
+    }
+    if (this.status === 'ERROR') {
+      return 'Si el problema persiste, intenta nuevamente o contacta al equipo de soporte.';
+    }
+    return '';
+  }
+
   get variant(): 'success' | 'warning' | 'error' {
     switch (this.status) {
       case 'COMPLETADA':
@@ -80,4 +136,5 @@ export class SessionEndComponent implements OnInit {
 
   readonly formatDuration = formatDuration;
 }
+
 

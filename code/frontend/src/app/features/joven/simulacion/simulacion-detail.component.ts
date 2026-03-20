@@ -38,7 +38,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
   youthId = signal<string | null>(null);
   embedUrl = signal<SafeResourceUrl | null>(null);
   useLiveKit = signal(false);
-  turnIndicator = signal('⏳ Esperando...');
+  turnIndicator = signal('La entrevistadora está ingresando a la sala...');
   sessionMode = signal<string | null>(null);
   sessionContext = signal<{ jobRoleName: string; caseName: string } | null>(null);
   loading = signal(true);
@@ -58,6 +58,13 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
   audioReady = signal(false);
   volume = signal(0.8);
   muted = signal(false);
+  audioPanelOpen = signal(false);
+  captionsEnabled = signal(false);
+  captionsAvailable = signal(false);
+  captionLines = signal<string[]>([]);
+  captionRole = signal<'user' | 'avatar' | 'system' | null>(null);
+  chatMessages = signal<{ id: number; text: string }[]>([]);
+  chatAvailable = signal(false);
 
   audioRecording = signal<'idle' | 'recording' | 'stopped' | 'error'>('idle');
   audioRecordingError = signal<string | null>(null);
@@ -145,6 +152,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
           this.loadSessionContext();
           this.startTimer();
           this.startAudioRecording();
+          this.turnIndicator.set('Revisando antecedentes del cargo...');
 
         if (result.livekit_url && result.access_token) {
           this.useLiveKit.set(true);
@@ -216,20 +224,23 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
         try {
           const data = JSON.parse(new TextDecoder().decode(payload));
           const eventType = data?.event_type;
-          if (!eventType) return;
+          if (typeof eventType !== 'string') return;
+          if (eventType.includes('transcript')) {
+            this.handleTranscriptEvent(data, eventType);
+          }
           if (eventType === 'user.speak_started' && !this.avatarIsSpeaking) {
-            this.turnIndicator.set('Te escuchamos');
+            this.turnIndicator.set('Te escucho, adelante');
           } else if (eventType === 'user.speak_ended' && !this.avatarIsSpeaking) {
-            this.turnIndicator.set('Procesando...');
+            this.turnIndicator.set('Gracias, estoy analizando');
           } else if (eventType === 'user.transcription' && !this.avatarIsSpeaking) {
-            this.turnIndicator.set('Analizando respuesta...');
+            this.turnIndicator.set('Organizando tu respuesta...');
           } else if (eventType === 'avatar.speak_started') {
             this.avatarIsSpeaking = true;
-            this.turnIndicator.set('Hablando Javiera');
+            this.turnIndicator.set('Javiera está respondiendo');
             this.room?.localParticipant.setMicrophoneEnabled(false);
           } else if (eventType === 'avatar.speak_ended') {
             this.avatarIsSpeaking = false;
-            this.turnIndicator.set('Escuchando...');
+            this.turnIndicator.set('Tu turno, te escucho');
             this.room?.localParticipant.setMicrophoneEnabled(true);
           }
         } catch {
@@ -240,7 +251,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
       await this.room.connect(url, token);
       await this.room.localParticipant.setMicrophoneEnabled(true);
       this.sendCommandToAvatar('avatar.start_listening');
-      this.turnIndicator.set('Escuchando...');
+      this.turnIndicator.set('La entrevista comenzará en unos segundos...');
     } catch (err) {
       this.error.set('Error al conectar con LiveAvatar');
       this.connectionErrorBanner.set(true);
@@ -273,6 +284,22 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
   toggleMute(): void {
     this.muted.set(!this.muted());
     this.applyAudioVolume();
+  }
+
+  toggleAudioPanel(): void {
+    this.audioPanelOpen.set(!this.audioPanelOpen());
+  }
+
+  toggleCaptions(): void {
+    this.captionsEnabled.set(!this.captionsEnabled());
+  }
+
+
+  captionRoleLabel(): string {
+    const role = this.captionRole();
+    if (role === 'avatar') return 'Javiera';
+    if (role === 'user') return 'Joven';
+    return 'Entrevista';
   }
 
   private applyAudioVolume(): void {
@@ -386,11 +413,44 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
     if (this.isProfessionalView()) {
       return this.returnUrl() ? 'Volver a ficha' : 'Volver al listado';
     }
-    return 'Volver a entrevista';
+    return 'Practicar nuevamente';
   }
 
   secondaryReturnLabel(): string {
     return this.isProfessionalView() ? 'Ver entrevistas' : 'Ver historial';
+  }
+
+  companyContext(jobRoleName?: string | null): { name: string; sector: string } {
+    if (!jobRoleName) return { name: 'Empresa colaboradora', sector: 'Servicios empresariales' };
+    const normalized = jobRoleName.toLowerCase();
+    if (normalized.includes('operario')) return { name: 'Logística Andina', sector: 'Logística y bodegaje' };
+    if (normalized.includes('atención') || normalized.includes('publico')) {
+      return { name: 'Centro Ciudadano', sector: 'Atención al cliente y servicios' };
+    }
+    if (normalized.includes('administrativo')) return { name: 'Clínica Horizonte', sector: 'Salud y administración' };
+    if (normalized.includes('técnico') || normalized.includes('tecnico')) {
+      return { name: 'TecnoSoluciones', sector: 'Servicios técnicos' };
+    }
+    return { name: 'Empresa colaboradora', sector: 'Servicios empresariales' };
+  }
+
+  formatModeLabel(mode?: string | null): string {
+    if (!mode) return 'Entrevista simulada';
+    if (mode === 'AUTOGESTIONADA') return 'Autogestionada';
+    if (mode === 'SUPERVISADA') return 'Supervisada';
+    return mode;
+  }
+
+  buildNarrative(data?: {
+    jobRoleName?: string;
+    caseName?: string;
+    mode?: string;
+  }): string {
+    if (!data) return 'Se registró una entrevista simulada en la plataforma.';
+    const role = data.jobRoleName ?? 'el cargo';
+    const caseText = data.caseName ? `en un escenario ${data.caseName.toLowerCase()}` : 'en un escenario simulado';
+    const modeLabel = this.formatModeLabel(data.mode);
+    return `Participaste en una entrevista para el cargo de ${role} ${caseText}. La modalidad fue ${modeLabel.toLowerCase()}.`;
   }
 
   completedTitle(): string {
@@ -414,6 +474,9 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
   }
 
   closeSession(status: 'COMPLETADA' | 'CANCELADA', motivo?: string): void {
+    if (status === 'COMPLETADA' && !confirm('¿Finalizar entrevista? Se registrará como completada.')) {
+      return;
+    }
     if (status === 'CANCELADA' && !confirm('¿Estás seguro de que quieres cancelar esta entrevista? Se registrará como cancelada.')) {
       return;
     }
@@ -535,6 +598,93 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
     this.mediaRecorder = null;
     this.audioStream = null;
     this.audioStartTime = null;
+  }
+
+  private handleTranscriptEvent(data: any, eventType: string): void {
+    const text = this.extractTranscriptText(data);
+    if (!text) return;
+    const role = this.extractTranscriptRole(data, eventType);
+    const previous = this.captionLines();
+    const next = [...previous];
+    if (next.length && this.isTranscriptOverlap(next[next.length - 1], text)) {
+      next[next.length - 1] = text;
+    } else {
+      next.push(text);
+    }
+    this.captionLines.set(next.slice(-2));
+    this.captionRole.set(role);
+    if (role === 'avatar') {
+      this.upsertChatMessage(text);
+      this.chatAvailable.set(true);
+    }
+    this.captionsAvailable.set(true);
+    if (!this.captionsEnabled()) {
+      this.captionsEnabled.set(true);
+    }
+  }
+
+  private extractTranscriptText(data: any): string | null {
+    const direct =
+      data?.text ??
+      data?.transcript ??
+      data?.transcription ??
+      data?.message ??
+      data?.content ??
+      data?.payload?.text ??
+      data?.payload?.transcript ??
+      data?.payload?.message ??
+      data?.data?.text ??
+      data?.data?.transcript ??
+      data?.data?.message;
+    if (typeof direct === 'string') {
+      const trimmed = direct.trim();
+      return trimmed.length ? trimmed : null;
+    }
+    return null;
+  }
+
+  private upsertChatMessage(text: string): void {
+    const now = Date.now();
+    const windowMs = 7000;
+    const current = this.chatMessages();
+    let trimIndex = current.length;
+
+    while (trimIndex > 0) {
+      const candidate = current[trimIndex - 1];
+      if (now - candidate.id > windowMs) break;
+      if (this.isTranscriptOverlap(candidate.text, text)) {
+        trimIndex--;
+        continue;
+      }
+      break;
+    }
+
+    const next = [...current.slice(0, trimIndex), { id: now, text }].slice(-3);
+    this.chatMessages.set(next);
+  }
+
+  private isTranscriptOverlap(prev: string, next: string): boolean {
+    const a = prev.trim().toLowerCase();
+    const b = next.trim().toLowerCase();
+    if (!a || !b) return false;
+    return a === b || a.includes(b) || b.includes(a);
+  }
+
+  private extractTranscriptRole(data: any, eventType: string): 'user' | 'avatar' | 'system' | null {
+    const raw =
+      data?.role ??
+      data?.speaker ??
+      data?.source ??
+      data?.payload?.role ??
+      data?.payload?.speaker ??
+      data?.data?.role ??
+      data?.data?.speaker;
+    const normalized = typeof raw === 'string' ? raw.toLowerCase() : '';
+    if (normalized.includes('avatar') || normalized.includes('assistant') || normalized.includes('agent')) return 'avatar';
+    if (normalized.includes('user') || normalized.includes('joven') || normalized.includes('candidate')) return 'user';
+    if (eventType.startsWith('avatar')) return 'avatar';
+    if (eventType.startsWith('user')) return 'user';
+    return null;
   }
 
   private pickAudioMimeType(): string | null {

@@ -1,10 +1,98 @@
 ﻿@if (status) {
-  <div class="session-end" [class]="'session-end--' + variant">
-    <div class="session-end-header">
-      <h3>{{ title }}</h3>
-      <div class="session-end-actions">
+  <div class="report-shell" [class.report-shell--success]="variant === 'success'" [class.report-shell--warning]="variant === 'warning'" [class.report-shell--error]="variant === 'error'">
+    <div class="report-card">
+      <header class="report-header">
+        <div class="report-status">
+          <span class="status-pill">
+            <span class="status-text">{{ statusLabel }}</span>
+          </span>
+        </div>
+        <div class="report-title">
+          <h2>Informe de entrevista</h2>
+          <p class="report-subtitle">Registro de tu simulación y próximos pasos sugeridos.</p>
+        </div>
+      </header>
+
+      @if (status === 'ERROR' && motivo) {
+        <div class="report-alert">
+          <strong>Detalle:</strong> {{ motivo }}
+        </div>
+      }
+
+      <section class="report-section report-narrative">
+        <h3>Resumen narrativo</h3>
+        <p>
+          Participaste en una entrevista para el cargo de
+          <strong>{{ sessionSummary?.jobRoleName || 'este rol' }}</strong>
+          @if (sessionSummary?.caseName; as caseName) {
+            en un escenario {{ (caseName ?? '') | lowercase }}.
+          } @else {
+            en un escenario simulado.
+          }
+          Este informe resume el resultado y orienta tus próximos pasos.
+        </p>
+      </section>
+
+      <section class="report-section report-metrics">
+        <h3>Datos clave</h3>
+        <div class="metric-grid">
+          <div class="metric-item">
+            <span class="metric-label">Duración</span>
+            <span class="metric-value">
+              @if (sessionSummary?.duration_seconds; as duration) {
+                {{ formatDuration(duration ?? undefined) }}
+              } @else {
+                —
+              }
+            </span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Cargo</span>
+            <span class="metric-value">{{ sessionSummary?.jobRoleName || '—' }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Caso</span>
+            <span class="metric-value">{{ sessionSummary?.caseName || '—' }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Modalidad</span>
+            <span class="metric-value">Entrevista en línea</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="report-section report-feedback">
+        <div class="feedback-header">
+          <h3>Retroalimentación</h3>
+          <span class="feedback-badge">Pendiente</span>
+        </div>
+        <p>
+          El tutor revisará esta entrevista y dejará comentarios cuando estén disponibles.
+          Puedes revisarlos luego en tu historial.
+        </p>
+      </section>
+
+      <section class="report-section report-next">
+        <h3>Próximos pasos</h3>
+        <ul class="next-steps">
+          @if (status === 'COMPLETADA' && isJoven) {
+            <li>Revisa material de apoyo y refuerza tu preparación.</li>
+            <li>Vuelve a practicar para ganar confianza.</li>
+            <li>Consulta tu historial cuando esté la retroalimentación.</li>
+          } @else if (status === 'COMPLETADA' && isProfesional) {
+            <li>Registra un resumen y feedback del joven.</li>
+            <li>Revisa avances en su perfil.</li>
+          } @else {
+            <li>Cuando quieras, vuelve a intentar la entrevista.</li>
+            <li>Revisa tu historial o material de apoyo.</li>
+          }
+        </ul>
+      </section>
+
+      <div class="report-actions">
         @if (isJoven && status === 'COMPLETADA') {
-          <a routerLink="/joven/material" (click)="sessionEndService.clear()" class="btn-primary">Ver material de apoyo</a>
+          <a routerLink="/joven/simulacion/nueva" (click)="sessionEndService.clear()" class="btn-primary">Practicar nuevamente</a>
+          <a routerLink="/joven/material" (click)="sessionEndService.clear()" class="btn-secondary">Ver material de apoyo</a>
           <a routerLink="/joven/historial" (click)="sessionEndService.clear()" class="btn-secondary">Ver mi historial</a>
         }
         @if (isProfesional && youthId && status === 'COMPLETADA') {
@@ -13,35 +101,5 @@
         <button type="button" class="btn-secondary" (click)="onVolver()">Volver a entrevista</button>
       </div>
     </div>
-    @if (status === 'ERROR' && motivo) {
-      <p class="session-end-detail">{{ motivo }}</p>
-    }
-    @if (status === 'COMPLETADA' && isJoven) {
-      @if (sessionSummary && (sessionSummary.duration_seconds || sessionSummary.jobRoleName || sessionSummary.caseName)) {
-        <div class="session-summary">
-          <p class="session-summary-intro">¡Bien hecho! Completaste la entrevista.</p>
-          <ul class="session-summary-list">
-            @if (sessionSummary.jobRoleName || sessionSummary.caseName) {
-              <li>
-                <strong>Practicaste:</strong>
-                {{ sessionSummary.jobRoleName && sessionSummary.caseName
-                  ? sessionSummary.jobRoleName + ' - ' + sessionSummary.caseName
-                  : sessionSummary.jobRoleName || sessionSummary.caseName }}
-              </li>
-            }
-            @if (sessionSummary.duration_seconds) {
-              <li><strong>Duración:</strong> {{ formatDuration(sessionSummary.duration_seconds) }}</li>
-            }
-          </ul>
-          <p class="session-summary-note">Tu tutor puede revisar esta entrevista y dejar retroalimentacion escrita. Revisa tu historial mas adelante o el material de apoyo sugerido.</p>
-        </div>
-      } @else {
-        <p class="session-end-hint">Revisa el material de apoyo sugerido para seguir preparándote.</p>
-      }
-    }
-    @if (status === 'COMPLETADA' && isProfesional && youthId) {
-      <p class="session-end-hint">Puedes registrar un resumen y revisar el perfil del joven.</p>
-    }
   </div>
 }
-

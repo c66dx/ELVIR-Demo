@@ -10,15 +10,28 @@
     } @else {
       <ul class="material-list">
         @for (s of suggested.items; track s.id) {
-          <li>
+          <li class="material-card">
             @if (s.material) {
-              <span class="title">{{ s.material.title }}</span>
-              <span class="meta">{{ s.material.type }}</span>
-              @if (s.reason) {
-                <span class="reason">{{ s.reason }}</span>
-              }
-              <span class="visto-badge" [class.visto]="isViewed(s.material_id)">{{ isViewed(s.material_id) ? 'Visto' : 'No visto' }}</span>
-              <button type="button" class="btn-primary" (click)="openMaterial(s.material_id, s.material!.url)">Abrir</button>
+              <div class="material-icon" [class]="'material-icon material-icon--' + s.material.type.toLowerCase()">
+                {{ typeAbbr(s.material.type) }}
+              </div>
+              <div class="material-body">
+                <div class="material-header">
+                  <span class="title">{{ s.material.title }}</span>
+                  <span class="visto-badge" [class.visto]="isViewed(s.material_id)">{{ isViewed(s.material_id) ? 'Visto' : 'No visto' }}</span>
+                </div>
+                <p class="material-desc">{{ materialSummary(s.material) }}</p>
+                <div class="material-meta">
+                  <span class="meta-chip">{{ typeLabel(s.material.type) }}</span>
+                  <span class="meta-chip">Tiempo estimado: {{ estimateDuration(s.material.type) }}</span>
+                </div>
+                @if (s.reason) {
+                  <div class="material-reason">Recomendado: {{ s.reason }}</div>
+                }
+              </div>
+              <div class="material-actions">
+                <button type="button" class="btn-primary" (click)="openMaterial(s.material_id, s.material!.url)">Abrir</button>
+              </div>
             } @else {
               <span>Material no encontrado</span>
             }
@@ -50,10 +63,24 @@
   @if (catalog$ | async; as catalog) {
     <ul class="material-list">
       @for (m of catalog.items; track m.id) {
-        <li>
-          <span class="title">{{ m.title }}</span>
-          <span class="meta">{{ m.type }}</span>
-          <button type="button" class="btn-primary" (click)="openMaterial(m.id, m.url)">Abrir</button>
+        <li class="material-card">
+          <div class="material-icon" [class]="'material-icon material-icon--' + m.type.toLowerCase()">
+            {{ typeAbbr(m.type) }}
+          </div>
+          <div class="material-body">
+            <div class="material-header">
+              <span class="title">{{ m.title }}</span>
+              <span class="visto-badge" [class.visto]="isViewed(m.id)">{{ isViewed(m.id) ? 'Visto' : 'No visto' }}</span>
+            </div>
+            <p class="material-desc">{{ materialSummary(m) }}</p>
+            <div class="material-meta">
+              <span class="meta-chip">{{ typeLabel(m.type) }}</span>
+              <span class="meta-chip">Tiempo estimado: {{ estimateDuration(m.type) }}</span>
+            </div>
+          </div>
+          <div class="material-actions">
+            <button type="button" class="btn-primary" (click)="openMaterial(m.id, m.url)">Abrir</button>
+          </div>
         </li>
       }
     </ul>

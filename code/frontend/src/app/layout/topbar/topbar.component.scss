@@ -46,12 +46,54 @@
   }
 }
 
+body.theme-dark .topbar .brand-logos img {
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+
 .topbar-actions {
   display: flex;
   align-items: center;
   gap: var(--space-4);
   min-width: 0;
   justify-content: flex-end;
+}
+
+.theme-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba(122, 162, 211, 0.6);
+  }
+
+  &.is-dark {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.theme-switch-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .user-menu {
@@ -213,5 +255,9 @@
 
   .user-name {
     max-width: 65vw;
+  }
+
+  .theme-switch-label {
+    display: none;
   }
 }

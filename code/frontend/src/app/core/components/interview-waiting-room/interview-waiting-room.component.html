@@ -1,0 +1,66 @@
+<div class="waiting-room" [style.--wait-duration]="waitMs() + 'ms'">
+  <div class="waiting-card">
+    <div class="context-card">
+      <div class="context-top">
+        <div class="context-company">
+          <span class="context-label">Empresa</span>
+          <h1 class="context-company-name">{{ companyName() }}</h1>
+          <p class="context-company-sector">{{ companySector() }}</p>
+        </div>
+        <span class="context-pill">Sala de espera</span>
+      </div>
+
+      <div class="context-grid">
+        <div class="context-item">
+          <span class="item-label">Cargo</span>
+          <span class="item-value">{{ jobRoleName() }}</span>
+        </div>
+        <div class="context-item">
+          <span class="item-label">Caso</span>
+          <span class="item-value">{{ caseName() || 'Entrevista estándar' }}</span>
+        </div>
+        <div class="context-item">
+          <span class="item-label">Modalidad</span>
+          <span class="item-value">{{ interviewMode() }}</span>
+        </div>
+        <div class="context-item">
+          <span class="item-label">Entrevistador</span>
+          <span class="item-value">{{ interviewerName() }}</span>
+        </div>
+      </div>
+
+      <div class="context-summary">
+        <span class="item-label">Contexto laboral</span>
+        <p>{{ contextSummary() }}</p>
+      </div>
+
+      <div class="context-motivation">
+        <span class="motivation-label">Mensaje motivacional</span>
+        <p class="motivation-message">{{ motivationMessage() }}</p>
+      </div>
+    </div>
+
+    <div class="waiting-status">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span>El entrevistador se conectará en breve</span>
+    </div>
+
+    <div class="loading-message" [class.is-pulse]="messagePulse()">
+      <span class="message-text">{{ loadingMessages[messageIndex()] }}</span>
+      <span class="message-dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+    </div>
+
+    <div class="waiting-timer">
+      <div class="timer-circle">
+        <span class="timer-value">{{ secondsLeft() }}</span>
+        <span class="timer-label">seg</span>
+      </div>
+      <div class="timer-info">
+        <p class="timer-message">Preparando la videollamada...</p>
+        <div class="waiting-progress" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+</div>

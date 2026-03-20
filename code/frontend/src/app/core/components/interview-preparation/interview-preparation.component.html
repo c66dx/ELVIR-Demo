@@ -1,0 +1,53 @@
+<div class="prep-room">
+  <div class="prep-card">
+    <div class="prep-header">
+      <div>
+        <span class="prep-kicker">Preparación</span>
+        <h1 class="prep-title">Antes de comenzar la entrevista</h1>
+        <p class="prep-subtitle">Revisa el contexto y los recordatorios clave para una entrevista efectiva.</p>
+      </div>
+      <span class="prep-pill">Paso previo</span>
+    </div>
+
+    <div class="prep-context">
+      <div class="context-block">
+        <span class="context-label">Empresa</span>
+        <p class="context-value">{{ companyName }}</p>
+        <p class="context-meta">{{ companySector }}</p>
+      </div>
+      <div class="context-block">
+        <span class="context-label">Cargo</span>
+        <p class="context-value">{{ jobRoleName }}</p>
+        <p class="context-meta">Caso: {{ caseName || 'Entrevista estándar' }}</p>
+      </div>
+    </div>
+
+    <div class="prep-summary">
+      <span class="context-label">Contexto laboral</span>
+      <p>{{ contextSummary }}</p>
+    </div>
+
+    <div class="prep-grid">
+      <div class="prep-panel">
+        <h3>Recomendaciones breves</h3>
+        <ul>
+          @for (item of recommendations; track item) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+      </div>
+      <div class="prep-panel">
+        <h3>Recordatorios</h3>
+        <ul>
+          @for (item of reminders; track item) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="prep-footer">
+      <button type="button" class="btn-primary" (click)="startInterview()">Estoy listo/a</button>
+    </div>
+  </div>
+</div>

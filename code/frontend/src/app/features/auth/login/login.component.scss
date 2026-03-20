@@ -43,7 +43,7 @@
 .login-bg-shape-3 {
   width: 200px;
   height: 200px;
-  background: #fff;
+  background: var(--color-surface);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -53,7 +53,7 @@
   width: 100%;
   max-width: 520px;
   padding: var(--space-10) var(--space-8);
-  background: rgba(255, 255, 255, 0.98);
+  background: var(--color-surface);
   border-radius: 20px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
   position: relative;
@@ -63,6 +63,41 @@
 
   &--form {
     max-width: 420px;
+  }
+}
+
+.theme-mini {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.15);
+  transition: all 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    color: var(--color-text);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+
+  &.is-dark {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #e5e7eb;
   }
 }
 
@@ -180,23 +215,23 @@
   padding: var(--space-3) var(--space-4);
   border: 1.5px dashed var(--color-border);
   border-radius: 999px;
-  background: var(--color-bg);
+  background: var(--color-surface-alt);
   color: var(--color-text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
 
   &:hover {
-    border-color: #6b7280;
+    border-color: var(--color-text-muted);
     color: var(--color-text);
-    background: #f8fafc;
+    background: var(--color-surface);
   }
 }
 
 .role-admin-icon {
   width: 24px;
   height: 24px;
-  color: #6b7280;
+  color: var(--color-text-muted);
 
   svg {
     width: 100%;
@@ -309,10 +344,11 @@
   border-radius: var(--radius-md);
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
-  background: var(--color-card);
+  background: var(--color-input-bg);
+  color: var(--color-text);
 
   &::placeholder {
-    color: #9ca3af;
+    color: var(--color-text-muted);
   }
 
   &:focus {

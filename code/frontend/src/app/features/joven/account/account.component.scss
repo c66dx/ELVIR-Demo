@@ -117,17 +117,18 @@
 
 .account-form input {
   padding: 0.65rem 0.85rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-input-border);
   border-radius: 12px;
   font-size: 0.95rem;
-  background: #ffffff;
+  background: var(--color-input-bg);
+  color: var(--color-text);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .account-form input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(27, 127, 121, 0.12);
+  box-shadow: 0 0 0 3px var(--color-input-focus);
 }
 
 .card-hint {

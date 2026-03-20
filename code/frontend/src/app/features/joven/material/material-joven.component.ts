@@ -6,6 +6,7 @@ import { YouthService } from '../../../core/services/youth.service';
 import { ApiService } from '../../../core/services/api.service';
 import type { MaterialSuggestion } from '../../../core/models/material-suggestion.model';
 import type { SupportMaterial } from '../../../core/models/support-material.model';
+import type { MaterialType } from '../../../core/models/types.model';
 
 interface SuggestionWithMaterial extends MaterialSuggestion {
   material?: SupportMaterial;
@@ -110,6 +111,53 @@ export class MaterialJovenComponent {
   nextCatalog(total: number): void {
     const current = this.catalogPage$.value;
     if (current < this.totalPages(total, this.catalogPageSize)) this.catalogPage$.next(current + 1);
+  }
+
+  typeLabel(type: MaterialType): string {
+    switch (type) {
+      case 'VIDEO':
+        return 'Video';
+      case 'PDF':
+        return 'Guía PDF';
+      default:
+        return 'Enlace';
+    }
+  }
+
+  typeAbbr(type: MaterialType): string {
+    switch (type) {
+      case 'VIDEO':
+        return 'VID';
+      case 'PDF':
+        return 'PDF';
+      default:
+        return 'WEB';
+    }
+  }
+
+  estimateDuration(type: MaterialType): string {
+    switch (type) {
+      case 'VIDEO':
+        return '6-12 min';
+      case 'PDF':
+        return '8-15 min';
+      default:
+        return '3-6 min';
+    }
+  }
+
+  materialSummary(material: SupportMaterial): string {
+    const desc = material.description?.trim();
+    if (desc) {
+      return desc.length > 140 ? `${desc.slice(0, 137)}...` : desc;
+    }
+    if (material.type === 'VIDEO') {
+      return 'Guía audiovisual para reforzar habilidades clave de entrevista.';
+    }
+    if (material.type === 'PDF') {
+      return 'Resumen descargable con recomendaciones y ejemplos prácticos.';
+    }
+    return 'Recurso externo con consejos aplicables a entrevistas laborales.';
   }
 }
 
