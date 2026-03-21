@@ -1,4 +1,4 @@
-﻿import { Component, inject, OnDestroy, OnInit, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Room, RoomEvent, RemoteTrack } from 'livekit-client';

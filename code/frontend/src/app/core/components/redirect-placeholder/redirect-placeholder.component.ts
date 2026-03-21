@@ -1,4 +1,4 @@
-﻿import { Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 /**
  * Placeholder para la ruta raíz. El redirectToDashboardGuard redirige antes de renderizar.

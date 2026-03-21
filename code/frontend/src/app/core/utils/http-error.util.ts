@@ -1,4 +1,4 @@
-﻿import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 
 /** Mensajes por código de estado cuando el backend no devuelve detail. */
 const STATUS_MESSAGES: Record<number, string> = {

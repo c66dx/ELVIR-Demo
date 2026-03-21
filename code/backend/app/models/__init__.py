@@ -21,6 +21,7 @@ from app.models.competency import Competency
 from app.models.competency_level import CompetencyLevel
 from app.models.session_competency import SessionCompetency
 from app.models.audit_log import AuditLog
+from app.models.notification import YouthNotification
 
 __all__ = [
     "Base",
@@ -45,4 +46,5 @@ __all__ = [
     "CompetencyLevel",
     "SessionCompetency",
     "AuditLog",
+    "YouthNotification",
 ]

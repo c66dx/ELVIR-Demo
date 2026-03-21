@@ -1,4 +1,4 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { switchMap, map, shareReplay } from 'rxjs/operators';
 import { ApiService } from './api.service';

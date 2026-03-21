@@ -1,4 +1,4 @@
-﻿import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import type { AdminYouthLogRow, AdminProfessionalLogRow, AdminYouthLogs } from '../../../core/services/api.service';
 import { formatDate, formatStatusLabel } from '../../../shared/utils/date-format.util';

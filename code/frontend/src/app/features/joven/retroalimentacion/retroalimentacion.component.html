@@ -1,82 +1,338 @@
-﻿<div class="page-header">
-  <h2>Retroalimentacion del tutor</h2>
+<div class="page-header">
+
+
+
+  <h2>Retroalimentación del tutor</h2>
+
+
+
   <p class="page-subtitle">
-    Aqui veras la retroalimentacion escrita que tu tutor deje despues de cada entrevista.
+
+
+
+    Aquí verás la retroalimentación escrita que tu tutor deje después de cada entrevista.
+
+
+
   </p>
+
+
+
 </div>
 
-@if (feedback$ | async; as items) {
-  @if (items.length === 0) {
-    <p class="empty-hint">Aun no hay retroalimentacion disponible.</p>
+
+
+
+
+
+
+@if (feedback$ | async; as data) {
+
+
+  @if (data.items.length === 0) {
+
+
+    <p class="empty-hint">Aún no hay retroalimentación disponible.</p>
+
+
   } @else {
+
+
     <div class="feedback-grid">
-      @for (item of items; track item.sessionId) {
+
+
+      @for (item of data.items; track item.sessionId) {
+
+
         <article class="feedback-card">
+
+
           <header class="feedback-header">
+
+
+
             <div>
+
+
+
               <h3>Entrevista</h3>
+
+
+
               <p class="feedback-meta">
+
+
+
                 <span>{{ formatDate(item.startedAt) }}</span>
+
+
+
                 <span class="dot">&middot;</span>
+
+
+
                 <span>{{ formatStatusLabel(item.status) }}</span>
+
+
+
               </p>
+
+
+
             </div>
+
+
+
             <div class="feedback-tags">
+
+
+
               @if (item.jobRoleName) {
+
+
+
                 <span class="pill">Cargo: {{ item.jobRoleName }}</span>
+
+
+
               }
+
+
+
               @if (item.caseName) {
+
+
+
                 <span class="pill pill--neutral">Caso: {{ item.caseName }}</span>
+
+
+
               }
+
+
+
             </div>
+
+
+
           </header>
 
+
+
+
+
+
+
           <div class="feedback-body">
+
+
+
             <section class="feedback-block">
+
+
+
               <h4>Mensaje del tutor</h4>
+
+
+
               @if (item.summaryText) {
+
+
+
                 <p>{{ item.summaryText }}</p>
+
+
+
               } @else {
-                <p class="muted">Aun no hay retroalimentacion escrita para esta entrevista.</p>
+
+
+
+                <p class="muted">Aún no hay retroalimentación escrita para esta entrevista.</p>
+
+
+
               }
+
+
+
             </section>
 
+
+
+
+
+
+
             <div class="feedback-split">
-              <section class="feedback-block">
-                <h4>Puntos fuertes</h4>
-                @if (item.strengths.length > 0) {
-                  <ul class="feedback-list">
-                    @for (point of item.strengths; track point) {
-                      <li>{{ point }}</li>
-                    }
-                  </ul>
-                } @else {
-                  <p class="muted">Pendiente de completar por el tutor.</p>
-                }
-              </section>
+
+
 
               <section class="feedback-block">
-                <h4>Sugerencias</h4>
-                @if (item.suggestions.length > 0) {
+
+
+
+                <h4>Puntos fuertes</h4>
+
+
+
+                @if (item.strengths.length > 0) {
+
+
+
                   <ul class="feedback-list">
-                    @for (tip of item.suggestions; track tip) {
-                      <li>{{ tip }}</li>
+
+
+
+                    @for (point of item.strengths; track point) {
+
+
+
+                      <li>{{ point }}</li>
+
+
+
                     }
+
+
+
                   </ul>
+
+
+
                 } @else {
+
+
+
                   <p class="muted">Pendiente de completar por el tutor.</p>
+
+
+
                 }
+
+
+
               </section>
+
+
+
+
+
+
+
+              <section class="feedback-block">
+
+
+
+                <h4>Sugerencias</h4>
+
+
+
+                @if (item.suggestions.length > 0) {
+
+
+
+                  <ul class="feedback-list">
+
+
+
+                    @for (tip of item.suggestions; track tip) {
+
+
+
+                      <li>{{ tip }}</li>
+
+
+
+                    }
+
+
+
+                  </ul>
+
+
+
+                } @else {
+
+
+
+                  <p class="muted">Pendiente de completar por el tutor.</p>
+
+
+
+                }
+
+
+
+              </section>
+
+
+
             </div>
+
+
+
           </div>
 
+
+
+
+
+
+
           <footer class="feedback-actions">
-            <a [routerLink]="['/joven/simulacion', item.sessionId]" class="btn-secondary">Ver entrevista</a>
+
+
+            <a [routerLink]="['/joven/retroalimentacion', item.sessionId]" class="btn-secondary">Ver retroalimentación</a>
+
+
           </footer>
+
+
         </article>
+
+
       }
+
+
     </div>
+
+
+    <div class="pager">
+
+
+      <span>Página {{ data.page }} de {{ totalPages(data.total) }} &middot; Total {{ data.total }}</span>
+
+
+      <div class="pager-actions">
+
+
+        <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="data.page <= 1">Anterior</button>
+
+
+        <button type="button" class="pager-btn" (click)="nextPage(data.total)" [disabled]="data.page >= totalPages(data.total)">
+
+
+          Siguiente
+
+
+        </button>
+
+
+      </div>
+
+
+    </div>
+
+
   }
+
+
 } @else {
+
+
   <p>Cargando...</p>
+
+
 }
+
+

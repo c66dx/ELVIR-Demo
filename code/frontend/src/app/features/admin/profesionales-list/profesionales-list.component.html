@@ -1,58 +1,116 @@
-﻿<div class="list-page">
+<div class="list-page">
+
   <header class="page-header">
+
     <h2>Tutores</h2>
+
     <a routerLink="/admin/profesionales/nuevo" class="btn-primary">Crear tutor</a>
+
   </header>
 
+
+
   @if (loading) {
+
     <p class="loading">Cargando...</p>
+
   } @else if (total === 0) {
+
     <p class="empty">No hay tutores registrados. <a routerLink="/admin/profesionales/nuevo">Crear el primero</a></p>
+
   } @else {
+
     <div class="table-wrap">
+
       <table class="data-table">
+
         <thead>
+
           <tr>
+
             <th>Nombre</th>
+
             <th>Especialidad</th>
+
             <th>Institución</th>
+
             <th>Estado</th>
+
             <th></th>
+
           </tr>
+
         </thead>
+
         <tbody>
+
           @for (p of professionals; track p.id) {
+
             <tr>
+
               <td>{{ p.display_name }}</td>
+
               <td>{{ p.specialty || '-' }}</td>
+
               <td>{{ p.institution || '-' }}</td>
+
               <td>
+
                 <span class="badge" [class.badge-active]="p.is_active" [class.badge-inactive]="!p.is_active">
+
                   {{ p.is_active ? 'Activo' : 'Inactivo' }}
+
                 </span>
+
               </td>
+
               <td class="actions-cell">
+
                 <a [routerLink]="['/admin/profesionales', p.id, 'editar']" class="btn-link">Editar</a>
+
               </td>
+
             </tr>
+
           }
+
         </tbody>
+
       </table>
+
     </div>
+
     <div class="pager">
+
       <span>Página {{ page }} de {{ totalPages() }} · Total {{ total }}</span>
+
       <div class="pager-actions">
+
         <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="page <= 1">Anterior</button>
+
         <button
+
           type="button"
+
           class="pager-btn"
+
           (click)="nextPage()"
+
           [disabled]="page >= totalPages()"
+
         >
+
           Siguiente
+
         </button>
+
       </div>
+
     </div>
+
   }
+
 </div>
+
+
 

@@ -37,6 +37,7 @@ from app.schemas.session_audio import SessionAudioResponse
 from app.core.dependencies import get_current_user, get_current_professional
 from app.config import settings
 from pydantic import BaseModel
+from app.services.notifications import upsert_youth_notification
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 logger = logging.getLogger("elvir.api")
@@ -591,6 +592,18 @@ def close_session(
     if data.motivo:
         payload["motivo"] = data.motivo
     db.add(SessionEvent(session_id=session.id, event_type="ENDED", payload=payload))
+
+    if data.status == "COMPLETADA":
+        upsert_youth_notification(
+            db,
+            youth_id=session.youth_id,
+            type="session",
+            title="Entrevista completada",
+            message="Tu entrevista fue guardada en el historial.",
+            link=f"/joven/simulacion/{session.id}",
+            entity_type="session",
+            entity_id=session.id,
+        )
     db.commit()
     db.refresh(session)
     return SessionResponse.model_validate(session)

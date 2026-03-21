@@ -13,6 +13,7 @@ from app.models.youth import Youth
 from app.models.professional import Professional
 from app.models.assignment import Assignment
 from app.core.dependencies import get_current_user, get_current_professional
+from app.services.notifications import upsert_youth_notification
 
 router = APIRouter(tags=["summaries"])
 
@@ -66,6 +67,16 @@ def create_or_update_summary(
         existing.summary_text = data.summary_text
         existing.competency_tags = data.competency_tags
         existing.professional_id = prof.id
+        upsert_youth_notification(
+            db,
+            youth_id=session.youth_id,
+            type="feedback",
+            title="Retroalimentacion disponible",
+            message="Hay comentarios del tutor sobre tu entrevista.",
+            link=f"/joven/retroalimentacion/{session_id}",
+            entity_type="interview_summary",
+            entity_id=existing.id,
+        )
         db.commit()
         db.refresh(existing)
         return {
@@ -84,6 +95,17 @@ def create_or_update_summary(
         competency_tags=data.competency_tags,
     )
     db.add(summary)
+    db.flush()
+    upsert_youth_notification(
+        db,
+        youth_id=session.youth_id,
+        type="feedback",
+        title="Retroalimentacion disponible",
+        message="Hay comentarios del tutor sobre tu entrevista.",
+        link=f"/joven/retroalimentacion/{session_id}",
+        entity_type="interview_summary",
+        entity_id=summary.id,
+    )
     db.commit()
     db.refresh(summary)
     return {

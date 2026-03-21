@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { UserRole } from '../models/user.model';
 
 const ROLE_KEY = 'elvir_role';

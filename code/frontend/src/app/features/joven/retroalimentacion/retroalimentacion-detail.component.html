@@ -1,0 +1,246 @@
+@if (vm$ | async; as vm) {
+
+
+  @if (vm.state === 'loading') {
+
+
+    <p>Cargando...</p>
+
+
+  } @else if (vm.state === 'notfound') {
+
+
+    <div class="empty-state">
+
+
+      <h2>Retroalimentación no encontrada</h2>
+
+
+      <p>No se encontró una entrevista válida para mostrar retroalimentación.</p>
+
+
+      <a routerLink="/joven/retroalimentacion" class="btn-secondary">Volver a retroalimentación</a>
+
+
+    </div>
+
+
+  } @else {
+
+
+    <div class="page-header detail-header">
+
+
+      <div>
+
+
+        <h2>Retroalimentación del tutor</h2>
+
+
+        <p class="page-subtitle">Detalle de la retroalimentación de esta entrevista.</p>
+
+
+      </div>
+
+
+      <div class="page-actions">
+
+
+        <a routerLink="/joven/retroalimentacion" class="btn-secondary">Volver</a>
+
+
+        <a [routerLink]="['/joven/simulacion', vm.detail.sessionId]" class="btn-primary">Ver entrevista</a>
+
+
+      </div>
+
+
+    </div>
+
+
+
+
+
+    <article class="feedback-card detail-card">
+
+
+      <header class="feedback-header">
+
+
+        <div>
+
+
+          <h3>Entrevista</h3>
+
+
+          <p class="feedback-meta">
+
+
+            <span>{{ formatDate(vm.detail.startedAt) }}</span>
+
+
+            <span class="dot">&middot;</span>
+
+
+            <span>{{ formatStatusLabel(vm.detail.status) }}</span>
+
+
+          </p>
+
+
+        </div>
+
+
+        <div class="feedback-tags">
+
+
+          @if (vm.detail.jobRoleName) {
+
+
+            <span class="pill">Cargo: {{ vm.detail.jobRoleName }}</span>
+
+
+          }
+
+
+          @if (vm.detail.caseName) {
+
+
+            <span class="pill pill--neutral">Caso: {{ vm.detail.caseName }}</span>
+
+
+          }
+
+
+        </div>
+
+
+      </header>
+
+
+
+
+
+      <div class="feedback-body">
+
+
+        <section class="feedback-block">
+
+
+          <h4>Mensaje del tutor</h4>
+
+
+          @if (vm.detail.summaryText) {
+
+
+            <p>{{ vm.detail.summaryText }}</p>
+
+
+          } @else {
+
+
+            <p class="muted">Aún no hay retroalimentación escrita para esta entrevista.</p>
+
+
+          }
+
+
+        </section>
+
+
+
+
+
+        <div class="feedback-split">
+
+
+          <section class="feedback-block">
+
+
+            <h4>Puntos fuertes</h4>
+
+
+            @if (vm.detail.strengths.length > 0) {
+
+
+              <ul class="feedback-list">
+
+
+                @for (point of vm.detail.strengths; track point) {
+
+
+                  <li>{{ point }}</li>
+
+
+                }
+
+
+              </ul>
+
+
+            } @else {
+
+
+              <p class="muted">Pendiente de completar por el tutor.</p>
+
+
+            }
+
+
+          </section>
+
+
+
+
+
+          <section class="feedback-block">
+
+
+            <h4>Sugerencias</h4>
+
+
+            @if (vm.detail.suggestions.length > 0) {
+
+
+              <ul class="feedback-list">
+
+
+                @for (tip of vm.detail.suggestions; track tip) {
+
+
+                  <li>{{ tip }}</li>
+
+
+                }
+
+
+              </ul>
+
+
+            } @else {
+
+
+              <p class="muted">Pendiente de completar por el tutor.</p>
+
+
+            }
+
+
+          </section>
+
+
+        </div>
+
+
+      </div>
+
+
+    </article>
+
+
+  }
+
+
+}
+
+

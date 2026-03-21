@@ -14,6 +14,7 @@ from app.models.professional import Professional
 from app.models.assignment import Assignment
 from app.schemas.material import CreateMaterialRequest, SuggestMaterialRequest, RecordViewRequest
 from app.core.dependencies import get_current_user, get_current_professional, get_current_admin
+from app.services.notifications import upsert_youth_notification
 
 router = APIRouter(tags=["material"])
 
@@ -124,6 +125,25 @@ def suggest_material(
         reason=data.reason,
     )
     db.add(sugg)
+    db.flush()
+
+    material = db.query(SupportMaterial).filter(SupportMaterial.id == data.material_id).first()
+    material_title = material.title if material else None
+    message = (
+        f'Tu tutor te asigno "{material_title}".'
+        if material_title
+        else "Tu tutor te asigno un material nuevo para revisar."
+    )
+    upsert_youth_notification(
+        db,
+        youth_id=data.youth_id,
+        type="material",
+        title="Material asignado",
+        message=message,
+        link="/joven/material",
+        entity_type="material_suggestion",
+        entity_id=sugg.id,
+    )
     db.commit()
     db.refresh(sugg)
     return {

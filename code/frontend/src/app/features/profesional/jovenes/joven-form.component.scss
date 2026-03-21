@@ -4,9 +4,11 @@
   label {
     display: block;
     margin-bottom: var(--space-2);
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--color-text);
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   input[type='text'],
@@ -16,16 +18,19 @@
   select {
     width: 100%;
     max-width: 100%;
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: 1rem;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--color-input-border);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    background: var(--color-input-bg);
+    color: var(--color-text);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     transition: border-color 0.2s, box-shadow 0.2s;
 
     &:focus {
       outline: none;
       border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px var(--color-primary-light);
+      box-shadow: 0 0 0 3px var(--color-input-focus);
     }
   }
 
@@ -51,9 +56,9 @@
   .readonly-value {
     display: block;
     padding: var(--space-3) var(--space-4);
-    background: var(--color-bg-muted, #f3f4f6);
+    background: var(--color-surface-alt);
     border-radius: var(--radius-sm);
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--color-text);
   }
 
@@ -67,8 +72,8 @@
     }
 
     .btn-sm {
-      padding: var(--space-2) var(--space-3);
-      font-size: 0.875rem;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.82rem;
     }
   }
 }
@@ -107,7 +112,7 @@
     transition: background 0.2s;
 
     &:hover {
-      background: var(--color-bg-hover, rgba(0, 0, 0, 0.03));
+      background: var(--color-primary-light);
     }
 
     input[type='checkbox'] {
@@ -123,8 +128,8 @@
 
 .activation-success {
   padding: var(--space-6);
-  background: var(--color-success-light, #ecfdf5);
-  border: 1px solid var(--color-success, #10b981);
+  background: var(--color-success-light);
+  border: 1px solid rgba(34, 197, 94, 0.4);
   border-radius: var(--radius-md);
 }
 
@@ -178,8 +183,8 @@
 .modal-content {
   background: var(--color-card);
   padding: var(--space-6);
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   max-width: 420px;
   width: 90%;
 

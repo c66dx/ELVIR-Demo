@@ -1,4 +1,4 @@
-﻿.page-header {
+.page-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -17,9 +17,10 @@
   gap: var(--space-4);
   margin-bottom: var(--space-6);
   padding: var(--space-4);
-  background: var(--color-bg);
-  border-radius: var(--radius-md);
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 
   .filter-group {
     display: flex;
@@ -27,22 +28,27 @@
     gap: var(--space-2);
 
     label {
-      font-size: 0.8rem;
-      font-weight: 500;
+      font-size: 0.75rem;
+      font-weight: 600;
       color: var(--color-text-muted);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
     }
 
     input,
     select {
-      padding: var(--space-2) var(--space-3);
-      border: 1px solid var(--color-border);
+      padding: 0.55rem 0.8rem;
+      border: 1px solid var(--color-input-border);
       border-radius: var(--radius-sm);
       font-size: 0.9rem;
       min-width: 160px;
+      background: var(--color-input-bg);
+      color: var(--color-text);
 
       &:focus {
         outline: none;
         border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px var(--color-input-focus);
       }
     }
   }
@@ -63,7 +69,7 @@
 .table-wrap {
   overflow-x: auto;
   margin-bottom: var(--space-6);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
 
@@ -71,7 +77,7 @@
   width: 100%;
   border-collapse: collapse;
   background: var(--color-card);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--color-border);
 
@@ -84,12 +90,12 @@
   }
 
   th {
-    background: var(--color-bg);
+    background: var(--color-surface-alt);
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
   }
 
   tbody tr {
@@ -167,6 +173,7 @@
     font-weight: 700;
     font-size: 0.8rem;
     overflow: hidden;
+    border: 1px solid var(--color-primary-soft-20);
   }
 
   .avatar--image {
@@ -193,12 +200,12 @@
 
 .status-pill {
   align-self: flex-start;
-  padding: 0.15rem 0.45rem;
-  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
   font-size: 0.7rem;
-  font-weight: 600;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  font-weight: 700;
+  background: var(--color-info-light);
+  color: var(--color-info);
 }
 
 .metric {
@@ -221,10 +228,10 @@
 .progress-chip {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .progress-chip--up {
@@ -243,7 +250,7 @@
 }
 
 .progress-chip--none {
-  background: var(--color-border);
+  background: var(--color-surface-alt);
   color: var(--color-text-muted);
 }
 
@@ -259,10 +266,10 @@
 }
 
 .pending-badge {
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .pending-badge--warn {

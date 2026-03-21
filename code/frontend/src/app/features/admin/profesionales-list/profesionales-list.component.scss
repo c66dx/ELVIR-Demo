@@ -1,5 +1,5 @@
-﻿.list-page {
-  padding: var(--space-6);
+.list-page {
+  width: 100%;
 }
 
 :host ::ng-deep .content-inner {
@@ -18,16 +18,7 @@
 }
 
 .btn-primary {
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-primary);
-  color: white;
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  font-weight: 600;
-
-  &:hover {
-    opacity: 0.9;
-  }
+  padding: 0.55rem 1rem;
 }
 
 .loading,
@@ -41,6 +32,10 @@
 
 .table-wrap {
   overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  box-shadow: var(--shadow-sm);
 }
 
 .data-table {
@@ -57,23 +52,27 @@
   th {
     font-weight: 600;
     color: var(--color-text-muted);
-    font-size: 0.875rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--color-surface-alt);
   }
 }
 
 .badge {
   display: inline-block;
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.8rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
 
   &.badge-active {
-    background: rgba(34, 197, 94, 0.15);
-    color: #16a34a;
+    background: var(--color-success-light);
+    color: var(--color-success);
   }
 
   &.badge-inactive {
-    background: rgba(156, 163, 175, 0.2);
+    background: var(--color-surface-alt);
     color: var(--color-text-muted);
   }
 }

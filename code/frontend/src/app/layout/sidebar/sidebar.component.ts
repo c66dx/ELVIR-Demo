@@ -1,16 +1,9 @@
-﻿import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { UserRole } from '../../core/models/user.model';
-
-interface NavItem {
-  label: string;
-  route: string;
-  roles: UserRole[];
-  exact?: boolean;
-  icon: string;
-}
+import { JOVEN_NAV, PROFESIONAL_NAV, ADMIN_NAV, type NavItem } from '../navigation';
 
 @Component({
   selector: 'app-sidebar',
@@ -28,29 +21,9 @@ export class SidebarComponent implements OnInit {
   avatarUrl: string | null = null;
   showProfile = !!this.role;
 
-  jovenItems: NavItem[] = [
-    { label: 'Entrevista', route: '/joven/simulacion/nueva', roles: ['JOVEN'], exact: true, icon: 'play' },
-    { label: 'Historial', route: '/joven/historial', roles: ['JOVEN'], exact: true, icon: 'history' },
-    { label: 'Retroalimentacion del tutor', route: '/joven/retroalimentacion', roles: ['JOVEN'], exact: true, icon: 'message' },
-    { label: 'Material', route: '/joven/material', roles: ['JOVEN'], exact: true, icon: 'material' },
-  ];
-
-  profesionalItems: NavItem[] = [
-    { label: 'Dashboard', route: '/profesional/dashboard', roles: ['PROFESIONAL'], exact: true, icon: 'dashboard' },
-    { label: 'Jóvenes', route: '/profesional/jovenes', roles: ['PROFESIONAL'], exact: true, icon: 'users' },
-    { label: 'Entrevistas', route: '/profesional/sesiones', roles: ['PROFESIONAL'], exact: true, icon: 'history' },
-    { label: 'Crear Joven', route: '/profesional/jovenes/nuevo', roles: ['PROFESIONAL'], exact: true, icon: 'user-plus' },
-    { label: 'Crear Material', route: '/profesional/material/nuevo', roles: ['PROFESIONAL'], exact: true, icon: 'material' },
-  ];
-
-  adminItems: NavItem[] = [
-    { label: 'Dashboard', route: '/admin/dashboard', roles: ['ADMIN'], exact: true, icon: 'dashboard' },
-    { label: 'Usuarios y logs', route: '/admin/usuarios', roles: ['ADMIN'], exact: true, icon: 'users' },
-    { label: 'Auditoría', route: '/admin/auditoria', roles: ['ADMIN'], exact: true, icon: 'history' },
-    { label: 'Crear Tutor', route: '/admin/profesionales/nuevo', roles: ['ADMIN'], exact: true, icon: 'user-plus' },
-    { label: 'Crear Material', route: '/admin/material/nuevo', roles: ['ADMIN'], exact: true, icon: 'material' },
-    { label: 'Cambiar contraseña', route: '/cambiar-contrasena', roles: ['ADMIN'], exact: true, icon: 'lock' },
-  ];
+  jovenItems: NavItem[] = JOVEN_NAV;
+  profesionalItems: NavItem[] = PROFESIONAL_NAV;
+  adminItems: NavItem[] = ADMIN_NAV;
 
   get visibleItems(): NavItem[] {
     if (this.role === 'JOVEN') return this.jovenItems;

@@ -1,493 +1,2465 @@
-﻿@if (loading()) {
+@if (loading()) {
+
+
+
+
   <p>Cargando...</p>
+
+
+
+
 } @else {
+
+
+
+
   @let y = youth();
+
+
+
+
   @if (y) {
+
+
+
+
     <section class="profile-hero">
+
+
+
+
       <div class="hero-top">
+
+
+
+
         <a routerLink="/profesional/jovenes" class="back-link">← Volver a Jóvenes</a>
+
+
+
+
         <div class="header-actions">
+
+
+
+
           <button type="button" class="btn-suggest" (click)="openSuggestMaterialPanel()">Sugerir material</button>
+
+
+
+
           <a [routerLink]="['/profesional/jovenes', youthId, 'supervisada', 'nueva']" class="btn-supervisada">Iniciar entrevista supervisada</a>
+
+
+
+
           <a [routerLink]="['/profesional/jovenes', youthId, 'editar']" class="btn-primary">Editar</a>
+
+
+
+
         </div>
+
+
+
+
       </div>
+
+
+
+
       <div class="hero-main">
+
+
+
+
         <div class="hero-identity">
+
+
+
+
           <div class="hero-avatar" [class.hero-avatar--image]="y.profile_photo_url">
+
+
+
+
             @if (y.profile_photo_url) {
+
+
+
+
               <img [src]="y.profile_photo_url" alt="Foto del joven" />
+
+
+
+
             } @else {
+
+
+
+
               <span>{{ initials(y.display_name) }}</span>
+
+
+
+
             }
+
+
+
+
           </div>
+
+
+
+
           <div class="hero-text">
+
+
+
+
             <h2 class="hero-name">{{ y.display_name }}</h2>
+
+
+
+
             <div class="hero-meta">
+
+
+
+
               <span>{{ y.email ?? 'Sin correo' }}</span>
+
+
+
+
               <span>RUT: {{ y.rut ?? '-' }}</span>
+
+
+
+
               <span>ID: {{ y.identifier ?? '-' }}</span>
+
+
+
+
             </div>
+
+
+
+
             <div class="hero-tags">
+
+
+
+
               <span class="hero-tag" [class.is-active]="y.login_enabled">{{ y.login_enabled ? 'Login habilitado' : 'Login deshabilitado' }}</span>
+
+
+
+
               <span class="hero-tag" [class.is-active]="y.is_active">{{ y.is_active ? 'Activo' : 'Inactivo' }}</span>
+
+
+
+
             </div>
+
+
+
+
           </div>
+
+
+
+
         </div>
+
+
+
+
         @let metrics = metricsSummary();
+
+
+
+
         <div class="hero-metrics">
+
+
+
+
           <div class="hero-metric">
+
+
+
+
             <span class="metric-value">{{ metrics?.total ?? 0 }}</span>
+
+
+
+
             <span class="metric-label">Entrevistas</span>
+
+
+
+
           </div>
+
+
+
+
           <div class="hero-metric">
+
+
+
+
             <span class="metric-value">{{ metrics?.completed ?? 0 }}</span>
+
+
+
+
             <span class="metric-label">Completadas</span>
+
+
+
+
           </div>
+
+
+
+
           <div class="hero-metric">
+
+
+
+
             <span class="metric-value">{{ metrics?.completionRate ?? 0 }}%</span>
+
+
+
+
             <span class="metric-label">Tasa de éxito</span>
+
+
+
+
           </div>
+
+
+
+
         </div>
+
+
+
+
       </div>
+
+
+
+
     </section>
 
+
+
+
+
+
+
+
+
     <nav class="profile-tabs" role="tablist" aria-label="Secciones del perfil">
+
+
+
+
       <button
+
+
+
+
         type="button"
+
+
+
+
         class="profile-tab"
+
+
+
+
         [class.is-active]="activeTab() === 'perfil'"
+
+
+
+
         role="tab"
+
+
+
+
         [attr.aria-selected]="activeTab() === 'perfil'"
+
+
+
+
         (click)="setTab('perfil')"
+
+
+
+
       >
+
+
+
+
         Perfil
+
+
+
+
       </button>
+
+
+
+
       <button
+
+
+
+
         type="button"
+
+
+
+
         class="profile-tab"
+
+
+
+
         [class.is-active]="activeTab() === 'accesos'"
+
+
+
+
         role="tab"
+
+
+
+
         [attr.aria-selected]="activeTab() === 'accesos'"
+
+
+
+
         [disabled]="!y.login_enabled || !y.user_id"
+
+
+
+
         (click)="setTab('accesos')"
+
+
+
+
       >
+
+
+
+
         Accesos
+
+
+
+
       </button>
+
+
+
+
       <button
+
+
+
+
         type="button"
+
+
+
+
         class="profile-tab"
+
+
+
+
         [class.is-active]="activeTab() === 'desempeno'"
+
+
+
+
         role="tab"
+
+
+
+
         [attr.aria-selected]="activeTab() === 'desempeno'"
+
+
+
+
         (click)="setTab('desempeno')"
+
+
+
+
       >
+
+
+
+
         Desempeño
+
+
+
+
       </button>
+
+
+
+
       <button
+
+
+
+
         type="button"
+
+
+
+
         class="profile-tab"
+
+
+
+
         [class.is-active]="activeTab() === 'sesiones'"
+
+
+
+
         role="tab"
+
+
+
+
         [attr.aria-selected]="activeTab() === 'sesiones'"
+
+
+
+
         (click)="setTab('sesiones')"
+
+
+
+
       >
+
+
+
+
         Entrevistas
+
+
+
+
       </button>
+
+
+
+
     </nav>
 
+
+
+
+
+
+
+
+
     <div class="profile-tab-panels">
+
+
+
+
       @if (activeTab() === 'perfil') {
+
+
+
+
         <section class="profile-section">
+
+
+
+
           <h3>Datos del joven</h3>
+
+
+
+
           <dl class="profile-dl">
+
+
+
+
             <dt>Foto</dt>
+
+
+
+
             <dd>
+
+
+
+
               <div class="profile-photo-row">
+
+
+
+
                 <div class="avatar" [class.avatar--image]="y.profile_photo_url">
+
+
+
+
                   @if (y.profile_photo_url) {
+
+
+
+
                     <img [src]="y.profile_photo_url" alt="Foto del joven" />
+
+
+
+
                   } @else {
+
+
+
+
                     <span>{{ initials(y.display_name) }}</span>
+
+
+
+
                   }
+
+
+
+
                 </div>
+
+
+
+
                 <div class="photo-actions">
+
+
+
+
                   <label class="btn-secondary btn-file">
+
+
+
+
                     @if (photoUploading()) {
+
+
+
+
                       Subiendo...
+
+
+
+
                     } @else {
+
+
+
+
                       Cambiar foto
+
+
+
+
                     }
+
+
+
+
                     <input
+
+
+
+
                       type="file"
+
+
+
+
                       accept="image/png,image/jpeg,image/webp"
+
+
+
+
                       (change)="onPhotoSelected($event)"
+
+
+
+
                       [disabled]="photoUploading()"
+
+
+
+
                     />
+
+
+
+
                   </label>
+
+
+
+
                   <p class="photo-hint">Formatos: JPG, PNG o WEBP. Maximo 5 MB.</p>
+
+
+
+
                   @if (photoError()) {
+
+
+
+
                     <p class="photo-error">{{ photoError() }}</p>
+
+
+
+
                   }
+
+
+
+
                 </div>
+
+
+
+
               </div>
+
+
+
+
             </dd>
+
+
+
+
             <dt>Nombre</dt>
+
+
+
+
             <dd>{{ y.display_name }}</dd>
+
+
+
+
             <dt>Identificador</dt>
+
+
+
+
             <dd>{{ y.identifier ?? '-' }}</dd>
+
+
+
+
             <dt>RUT</dt>
+
+
+
+
             <dd>{{ y.rut ?? '-' }}</dd>
+
+
+
+
             <dt>Teléfono</dt>
+
+
+
+
             <dd>{{ y.phone ?? '-' }}</dd>
+
+
+
+
             <dt>Año de nacimiento</dt>
+
+
+
+
             <dd>{{ y.year_of_birth ?? '-' }}</dd>
+
+
+
+
             <dt>Diagnóstico</dt>
+
+
+
+
             <dd>{{ y.diagnosis ?? '-' }}</dd>
+
+
+
+
             <dt>Login habilitado</dt>
+
+
+
+
             <dd>{{ y.login_enabled ? 'Sí' : 'No' }}</dd>
+
+
+
+
             <dt>Activo</dt>
+
+
+
+
             <dd>{{ y.is_active ? 'Sí' : 'No' }}</dd>
+
+
+
+
             <dt>Notas generales</dt>
+
+
+
+
             <dd>{{ y.general_notes ?? '-' }}</dd>
+
+
+
+
             @let checklistLabels = getChecklistLabels(y);
+
+
+
+
             @if (checklistLabels.length > 0) {
+
+
+
+
               <dt>Perfil postulante</dt>
+
+
+
+
               <dd>
+
+
+
+
                 <div class="profile-checklist-tags">
+
+
+
+
                   @for (label of checklistLabels; track label) {
+
+
+
+
                     <span class="tag">{{ label }}</span>
+
+
+
+
                   }
+
+
+
+
                 </div>
+
+
+
+
               </dd>
+
+
+
+
             }
+
+
+
+
           </dl>
+
+
+
+
         </section>
+
+
+
+
       }
+
+
+
+
+
+
+
+
 
       @if (activeTab() === 'accesos') {
+
+
+
+
         <section class="platform-sessions-section">
+
+
+
+
           <h3>Accesos a la plataforma</h3>
+
+
+
+
           <p class="section-desc">Registro de cuándo el joven entró y salió de la plataforma (login/logout).</p>
+
+
+
+
           @if (!y.login_enabled || !y.user_id) {
+
+
+
+
             <p>El joven no tiene login habilitado o aún no activó su cuenta.</p>
+
+
+
+
           } @else {
+
+
+
+
             @let ps = platformSessions();
+
+
+
+
             @if (ps.length === 0) {
+
+
+
+
               <p>Sin registros de acceso.</p>
+
+
+
+
             } @else {
+
+
+
+
               <div class="table-wrap">
+
+
+
+
                 <table class="data-table">
+
+
+
+
                   <thead>
+
+
+
+
                     <tr>
+
+
+
+
                       <th>Entrada</th>
+
+
+
+
                       <th>Salida</th>
+
+
+
+
                       <th>Duración</th>
+
+
+
+
                     </tr>
+
+
+
+
                   </thead>
+
+
+
+
                   <tbody>
+
+
+
+
                     @for (s of ps; track s.id) {
+
+
+
+
                       <tr>
+
+
+
+
                         <td>{{ formatDate(s.started_at) }}</td>
+
+
+
+
                         <td>{{ s.ended_at ? formatDate(s.ended_at) : 'En curso' }}</td>
+
+
+
+
                         <td>{{ s.ended_at ? formatDuration(durationBetween(s.started_at, s.ended_at)) : '-' }}</td>
+
+
+
+
                       </tr>
+
+
+
+
                     }
+
+
+
+
                   </tbody>
+
+
+
+
                 </table>
+
+
+
+
               </div>
+
+
+
+
               <div class="pager">
+
+
+
+
                 <span>Página {{ platformPage() }} de {{ totalPages(platformTotal(), platformPageSize) }} · Total {{ platformTotal() }}</span>
+
+
+
+
                 <div class="pager-actions">
+
+
+
+
                   <button type="button" class="pager-btn" (click)="prevPlatformPage()" [disabled]="platformPage() <= 1">Anterior</button>
+
+
+
+
                   <button
+
+
+
+
                     type="button"
+
+
+
+
                     class="pager-btn"
+
+
+
+
                     (click)="nextPlatformPage()"
+
+
+
+
                     [disabled]="platformPage() >= totalPages(platformTotal(), platformPageSize)"
+
+
+
+
                   >
+
+
+
+
                     Siguiente
+
+
+
+
                   </button>
+
+
+
+
                 </div>
+
+
+
+
               </div>
+
+
+
+
             }
+
+
+
+
           }
+
+
+
+
         </section>
+
+
+
+
       }
+
+
+
+
+
+
+
+
 
       @if (activeTab() === 'desempeno') {
+
+
+
+
         @let metrics = metricsSummary();
+
+
+
+
         @if (metrics && metrics.total > 0) {
+
+
+
+
           <section class="metrics-section">
+
+
+
+
             <h3>Métricas de desempeño</h3>
+
+
+
+
             <div class="metrics-grid">
+
+
+
+
               <div class="metric-card">
+
+
+
+
                 <span class="metric-value">{{ metrics.total }}</span>
+
+
+
+
                 <span class="metric-label">Total entrevistas</span>
+
+
+
+
               </div>
+
+
+
+
               <div class="metric-card">
+
+
+
+
                 <span class="metric-value">{{ metrics.completed }}</span>
+
+
+
+
                 <span class="metric-label">Completadas</span>
+
+
+
+
               </div>
+
+
+
+
               <div class="metric-card">
+
+
+
+
                 <span class="metric-value">{{ metrics.completionRate }}%</span>
+
+
+
+
                 <span class="metric-label">Tasa de completación</span>
+
+
+
+
               </div>
+
+
+
+
               @if (metrics.cancelled > 0) {
+
+
+
+
                 <div class="metric-card metric-card-muted">
+
+
+
+
                   <span class="metric-value">{{ metrics.cancelled }}</span>
+
+
+
+
                   <span class="metric-label">Canceladas</span>
+
+
+
+
                 </div>
+
+
+
+
               }
+
+
+
+
               @if (metrics.error > 0) {
+
+
+
+
                 <div class="metric-card metric-card-muted">
+
+
+
+
                   <span class="metric-value">{{ metrics.error }}</span>
+
+
+
+
                   <span class="metric-label">Con error</span>
+
+
+
+
                 </div>
+
+
+
+
               }
+
+
+
+
             </div>
+
+
+
+
           </section>
+
+
+
+
         } @else {
+
+
+
+
           <p>Sin datos de desempeño todavía.</p>
+
+
+
+
         }
+
+
+
+
+
+
+
+
 
         @let chartsData = charts();
+
+
+
+
         @if (chartsData.length > 0) {
+
+
+
+
           <section class="charts-section">
+
+
+
+
             <h3>Curvas de seguimiento</h3>
+
+
+
+
             <div class="charts-grid">
+
+
+
+
               @for (chart of chartsData; track chart.id) {
+
+
+
+
                 <article class="chart-card">
+
+
+
+
                   <div class="chart-card-header">
+
+
+
+
                     <div>
+
+
+
+
                       <h4>{{ chart.title }}</h4>
+
+
+
+
                       <p>{{ chart.description }}</p>
+
+
+
+
                     </div>
+
+
+
+
                     @if (chart.unit) {
+
+
+
+
                       <span class="chart-unit">{{ chart.unit }}</span>
+
+
+
+
                     }
+
+
+
+
                   </div>
+
+
+
+
                   <div class="chart-card-body">
+
+
+
+
                     <svg class="chart-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+
+
+
+
                       @for (series of chart.series; track series.name; let i = $index) {
+
+
+
+
                         <path
+
+
+
+
                           class="chart-path"
+
+
+
+
                           [attr.d]="getSeriesPath(chart, series)"
+
+
+
+
                           [attr.stroke]="getSeriesColor(i)"
+
+
+
+
                           fill="none"
+
+
+
+
                           stroke-width="2"
+
+
+
+
                           stroke-linecap="round"
+
+
+
+
                           stroke-linejoin="round"
+
+
+
+
                         />
+
+
+
+
                       }
+
+
+
+
                     </svg>
+
+
+
+
                     <div class="chart-axis">
+
+
+
+
                       @for (label of chart.x; track label) {
+
+
+
+
                         <span>{{ label }}</span>
+
+
+
+
                       }
+
+
+
+
                     </div>
+
+
+
+
                   </div>
+
+
+
+
                   <div class="chart-legend">
+
+
+
+
                     @for (series of chart.series; track series.name; let i = $index) {
+
+
+
+
                       <div class="legend-item">
+
+
+
+
                         <span class="legend-dot" [style.background]="getSeriesColor(i)"></span>
+
+
+
+
                         <span>{{ series.name }}</span>
+
+
+
+
                       </div>
+
+
+
+
                     }
+
+
+
+
                   </div>
+
+
+
+
                 </article>
+
+
+
+
               }
+
+
+
+
             </div>
+
+
+
+
           </section>
+
+
+
+
         }
+
+
+
+
       }
+
+
+
+
+
+
+
+
 
       @if (activeTab() === 'sesiones') {
+
+
+
+
         <section class="sessions-section">
+
+
+
+
           <h3>Historial de entrevistas</h3>
+
+
+
+
           @let sess = sessions();
+
+
+
+
           @if (sess.length === 0) {
+
+
+
+
             <p>Sin entrevistas registradas.</p>
+
+
+
+
           } @else {
+
+
+
+
             <div class="table-wrap">
+
+
+
+
               <table class="data-table">
+
+
+
+
                 <thead>
+
+
+
+
                   <tr>
+
+
+
+
                     <th>Fecha</th>
+
+
+
+
                     <th>Estado</th>
+
+
+
+
                     <th>Modo</th>
+
+
+
+
                     <th>Duración</th>
+
+
+
+
                     <th>Plantilla</th>
+
+
+
+
                     <th>Acción</th>
+
+
+
+
                   </tr>
+
+
+
+
                 </thead>
+
+
+
+
                 <tbody>
+
+
+
+
                   @for (s of sess; track s.id) {
+
+
+
+
                     <tr>
+
+
+
+
                       <td>{{ formatDate(s.started_at) }}</td>
+
+
+
+
                       <td><app-status-badge [status]="s.status" /></td>
+
+
+
+
                       <td>{{ s.mode }}</td>
+
+
+
+
                       <td>{{ formatDuration(s.duration_seconds) }}</td>
+
+
+
+
                   <td>{{ s.templateLabel }}</td>
+
+
+
+
                   <td>
+
+
+
+
                     <div class="session-actions">
+
+
+
+
                       <a
+
+
+
+
                         [routerLink]="['/profesional/sesiones', s.id]"
+
+
+
+
                         [queryParams]="{ returnUrl: '/profesional/jovenes/' + youthId }"
+
+
+
+
                         class="btn-sm btn-view-session"
+
+
+
+
                       >
+
+
+
+
                         Ver entrevista
+
+
+
+
                       </a>
+
+
+
+
                       @if (summariesBySession().get(s.id)) {
+
+
+
+
                         <a
+
+
+
+
                           [routerLink]="['/profesional/sesiones', s.id]"
+
+
+
+
                           [queryParams]="{ returnUrl: '/profesional/jovenes/' + youthId, summary: 1 }"
+
+
+
+
                           class="btn-sm btn-secondary"
+
+
+
+
                         >
-                          Ver retroalimentacion
+
+
+
+
+                          Ver retroalimentación
+
+
+
+
                         </a>
+
+
+
+
                       } @else {
+
+
+
+
                         <a
+
+
+
+
                           [routerLink]="['/profesional/sesiones', s.id]"
+
+
+
+
                           [queryParams]="{ returnUrl: '/profesional/jovenes/' + youthId, summary: 1, editSummary: 1 }"
+
+
+
+
                           class="btn-sm"
+
+
+
+
                         >
-                          Registrar retroalimentacion
+
+
+
+
+                          Registrar retroalimentación
+
+
+
+
                         </a>
+
+
+
+
                       }
+
+
+
+
                     </div>
+
+
+
+
                   </td>
+
+
+
+
                 </tr>
+
+
+
+
               }
+
+
+
+
                 </tbody>
+
+
+
+
               </table>
+
+
+
+
             </div>
+
+
+
+
             <div class="pager">
+
+
+
+
               <span>Página {{ sessionsPage() }} de {{ totalPages(sessionsTotal(), sessionsPageSize) }} · Total {{ sessionsTotal() }}</span>
+
+
+
+
               <div class="pager-actions">
+
+
+
+
                 <button type="button" class="pager-btn" (click)="prevSessionsPage()" [disabled]="sessionsPage() <= 1">Anterior</button>
+
+
+
+
                 <button
+
+
+
+
                   type="button"
+
+
+
+
                   class="pager-btn"
+
+
+
+
                   (click)="nextSessionsPage()"
+
+
+
+
                   [disabled]="sessionsPage() >= totalPages(sessionsTotal(), sessionsPageSize)"
+
+
+
+
                 >
+
+
+
+
                   Siguiente
+
+
+
+
                 </button>
+
+
+
+
               </div>
+
+
+
+
             </div>
+
+
+
+
           }
+
+
+
+
         </section>
 
+
+
+
+
+
+
+
+
         @if (showSuggestMaterialPanel()) {
+
+
+
+
           <section id="sugerir-material" class="suggest-material-section">
+
+
+
+
             <h3>Sugerir material</h3>
+
+
+
+
             <form [formGroup]="suggestMaterialForm" (ngSubmit)="submitSuggestMaterial()">
+
+
+
+
               <div class="suggest-grid">
+
+
+
+
                 <div class="field">
+
+
+
+
                   <label for="material_id">Material *</label>
+
+
+
+
                   <select id="material_id" formControlName="material_id">
+
+
+
+
                     <option value="">Seleccione...</option>
+
+
+
+
                     @for (m of supportMaterials(); track m.id) {
+
+
+
+
                       <option [value]="m.id">{{ m.title }} ({{ m.type }})</option>
+
+
+
+
                     }
+
+
+
+
                   </select>
+
+
+
+
                   <p class="field-help">Elige el recurso que mejor apoye al joven.</p>
+
+
+
+
                 </div>
+
+
+
+
                 <div class="field">
+
+
+
+
                   <label for="session_id">Asociar a entrevista</label>
+
+
+
+
                   <select id="session_id" formControlName="session_id">
+
+
+
+
                     <option value="">Ninguna</option>
+
+
+
+
                     @for (s of sessions(); track s.id) {
+
+
+
+
                       <option [value]="s.id">{{ formatDate(s.started_at) }} - {{ s.status }}</option>
+
+
+
+
                     }
+
+
+
+
                   </select>
+
+
+
+
                   <p class="field-help">Opcional: vincula la sugerencia a una entrevista.</p>
+
+
+
+
                 </div>
+
+
+
+
                 <div class="field field-wide">
+
+
+
+
                   <label for="reason">Razón</label>
+
+
+
+
                   <textarea id="reason" formControlName="reason" rows="3" placeholder="Opcional"></textarea>
+
+
+
+
                   <p class="field-help">Describe por qué este material es útil para el joven.</p>
+
+
+
+
                 </div>
+
+
+
+
               </div>
+
+
+
+
               <div class="form-actions suggest-actions">
+
+
+
+
                 <button type="submit" class="btn-primary" [disabled]="suggestMaterialForm.invalid || submittingSuggest()">Sugerir</button>
+
+
+
+
                 <button type="button" class="btn-secondary" (click)="cancelSuggestMaterial()">Cancelar</button>
+
+
+
+
               </div>
+
+
+
+
             </form>
+
+
+
+
           </section>
+
+
+
+
         }
 
+
+
+
+
+
+
+
+
         @if (showSummaryForm()) {
+
+
+
+
           <section id="registrar-resumen" class="summary-form-section">
-            <h3>Registrar retroalimentacion</h3>
+
+
+
+
+            <h3>Registrar retroalimentación</h3>
+
+
+
+
             @let transcript = sessionTranscript();
+
+
+
+
             @if (loadingTranscript()) {
+
+
+
+
               <p class="transcript-loading">Cargando transcripción...</p>
+
+
+
+
             } @else if (transcript?.transcript_data?.length) {
+
+
+
+
               <details class="transcript-details">
+
+
+
+
                 <summary>Ver transcripción de la conversación</summary>
+
+
+
+
                 <div class="transcript-content">
+
+
+
+
                   @for (entry of transcript!.transcript_data; track $index) {
+
+
+
+
                     <div class="transcript-entry" [class.role-user]="entry.role === 'user'" [class.role-avatar]="entry.role === 'avatar'">
+
+
+
+
                       <span class="transcript-role">{{ entry.role === 'user' ? 'Joven' : 'Avatar' }}:</span>
+
+
+
+
                       <span class="transcript-text">{{ entry.transcript }}</span>
+
+
+
+
                     </div>
+
+
+
+
                   }
+
+
+
+
                 </div>
+
+
+
+
               </details>
+
+
+
+
             }
+
+
+
+
             <form [formGroup]="summaryForm" (ngSubmit)="submitSummary()">
+
+
+
+
               <div class="field">
-                <label for="summary_text">Retroalimentacion *</label>
+
+
+
+
+                <label for="summary_text">Retroalimentación *</label>
+
+
+
+
                 <textarea id="summary_text" formControlName="summary_text" rows="4"></textarea>
+
+
+
+
               </div>
+
+
+
+
               <div class="field">
+
+
+
+
                 <label for="competency_tags">Etiquetas de competencia (separadas por coma)</label>
+
+
+
+
                 <input id="competency_tags" type="text" formControlName="competency_tags" placeholder="comunicación, liderazgo" />
+
+
+
+
               </div>
+
+
+
+
               @if (competencies().length > 0 && competencyLevels().length > 0) {
+
+
+
+
                 <div class="field">
+
+
+
+
                   <label>Evaluación por competencias (opcional)</label>
+
+
+
+
                   @if (loadingSessionCompetencies()) {
+
+
+
+
                     <p class="small-muted">Cargando evaluación por competencias...</p>
+
+
+
+
                   } @else {
+
+
+
+
                     <div class="competencies-table">
+
+
+
+
                       <div class="competencies-header">
+
+
+
+
                         <span>Competencia</span>
+
+
+
+
                         <span>Nivel</span>
+
+
+
+
                       </div>
+
+
+
+
                       <div class="competencies-body">
+
+
+
+
                         @for (row of sessionCompetencies(); track row.competency_slug) {
+
+
+
+
                           <div class="competency-row">
+
+
+
+
                             <span class="competency-name">{{ getCompetencyName(row.competency_slug) }}</span>
+
+
+
+
                             <select
+
+
+
+
                               [value]="row.level_slug ?? ''"
+
+
+
+
                               (change)="onCompetencyLevelChange(row.competency_slug, $event)"
+
+
+
+
                             >
+
+
+
+
                               <option value="">Sin evaluar</option>
+
+
+
+
                               @for (lvl of competencyLevels(); track lvl.slug) {
+
+
+
+
                                 <option [value]="lvl.slug">{{ lvl.label }}</option>
+
+
+
+
                               }
+
+
+
+
                             </select>
+
+
+
+
                           </div>
+
+
+
+
                         }
+
+
+
+
                       </div>
+
+
+
+
                     </div>
+
+
+
+
                   }
+
+
+
+
                 </div>
+
+
+
+
               }
+
+
+
+
               <div class="form-actions">
+
+
+
+
                 <button type="submit" class="btn-primary" [disabled]="summaryForm.invalid || submittingSummary()">Guardar</button>
+
+
+
+
                 <button type="button" class="btn-secondary" (click)="cancelSummaryForm()">Cancelar</button>
+
+
+
+
               </div>
+
+
+
+
             </form>
+
+
+
+
           </section>
+
+
+
+
         }
+
+
+
+
       }
+
+
+
+
     </div>
+
+
+
+
   } @else {
+
+
+
+
     <p>Joven no encontrado.</p>
+
+
+
+
   }
+
+
+
+
 }
+
+
+
+
+
+
+
+
 

@@ -60,7 +60,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["X-Total-Count", "X-Page", "X-Page-Size", "X-Request-ID"],
+    expose_headers=["X-Total-Count", "X-Total-Unread", "X-Page", "X-Page-Size", "X-Request-ID"],
 )
 
 app.include_router(auth.router, prefix="/api/v1")

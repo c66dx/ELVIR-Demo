@@ -18,8 +18,10 @@ from app.models.youth_invitation import YouthInvitation
 from app.models.assignment import Assignment
 from app.models.session import Session as SessionModel
 from app.models.platform_session import PlatformSession
+from app.models.notification import YouthNotification
 from app.schemas.youth import YouthCreate, YouthUpdate, YouthResponse, YouthWithLastSession, LastSessionInfo, YouthChangeEmailRequest, parse_profile_checklist
 from app.schemas.platform_session import PlatformSessionResponse
+from app.schemas.notification import YouthNotificationResponse, NotificationReadRequest
 from app.core.dependencies import get_current_user, get_current_professional
 
 router = APIRouter(prefix="/youths", tags=["youths"])
@@ -209,6 +211,27 @@ def _get_last_session_map(db: DBSession, youth_ids: list[int]) -> dict[int, Sess
         if s.youth_id not in by_youth:
             by_youth[s.youth_id] = s
     return by_youth
+
+
+def _check_youth_access(db: DBSession, user: User, youth_id: int) -> bool:
+    """Verifica si el usuario puede acceder al joven (propio, asignado o admin)."""
+    if user.role == "ADMIN":
+        return True
+    if user.role == "JOVEN":
+        youth = db.query(Youth).filter(Youth.user_id == user.id).first()
+        return youth and youth.id == youth_id
+    if user.role == "PROFESIONAL":
+        from app.models.professional import Professional
+        prof = db.query(Professional).filter(Professional.user_id == user.id).first()
+        if not prof:
+            return False
+        assign = db.query(Assignment).filter(
+            Assignment.youth_id == youth_id,
+            Assignment.professional_id == prof.id,
+            Assignment.status == "ACTIVO",
+        ).first()
+        return assign is not None
+    return False
 
 
 def _get_user_email_map(db: DBSession, user_ids: list[int]) -> dict[int, str]:
@@ -778,5 +801,89 @@ def activate_youth(
     email = _get_youth_email(db, youth.user_id) if youth.user_id else None
     profile_photo_url = _get_user_profile_photo(db, youth.user_id) if youth.user_id else None
     return _youth_to_response(youth, email=email, profile_photo_url=profile_photo_url)
+
+
+@router.get("/{youth_id}/notifications", response_model=list[YouthNotificationResponse])
+def list_youth_notifications(
+    youth_id: int,
+    page: int | None = Query(None, ge=1),
+    page_size: int | None = Query(None, ge=1, le=200),
+    unread_only: bool | None = Query(None),
+    user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+    response: Response = None,
+):
+    """Lista notificaciones del joven. JOVEN: solo propias. PROFESIONAL: si asignado. ADMIN: todo."""
+    if not _check_youth_access(db, user, youth_id):
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+
+    use_pagination = bool(page or page_size)
+    if use_pagination:
+        page = page or 1
+        page_size = page_size or 20
+
+    q = db.query(YouthNotification).filter(YouthNotification.youth_id == youth_id)
+    if unread_only:
+        q = q.filter(YouthNotification.read_at.is_(None))
+
+    total = q.order_by(None).count()
+    unread_total = (
+        db.query(YouthNotification)
+        .filter(YouthNotification.youth_id == youth_id, YouthNotification.read_at.is_(None))
+        .count()
+    )
+
+    if response:
+        response.headers["X-Total-Count"] = str(total)
+        response.headers["X-Total-Unread"] = str(unread_total)
+        response.headers["X-Page"] = str(page or 1)
+        response.headers["X-Page-Size"] = str(page_size or total)
+
+    q = q.order_by(YouthNotification.created_at.desc(), YouthNotification.id.desc())
+    if use_pagination:
+        q = q.offset((page - 1) * page_size).limit(page_size)
+
+    return q.all()
+
+
+@router.patch("/{youth_id}/notifications/read")
+def mark_notifications_read(
+    youth_id: int,
+    data: NotificationReadRequest,
+    user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Marca notificaciones como leídas (por IDs)."""
+    if not _check_youth_access(db, user, youth_id):
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+    if not data.ids:
+        return {"updated": 0}
+    now = datetime.now(timezone.utc)
+    updated = (
+        db.query(YouthNotification)
+        .filter(YouthNotification.youth_id == youth_id, YouthNotification.id.in_(data.ids))
+        .update({"read_at": now}, synchronize_session=False)
+    )
+    db.commit()
+    return {"updated": updated}
+
+
+@router.patch("/{youth_id}/notifications/read-all")
+def mark_all_notifications_read(
+    youth_id: int,
+    user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Marca todas las notificaciones del joven como leídas."""
+    if not _check_youth_access(db, user, youth_id):
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+    now = datetime.now(timezone.utc)
+    updated = (
+        db.query(YouthNotification)
+        .filter(YouthNotification.youth_id == youth_id, YouthNotification.read_at.is_(None))
+        .update({"read_at": now}, synchronize_session=False)
+    )
+    db.commit()
+    return {"updated": updated}
 
 

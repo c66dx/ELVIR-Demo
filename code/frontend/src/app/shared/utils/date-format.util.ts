@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Utilidades de formato para fechas, duraciones y estados de sesión.
  * Centraliza la lógica compartida entre componentes.
  */

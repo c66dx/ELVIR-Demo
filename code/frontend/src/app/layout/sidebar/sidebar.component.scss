@@ -19,7 +19,7 @@
   align-items: flex-start;
   text-align: left;
   padding: var(--space-6) var(--space-3) var(--space-5);
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .profile-avatar-wrap {
@@ -42,7 +42,7 @@
   font-weight: 700;
   font-size: 1.1rem;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   transition: border-width 0.2s ease, font-size 0.2s ease;
 }
 
@@ -82,8 +82,8 @@
 }
 
 .profile-role {
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.6);
 }
@@ -109,22 +109,40 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   font-size: 0.9rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
-  transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s;
   text-decoration: none;
+  position: relative;
 
   &:hover {
     background: var(--color-sidebar-hover);
     color: #fff;
+  }
+  
+  &:hover .nav-icon {
+    background: rgba(255, 255, 255, 0.04);
   }
 
   &.active {
     background: var(--color-sidebar-active);
     color: #fff;
     font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 6px 16px rgba(2, 6, 23, 0.35);
+  }
+
+  &.active::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 62%;
+    border-radius: 999px;
+    background: var(--color-primary);
   }
 }
 
@@ -133,14 +151,25 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  opacity: 0.9;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  transition: background 0.2s ease, color 0.2s ease;
 
   .active & {
-    opacity: 1;
+    color: #fff;
+    background: var(--color-sidebar-hover);
   }
 
   svg {
     display: block;
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 }
 

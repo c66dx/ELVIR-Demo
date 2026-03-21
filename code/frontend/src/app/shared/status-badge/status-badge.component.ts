@@ -15,15 +15,16 @@ const STATUS_LABELS: Record<string, string> = {
   styles: [`
     .status-badge {
       display: inline-block;
-      padding: 0.25rem 0.6rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border-radius: 6px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
     }
-    .status-badge--EN_CURSO { background: #e8f4fd; color: #0d6efd; }
-    .status-badge--COMPLETADA { background: #e8f5ef; color: #2f8f6b; }
-    .status-badge--CANCELADA { background: #fef9ed; color: #d19a38; }
-    .status-badge--ERROR { background: #fce8e6; color: #c44d3c; }
+    .status-badge--EN_CURSO { background: var(--color-info-light); color: var(--color-info); }
+    .status-badge--COMPLETADA { background: var(--color-success-light); color: var(--color-success); }
+    .status-badge--CANCELADA { background: var(--color-warning-light); color: var(--color-warning); }
+    .status-badge--ERROR { background: var(--color-danger-light); color: var(--color-danger); }
   `],
 })
 export class StatusBadgeComponent {

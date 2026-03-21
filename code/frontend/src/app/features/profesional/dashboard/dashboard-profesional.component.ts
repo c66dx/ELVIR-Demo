@@ -1,4 +1,4 @@
-﻿import { Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Observable, forkJoin, of } from 'rxjs';
@@ -24,8 +24,9 @@ export interface DashboardSessionItem {
 }
 
 export interface DashboardProfesionalData {
-  latestSessions: DashboardSessionItem[];
   pendingSessions: DashboardSessionItem[];
+  inProgressSessions: DashboardSessionItem[];
+  completedSessions: DashboardSessionItem[];
 }
 
 /** Dashboard del profesional: nuevas entrevistas y ultimas sesiones. */
@@ -58,14 +59,20 @@ export class DashboardProfesionalComponent {
             .filter((session, index) => !summaries[index])
             .map((s) => ({ ...this.buildSessionItem(s, youthMap), pendingFeedback: true }));
           const pendingIds = new Set(pendingSessions.map((s) => s.id));
-          const latestSessions = ordered
+          const inProgressSessions = ordered
+            .filter((s) => s.status === 'EN_CURSO')
+            .slice(0, 6)
+            .map((s) => this.buildSessionItem(s, youthMap));
+          const completedSessions = ordered
+            .filter((s) => s.status === 'COMPLETADA')
             .filter((s) => !pendingIds.has(s.id))
             .slice(0, 8)
             .map((s) => this.buildSessionItem(s, youthMap));
 
           return {
-            latestSessions,
             pendingSessions,
+            inProgressSessions,
+            completedSessions,
           };
         })
       );
@@ -103,4 +110,8 @@ export class DashboardProfesionalComponent {
   }
 
   readonly formatDate = formatDate;
+
+  modeLabel(mode: Session['mode']): string {
+    return mode === 'AUTOGESTIONADA' ? 'Autogestionada' : 'Supervisada';
+  }
 }

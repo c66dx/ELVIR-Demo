@@ -1,4 +1,4 @@
-﻿export interface Youth {
+export interface Youth {
   id: string;
   user_id?: string;
   login_enabled: boolean;

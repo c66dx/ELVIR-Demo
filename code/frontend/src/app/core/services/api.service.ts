@@ -1,4 +1,4 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, forkJoin } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
@@ -137,6 +137,25 @@ export interface PagedResult<T> {
   total: number;
   page: number;
   page_size: number;
+}
+
+export type YouthNotificationType = 'material' | 'feedback' | 'session' | 'general';
+
+export interface YouthNotificationDto {
+  id: string;
+  youth_id: string;
+  type: YouthNotificationType;
+  title: string;
+  message: string;
+  link?: string;
+  entity_type?: string;
+  entity_id?: string;
+  created_at: string;
+  read_at?: string | null;
+}
+
+export interface YouthNotificationsPage extends PagedResult<YouthNotificationDto> {
+  unread: number;
 }
 
 const API_BASE = environment.apiUrl;
@@ -1528,6 +1547,54 @@ export class ApiService {
         }),
         catchError(() => of({ items: [], total: 0, page: params?.page || 1, page_size: params?.page_size || 0 }))
       );
+  }
+
+  getYouthNotificationsPaged(
+    youthId: string,
+    params?: { page?: number; page_size?: number; unread_only?: boolean }
+  ): Observable<YouthNotificationsPage> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.page_size) httpParams = httpParams.set('page_size', String(params.page_size));
+    if (params?.unread_only != null) httpParams = httpParams.set('unread_only', String(params.unread_only));
+    return this.http
+      .get<unknown[]>(`${API_BASE}/youths/${youthId}/notifications`, { params: httpParams, observe: 'response' })
+      .pipe(
+        map((res) => {
+          const list = (res.body || []) as Record<string, unknown>[];
+          const total = Number(res.headers.get('X-Total-Count')) || list.length;
+          const unread = Number(res.headers.get('X-Total-Unread')) || 0;
+          const page = Number(res.headers.get('X-Page')) || params?.page || 1;
+          const pageSize = Number(res.headers.get('X-Page-Size')) || params?.page_size || list.length;
+          const items = list.map((n) => ({
+            id: str(n.id),
+            youth_id: str(n.youth_id),
+            type: n.type as YouthNotificationType,
+            title: n.title as string,
+            message: n.message as string,
+            link: n.link as string | undefined,
+            entity_type: n.entity_type ? String(n.entity_type) : undefined,
+            entity_id: n.entity_id != null ? str(n.entity_id) : undefined,
+            created_at: (n.created_at as string) || '',
+            read_at: (n.read_at as string) || null,
+          }));
+          return { items, total, unread, page, page_size: pageSize };
+        }),
+        catchError(() => of({ items: [], total: 0, unread: 0, page: params?.page || 1, page_size: params?.page_size || 0 }))
+      );
+  }
+
+  markYouthNotificationsRead(youthId: string, ids: string[]): Observable<{ updated: number }> {
+    const payload = { ids: ids.map((id) => Number(id)).filter((id) => !Number.isNaN(id)) };
+    return this.http.patch<{ updated: number }>(`${API_BASE}/youths/${youthId}/notifications/read`, payload).pipe(
+      catchError(() => of({ updated: 0 }))
+    );
+  }
+
+  markAllYouthNotificationsRead(youthId: string): Observable<{ updated: number }> {
+    return this.http.patch<{ updated: number }>(`${API_BASE}/youths/${youthId}/notifications/read-all`, {}).pipe(
+      catchError(() => of({ updated: 0 }))
+    );
   }
 
   recordMaterialView(materialId: string, youthId: string): Observable<MaterialView> {

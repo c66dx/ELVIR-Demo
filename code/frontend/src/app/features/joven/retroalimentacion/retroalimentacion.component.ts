@@ -1,13 +1,14 @@
-﻿import { Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { YouthService } from '../../../core/services/youth.service';
 import { ApiService } from '../../../core/services/api.service';
 import type { Session } from '../../../core/models/session.model';
 import type { InterviewSummary } from '../../../core/models/interview-summary.model';
 import { formatDate, formatStatusLabel } from '../../../shared/utils/date-format.util';
+import { parseSummary } from './retroalimentacion.utils';
 
 interface FeedbackItem {
   sessionId: string;
@@ -20,6 +21,13 @@ interface FeedbackItem {
   suggestions: string[];
 }
 
+interface FeedbackPage {
+  items: FeedbackItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
 @Component({
   selector: 'app-retroalimentacion-joven',
   standalone: true,
@@ -30,16 +38,29 @@ interface FeedbackItem {
 export class RetroalimentacionJovenComponent {
   private youthService = inject(YouthService);
   private api = inject(ApiService);
+  private pageSubject = new BehaviorSubject(1);
+  readonly pageSize = 10;
 
-  feedback$ = this.youthService.getCurrentYouthId().pipe(
-    switchMap((youthId) => {
-      if (!youthId) return of([] as FeedbackItem[]);
-      return this.api.getSessions({ youth_id: youthId }).pipe(
-        switchMap((sessions) => this.buildFeedbackItems(sessions)),
-        catchError(() => of([] as FeedbackItem[]))
+  feedback$: Observable<FeedbackPage> = combineLatest([this.youthService.getCurrentYouthId(), this.pageSubject]).pipe(
+    switchMap(([youthId, page]) => {
+      if (!youthId) {
+        return of({ items: [], total: 0, page, page_size: this.pageSize } as FeedbackPage);
+      }
+      return this.api.getSessionsPaged({ youth_id: youthId, page, page_size: this.pageSize }).pipe(
+        switchMap((paged) =>
+          this.buildFeedbackItems(paged.items).pipe(
+            map((items) => ({
+              items,
+              total: paged.total,
+              page: paged.page,
+              page_size: paged.page_size,
+            }))
+          )
+        ),
+        catchError(() => of({ items: [], total: 0, page, page_size: this.pageSize } as FeedbackPage))
       );
     }),
-    catchError(() => of([] as FeedbackItem[]))
+    catchError(() => of({ items: [], total: 0, page: 1, page_size: this.pageSize } as FeedbackPage))
   );
 
   private buildFeedbackItems(sessions: Session[]) {
@@ -48,10 +69,9 @@ export class RetroalimentacionJovenComponent {
       forkJoin({
         context: this.api.getSessionContext(session.id).pipe(catchError(() => of(null))),
         summary: this.api.getSessionSummary(session.id).pipe(catchError(() => of(null))),
-      }).pipe(
-        map(({ context, summary }) => this.mapFeedbackItem(session, summary, context?.jobRoleName, context?.caseName))
-      )
+      }).pipe(map(({ context, summary }) => this.mapFeedbackItem(session, summary, context?.jobRoleName, context?.caseName)))
     );
+
     return forkJoin(items$).pipe(
       map((items) =>
         items.sort((a, b) => {
@@ -68,7 +88,7 @@ export class RetroalimentacionJovenComponent {
     jobRoleName?: string,
     caseName?: string
   ): FeedbackItem {
-    const parsed = this.parseSummary(summary?.summary_text);
+    const parsed = parseSummary(summary?.summary_text);
     return {
       sessionId: session.id,
       startedAt: session.started_at || '',
@@ -81,46 +101,24 @@ export class RetroalimentacionJovenComponent {
     };
   }
 
-  private parseSummary(text?: string): { general: string; strengths: string[]; suggestions: string[] } {
-    if (!text) {
-      return { general: '', strengths: [], suggestions: [] };
-    }
-    const cleaned = text.replace(/\r/g, '').trim();
-    const lower = cleaned.toLowerCase();
-    const strengthsIndex = lower.indexOf('puntos fuertes');
-    const suggestionsIndex = lower.indexOf('sugerencias');
-
-    const firstIndex = [strengthsIndex, suggestionsIndex].filter((i) => i >= 0).sort((a, b) => a - b)[0];
-    const general = firstIndex != null ? cleaned.slice(0, firstIndex).trim() : cleaned;
-
-    const strengthsText = this.extractSection(cleaned, strengthsIndex, suggestionsIndex);
-    const suggestionsText = this.extractSection(cleaned, suggestionsIndex, -1);
-
-    return {
-      general,
-      strengths: this.parseList(strengthsText),
-      suggestions: this.parseList(suggestionsText),
-    };
-  }
-
-  private extractSection(text: string, startIndex: number, nextIndex: number): string {
-    if (startIndex < 0) return '';
-    const colon = text.indexOf(':', startIndex);
-    const sectionStart = colon >= 0 ? colon + 1 : startIndex;
-    const sectionEnd = nextIndex > startIndex ? nextIndex : text.length;
-    return text.slice(sectionStart, sectionEnd).trim();
-  }
-
-  private parseList(text: string): string[] {
-    if (!text) return [];
-    return text
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => line.replace(/^[-*\\u2022]\\s*/, '').trim())
-      .filter(Boolean);
-  }
-
   readonly formatDate = formatDate;
   readonly formatStatusLabel = formatStatusLabel;
+
+  totalPages(total: number): number {
+    if (!total) return 1;
+    return Math.max(1, Math.ceil(total / this.pageSize));
+  }
+
+  prevPage(): void {
+    const current = this.pageSubject.getValue();
+    if (current <= 1) return;
+    this.pageSubject.next(current - 1);
+  }
+
+  nextPage(total: number): void {
+    const current = this.pageSubject.getValue();
+    const max = this.totalPages(total);
+    if (current >= max) return;
+    this.pageSubject.next(current + 1);
+  }
 }

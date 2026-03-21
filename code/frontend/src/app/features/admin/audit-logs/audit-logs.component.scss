@@ -31,9 +31,10 @@
   gap: var(--space-4);
   margin-bottom: var(--space-6);
   padding: var(--space-4);
-  background: var(--color-bg);
-  border-radius: var(--radius-md);
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 
   .filter-group {
     display: flex;
@@ -41,14 +42,16 @@
     gap: var(--space-2);
 
     label {
-      font-size: 0.8rem;
-      font-weight: 500;
+      font-size: 0.75rem;
+      font-weight: 600;
       color: var(--color-text-muted);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
     }
 
     input,
     select {
-      padding: var(--space-2) var(--space-3);
+      padding: 0.55rem 0.8rem;
       border: 1px solid var(--color-input-border);
       border-radius: var(--radius-sm);
       font-size: 0.9rem;
@@ -59,6 +62,7 @@
       &:focus {
         outline: none;
         border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px var(--color-input-focus);
       }
     }
   }
@@ -76,7 +80,7 @@
 .table-wrap {
   overflow-x: auto;
   margin-bottom: var(--space-6);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
 
@@ -85,7 +89,7 @@
   min-width: 1200px;
   border-collapse: collapse;
   background: var(--color-card);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--color-border);
 
@@ -98,12 +102,12 @@
   }
 
   th {
-    background: var(--color-bg);
+    background: var(--color-surface-alt);
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
     white-space: nowrap;
   }
 
@@ -118,8 +122,8 @@
 
 .method-badge {
   display: inline-block;
-  padding: 0.2rem 0.45rem;
-  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -155,9 +159,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.2rem 0.45rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
