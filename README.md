@@ -234,6 +234,11 @@ Body: { session_id | liveavatar_session_id, evaluation, source? }
 
 Si `LIVEAVATAR_WEBHOOK_SECRET` esta configurado en `.env`, el header es obligatorio.
 
+## Errores y trazabilidad
+
+- El backend devuelve `X-Request-ID` en todas las respuestas. Puedes enviarlo en la request para propagar trazas.
+- El formato de error es estandarizado. Ver `docs/errors.md`.
+
 ## Limpieza de datos (dev)
 
 ```bash
@@ -288,6 +293,4 @@ Para validar desde fuera del backend el estado operativo y alertas simples (`/he
 python scripts/check_health_metrics.py --url http://localhost:8000/health/metrics --fail-on-alert
 ```
 
-Esto sirve para integrarlo en un cron o monitor externo liviano y fallar cuando exista una alerta activa.
-
----
+Esto sirve para integrarlo en un cron o monitor externo liviano y fallar cuando exista una alerta activa.---

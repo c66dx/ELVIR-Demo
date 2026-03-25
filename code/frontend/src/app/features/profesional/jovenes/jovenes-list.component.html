@@ -70,7 +70,20 @@
 @if (loading) {
 
 
-  <p>Cargando...</p>
+  <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
 
 
 } @else {
@@ -97,7 +110,7 @@
           <th>RUT</th>
 
 
-          <th>Último intento</th>
+          <th>último intento</th>
 
 
           <th>Desempeño actual</th>
@@ -163,7 +176,7 @@
             <td>{{ y.display_name }}</td>
 
 
-            <td>{{ y.rut ?? '-' }}</td>
+            <td>{{ y.rut  ?? '-' }}</td>
 
 
             <td>
@@ -181,7 +194,7 @@
                   @if (y.last_session?.status) {
 
 
-                    <span class="status-pill">{{ formatStatusLabel(y.last_session?.status ?? '') }}</span>
+                    <span class="status-pill">{{ formatStatusLabel(y.last_session?.status  ?? '') }}</span>
 
 
                   }
@@ -286,13 +299,13 @@
                   @if (y.pendingFeedback) {
 
 
-                    {{ y.pendingFeedbackCount > 1 ? 'Pendientes (' + y.pendingFeedbackCount + ')' : 'Pendiente' }}
+                    {{ y.pendingFeedbackCount > 1 ?  'Pendientes (' + y.pendingFeedbackCount + ')' : 'Pendiente' }}
 
 
                   } @else {
 
 
-                    Al día
+                    Al da
 
 
                   }
@@ -370,7 +383,7 @@
             </td>
 
 
-            <td>{{ y.login_enabled ? 'Sí' : 'No' }}</td>
+            <td>{{ y.login_enabled ? 'S' : 'No' }}</td>
 
 
             <td class="actions">
@@ -448,7 +461,7 @@
   <div class="pager">
 
 
-    <span>Página {{ page }} de {{ totalPages() }} · Total {{ total }}</span>
+    <span>Pgina {{ page }} de {{ totalPages() }}  Total {{ total }}</span>
 
 
     <div class="pager-actions">

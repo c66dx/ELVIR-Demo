@@ -1,6 +1,5 @@
 """Modelo PROFESSIONALS."""
 from sqlalchemy import Column, DateTime, Integer, String, Boolean, ForeignKey, func
-from sqlalchemy.orm import relationship
 
 from app.database import Base
 

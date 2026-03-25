@@ -1,0 +1,17 @@
+<select
+  class="form-control"
+  [attr.id]="id"
+  [attr.name]="name"
+  [disabled]="disabled"
+  [value]="value"
+  (change)="handleChange($event)"
+  (blur)="handleBlur()"
+>
+  @if (placeholder) {
+    <option value="">{{ placeholder }}</option>
+  }
+  @if (disabledOptionLabel) {
+    <option value="" disabled>{{ disabledOptionLabel }}</option>
+  }
+  <ng-content></ng-content>
+</select>

@@ -1,7 +1,6 @@
 """Modelo SESSION_TRANSCRIPTS."""
 from sqlalchemy import Column, DateTime, Integer, ForeignKey, Boolean, func
 from sqlalchemy import JSON
-from sqlalchemy.orm import relationship
 
 from app.database import Base
 

@@ -1,6 +1,5 @@
 """Modelo JOB_ROLES."""
 from sqlalchemy import Column, Integer, String, Boolean, Text
-from sqlalchemy.orm import relationship
 
 from app.database import Base
 

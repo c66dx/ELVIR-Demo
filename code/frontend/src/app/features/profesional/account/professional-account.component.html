@@ -1,63 +1,132 @@
-<div class="account-page">
-  <header class="account-header">
-    <h2>Mi Cuenta</h2>
-    <p>Administra tu perfil de tutor y seguridad.</p>
-  </header>
-
-  @if (loading()) {
-    <div class="account-loading">Cargando información...</div>
-  } @else {
-    <div class="account-grid">
-      <section class="account-card">
-        <div class="card-title">
-          <h3>Perfil de tutor</h3>
-          <p class="card-subtitle">Tu información principal y foto de perfil.</p>
-        </div>
-        <div class="profile-row">
-          <div class="avatar">
-            @if (photoUrl()) {
-              <img [src]="photoUrl()!" alt="Foto de perfil" />
-            } @else {
-              <span>{{ initials() }}</span>
-            }
-          </div>
-          <div class="profile-info">
-            <div class="profile-name">{{ professional()?.display_name || 'Tutor' }}</div>
-            <div class="profile-email">{{ me()?.email }}</div>
-          </div>
-          <label class="btn-secondary btn-sm btn-file">
+﻿<div class="account-page">
+  <header class="account-header">
+    <h2>Mi Cuenta</h2>
+    <p>Administra tu perfil de tutor, correo y seguridad.</p>
+  </header>
+
+  @if (loading()) {
+    <div class="account-loading">
+<div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando información...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
+</div>
+  } @else {
+    <div class="account-grid">
+      <section class="account-card">
+        <div class="card-title">
+          <h3>Perfil de tutor</h3>
+          <p class="card-subtitle">Tu información principal y foto de perfil.</p>
+        </div>
+
+        <div class="profile-row">
+          <div class="avatar">
+            @if (photoUrl()) {
+              <img [src]="photoUrl()!" alt="Foto de perfil" />
+            } @else {
+              <span>{{ initials() }}</span>
+            }
+          </div>
+
+          <div class="profile-info">
+            <div class="profile-name">{{ professional()?.display_name || 'Tutor' }}</div>
+            <div class="profile-email">{{ me()?.email }}</div>
+          </div>
+
+          <label class="btn-secondary btn-sm btn-file">
             {{ photoLoading() ? 'Subiendo...' : 'Actualizar foto' }}
-            <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onPhotoSelected($event)" [disabled]="photoLoading()" />
-          </label>
-        </div>
-        @if (photoError()) {
-          <p class="card-error">{{ photoError() }}</p>
-        }
-        <div class="info-list">
-          <div class="info-row">
-            <span class="info-label">Especialidad</span>
-            <span class="info-value">{{ professional()?.specialty || '-' }}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Institución</span>
-            <span class="info-value">{{ professional()?.institution || '-' }}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Estado</span>
+            <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onPhotoSelected($event)" [disabled]="photoLoading()" />
+          </label>
+        </div>
+
+        @if (photoError()) {
+          <p class="card-error">{{ photoError() }}</p>
+        }
+
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label">Especialidad</span>
+            <span class="info-value">{{ professional()?.specialty || '-' }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Institución</span>
+            <span class="info-value">{{ professional()?.institution || '-' }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Estado</span>
             <span class="info-value">{{ professional()?.is_active ? 'Activo' : 'Inactivo' }}</span>
-          </div>
-        </div>
-        <p class="card-hint">Para actualizar tu email, solicita el cambio a un administrador.</p>
-      </section>
-
-      <section class="account-card">
-        <div class="card-title">
-          <h3>Seguridad</h3>
-          <p class="card-subtitle">Mantén tu cuenta protegida.</p>
-        </div>
-        <p class="card-text">Puedes cambiar tu contraseña cuando lo necesites.</p>
-        <a routerLink="/cambiar-contrasena" class="btn-primary btn-sm">Cambiar contraseña</a>
-      </section>
-    </div>
-  }
-</div>
+          </div>
+        </div>
+
+        <p class="card-hint">Puedes actualizar tu correo en la sección siguiente.</p>
+      </section>
+
+      <section class="account-card">
+        <div class="card-title">
+          <h3>Correo electrónico</h3>
+          <span class="card-subtitle">Requiere confirmar con tu contraseña</span>
+        </div>
+        <form class="account-form" [formGroup]="emailForm" (ngSubmit)="onChangeEmail()">
+          <app-form-grid [columns]="1">
+            <app-form-field label="Nuevo correo" forId="new_email" [required]="true">
+              <app-text-input
+                id="new_email"
+                type="email"
+                formControlName="new_email"
+                placeholder="nuevo@correo.cl"
+                autocomplete="email"
+              ></app-text-input>
+            </app-form-field>
+            <app-form-field label="Contraseña actual" forId="current_password" [required]="true">
+              <app-text-input
+                id="current_password"
+                type="password"
+                formControlName="current_password"
+                placeholder="Tu contraseña"
+                autocomplete="current-password"
+              ></app-text-input>
+            </app-form-field>
+          </app-form-grid>
+          <app-form-actions [sticky]="false" align="start">
+            <button type="submit" class="btn-primary" [disabled]="emailForm.invalid">Solicitar cambio</button>
+          </app-form-actions>
+        </form>
+        @if (emailError()) {
+          <p class="card-error">{{ emailError() }}</p>
+        }
+        @if (emailMessage()) {
+          <p class="card-success">{{ emailMessage() }}</p>
+        }
+        @if (activationUrl()) {
+          <div class="activation-url">
+            <span>Enlace de confirmación:</span>
+            <a [href]="activationUrl()!" target="_blank" rel="noopener">{{ activationUrl() }}</a>
+          </div>
+        }
+      </section>
+
+      <section class="account-card">
+        <div class="card-title">
+          <h3>Seguridad</h3>
+          <p class="card-subtitle">Mantén tu cuenta protegida.</p>
+        </div>
+
+        <p class="card-text">Puedes cambiar tu contraseña cuando lo necesites.</p>
+
+        <a routerLink="/cambiar-contrasena" class="btn-primary btn-sm">Cambiar contraseña</a>
+      </section>
+    </div>
+  }
+</div>

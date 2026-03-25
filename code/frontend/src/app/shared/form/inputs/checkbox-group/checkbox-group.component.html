@@ -1,0 +1,18 @@
+<div class="form-checklist">
+  @for (item of items; track getItemValue(item)) {
+    <label class="form-checklist-item" [class.is-selected]="isSelected(getItemValue(item))">
+      <input
+        type="checkbox"
+        [checked]="isSelected(getItemValue(item))"
+        [disabled]="disabled"
+        (change)="toggle(getItemValue(item))"
+      />
+      <span class="form-checklist-text">
+        <span class="form-checklist-label">{{ getItemLabel(item) }}</span>
+        @if (getItemDescription(item)) {
+          <span class="form-checklist-desc">{{ getItemDescription(item) }}</span>
+        }
+      </span>
+    </label>
+  }
+</div>

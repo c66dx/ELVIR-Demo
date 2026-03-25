@@ -1,0 +1,17 @@
+<input
+  class="form-control"
+  [attr.id]="id"
+  [attr.name]="name"
+  [attr.type]="type"
+  [attr.placeholder]="placeholder || null"
+  [attr.autocomplete]="autocomplete || null"
+  [attr.inputmode]="inputmode || null"
+  [attr.min]="min  ?? null"
+  [attr.max]="max  ?? null"
+  [attr.step]="step  ?? null"
+  [readonly]="readonly"
+  [disabled]="disabled"
+  [value]="value"
+  (input)="handleInput($event)"
+  (blur)="handleBlur()"
+/>

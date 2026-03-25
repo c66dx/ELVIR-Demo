@@ -1,12 +1,15 @@
-﻿"""Router de profesionales (gestión por Admin)."""
-from datetime import datetime
+"""Router de profesionales (gestión por Admin)."""
+from datetime import datetime, timedelta, timezone
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, field_validator
 
+from app.config import settings
 from app.database import get_db
 from app.models.user import User
 from app.models.professional import Professional
+from app.models.professional_invitation import ProfessionalInvitation
 from app.models.assignment import Assignment
 from app.core.security import get_password_hash
 from app.core.dependencies import get_current_admin, get_current_user
@@ -72,9 +75,14 @@ class ProfessionalResponse(BaseModel):
     display_name: str
     specialty: str | None
     institution: str | None
+    profile_photo_url: str | None = None
     is_active: bool
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+class ProfessionalCreateResponse(ProfessionalResponse):
+    activation_url: str | None = None
 
 
 class ProfessionalUpdate(BaseModel):
@@ -88,6 +96,7 @@ class ProfessionalUpdate(BaseModel):
 def list_professionals(
     page: int | None = Query(None, ge=1),
     page_size: int | None = Query(None, ge=1, le=200),
+    is_active: bool | None = Query(None),
     admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
     response: Response = None,
@@ -98,7 +107,10 @@ def list_professionals(
         page = page or 1
         page_size = page_size or 50
 
-    q = db.query(Professional).filter(Professional.is_active == True)
+    q = db.query(Professional)
+    if is_active is not None:
+        q = q.filter(Professional.is_active == is_active)
+
     if use_pagination:
         total = q.order_by(None).count()
         if response:
@@ -109,6 +121,11 @@ def list_professionals(
     else:
         q = q.order_by(Professional.id)
     profs = q.all()
+
+    user_ids = [p.user_id for p in profs]
+    user_rows = db.query(User).filter(User.id.in_(user_ids)).all() if user_ids else []
+    user_map = {u.id: u for u in user_rows}
+
     return [
         ProfessionalResponse(
             id=p.id,
@@ -116,6 +133,7 @@ def list_professionals(
             display_name=p.display_name,
             specialty=p.specialty,
             institution=p.institution,
+            profile_photo_url=user_map.get(p.user_id).profile_photo_url if user_map.get(p.user_id) else None,
             is_active=p.is_active,
             created_at=p.created_at,
             updated_at=p.updated_at,
@@ -126,7 +144,6 @@ def list_professionals(
 
 class ProfessionalCreate(BaseModel):
     email: str
-    password: str
 
     @field_validator("email")
     @classmethod
@@ -134,12 +151,13 @@ class ProfessionalCreate(BaseModel):
         if "@" not in v or "." not in v.split("@")[-1]:
             raise ValueError("Formato de email inválido")
         return v.lower()
+
     display_name: str
     specialty: str | None = None
     institution: str | None = None
 
 
-@router.post("", response_model=ProfessionalResponse)
+@router.post("", response_model=ProfessionalCreateResponse)
 def create_professional(
     data: ProfessionalCreate,
     admin: User = Depends(get_current_admin),
@@ -148,15 +166,18 @@ def create_professional(
     """Crea un nuevo profesional. Solo Admin."""
     existing = db.query(User).filter(User.email.ilike(data.email)).first()
     if existing:
-        raise HTTPException(status_code=400, detail="El email ya está registrado")
+        raise HTTPException(status_code=400, detail="El email ya est? registrado")
+
+    temp_password = uuid.uuid4().hex
     user = User(
         email=data.email.lower(),
-        password_hash=get_password_hash(data.password),
+        password_hash=get_password_hash(temp_password),
         role="PROFESIONAL",
-        is_active=True,
+        is_active=False,
     )
     db.add(user)
     db.flush()
+
     prof = Professional(
         user_id=user.id,
         display_name=data.display_name,
@@ -165,17 +186,34 @@ def create_professional(
         is_active=True,
     )
     db.add(prof)
+    db.flush()
+
+    now = datetime.now(timezone.utc)
+    token = str(uuid.uuid4())
+    expires = now + timedelta(days=7)
+    db.add(
+        ProfessionalInvitation(
+            professional_id=prof.id,
+            email=user.email,
+            token=token,
+            expires_at=expires,
+        )
+    )
     db.commit()
     db.refresh(prof)
-    return ProfessionalResponse(
+
+    activation_url = f"{settings.APP_BASE_URL}/activar?token={token}"
+    return ProfessionalCreateResponse(
         id=prof.id,
         user_id=prof.user_id,
         display_name=prof.display_name,
         specialty=prof.specialty,
         institution=prof.institution,
+        profile_photo_url=user.profile_photo_url,
         is_active=prof.is_active,
         created_at=prof.created_at,
         updated_at=prof.updated_at,
+        activation_url=activation_url,
     )
 
 
@@ -191,12 +229,14 @@ def get_professional(
     prof = db.query(Professional).filter(Professional.id == professional_id).first()
     if not prof:
         raise HTTPException(status_code=404, detail="Profesional no encontrado")
+    linked_user = db.query(User).filter(User.id == prof.user_id).first() if prof.user_id else None
     return ProfessionalResponse(
         id=prof.id,
         user_id=prof.user_id,
         display_name=prof.display_name,
         specialty=prof.specialty,
         institution=prof.institution,
+        profile_photo_url=linked_user.profile_photo_url if linked_user else None,
         is_active=prof.is_active,
         created_at=prof.created_at,
         updated_at=prof.updated_at,
@@ -219,16 +259,21 @@ def update_professional(
     prof.institution = data.institution
     if data.is_active is not None:
         prof.is_active = data.is_active
+        if prof.user_id:
+            user = db.query(User).filter(User.id == prof.user_id).first()
+            if user:
+                user.is_active = data.is_active
     db.commit()
     db.refresh(prof)
+    linked_user = db.query(User).filter(User.id == prof.user_id).first() if prof.user_id else None
     return ProfessionalResponse(
         id=prof.id,
         user_id=prof.user_id,
         display_name=prof.display_name,
         specialty=prof.specialty,
         institution=prof.institution,
+        profile_photo_url=linked_user.profile_photo_url if linked_user else None,
         is_active=prof.is_active,
         created_at=prof.created_at,
         updated_at=prof.updated_at,
     )
-

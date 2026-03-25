@@ -22,7 +22,13 @@ jobs:
           python-version: "3.11"
 
       - name: Install backend dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Lint backend (ruff)
+        run: python -m ruff check .
+
+      - name: Type-check backend (mypy)
+        run: python -m mypy --config-file ../../pyproject.toml
 
 
       - name: Validate Alembic migrations

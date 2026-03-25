@@ -10,6 +10,8 @@ from app.database import get_db
 from app.models.user import User
 from app.models.youth import Youth
 from app.models.youth_invitation import YouthInvitation
+from app.models.professional import Professional
+from app.models.professional_invitation import ProfessionalInvitation
 from app.models.platform_session import PlatformSession
 from app.schemas.auth import (
     LoginRequest,
@@ -140,80 +142,155 @@ def get_me(user: User = Depends(get_current_user), db: Session = Depends(get_db)
 @router.get("/activate/validate", response_model=ActivateValidateResponse)
 def validate_activation_token(token: str, db: Session = Depends(get_db)):
     """Valida token de invitación: existe, no usado, no expirado. Para mostrar formulario de activación."""
+    now = datetime.now(timezone.utc)
     inv = db.query(YouthInvitation).filter(YouthInvitation.token == token).first()
-    if not inv:
+    if inv:
+        if inv.used_at:
+            return ActivateValidateResponse(valid=False, error="TOKEN_USED")
+        if inv.expires_at < now:
+            return ActivateValidateResponse(valid=False, error="TOKEN_EXPIRED")
+        youth = db.query(Youth).filter(Youth.id == inv.youth_id).first()
+        is_change_email = youth is not None and youth.user_id is not None
+        if youth and youth.user_id:
+            user = db.query(User).filter(User.id == youth.user_id).first()
+            if user and not user.is_active:
+                is_change_email = False
+        return ActivateValidateResponse(
+            valid=True,
+            email=inv.email,
+            display_name=youth.display_name if youth else None,
+            is_change_email=is_change_email,
+        )
+
+    prof_inv = db.query(ProfessionalInvitation).filter(ProfessionalInvitation.token == token).first()
+    if not prof_inv:
         return ActivateValidateResponse(valid=False, error="TOKEN_NOT_FOUND")
-    if inv.used_at:
+    if prof_inv.used_at:
         return ActivateValidateResponse(valid=False, error="TOKEN_USED")
-    if inv.expires_at < datetime.now(timezone.utc):
+    if prof_inv.expires_at < now:
         return ActivateValidateResponse(valid=False, error="TOKEN_EXPIRED")
-    youth = db.query(Youth).filter(Youth.id == inv.youth_id).first()
-    is_change_email = youth is not None and youth.user_id is not None
-    if youth and youth.user_id:
-        user = db.query(User).filter(User.id == youth.user_id).first()
-        if user and not user.is_active:
-            is_change_email = False
+    prof = db.query(Professional).filter(Professional.id == prof_inv.professional_id).first()
+    is_change_email = False
+    if prof and prof.user_id:
+        linked_user = db.query(User).filter(User.id == prof.user_id).first()
+        if linked_user and linked_user.is_active:
+            is_change_email = True
     return ActivateValidateResponse(
         valid=True,
-        email=inv.email,
-        display_name=youth.display_name if youth else None,
+        email=prof_inv.email,
+        display_name=prof.display_name if prof else None,
         is_change_email=is_change_email,
     )
 
-
 @router.post("/activate", response_model=ActivateResponse)
 def activate_account(data: ActivateRequest, db: Session = Depends(get_db)):
-    """Activa cuenta del joven: crea USERS, vincula YOUTH, invalida invitación.
-    Si el joven ya tiene user_id (cambio de email), actualiza User.email y password."""
+    """Activa cuenta del joven o del profesional.
+    Para jóvenes: crea USERS, vincula YOUTH, invalida invitación.
+    Para profesionales: activa el usuario y asigna contraseña."""
+    now = datetime.now(timezone.utc)
     inv = db.query(YouthInvitation).filter(YouthInvitation.token == data.token).first()
-    if not inv:
+    if inv:
+        if inv.used_at:
+            return ActivateResponse(success=False, error="TOKEN_USED")
+        if inv.expires_at < now:
+            return ActivateResponse(success=False, error="TOKEN_EXPIRED")
+        youth = db.query(Youth).filter(Youth.id == inv.youth_id).first()
+        if youth and youth.user_id:
+            user = db.query(User).filter(User.id == youth.user_id).first()
+            if user:
+                if user.is_active:
+                    if not data.current_password or not data.current_password.strip():
+                        return ActivateResponse(success=False, error="CURRENT_PASSWORD_REQUIRED")
+                    if not verify_password(data.current_password, user.password_hash):
+                        return ActivateResponse(success=False, error="CURRENT_PASSWORD_INVALID")
+                else:
+                    if not data.password or not data.password.strip():
+                        return ActivateResponse(success=False, error="PASSWORD_REQUIRED")
+                existing = db.query(User).filter(User.email.ilike(inv.email)).first()
+                if existing and existing.id != user.id:
+                    return ActivateResponse(success=False, error="EMAIL_ALREADY_EXISTS")
+                user.email = inv.email.lower()
+                if data.password and data.password.strip():
+                    user.password_hash = get_password_hash(data.password)
+                if not user.is_active:
+                    user.is_active = True
+                inv.used_at = now
+                db.commit()
+                return ActivateResponse(success=True, message="Email actualizado. Ya puedes iniciar sesión.")
+        if not data.password or not data.password.strip():
+            return ActivateResponse(success=False, error="PASSWORD_REQUIRED")
+        existing = db.query(User).filter(User.email.ilike(inv.email)).first()
+        if existing:
+            return ActivateResponse(success=False, error="EMAIL_ALREADY_EXISTS")
+        user = User(
+            email=inv.email.lower(),
+            password_hash=get_password_hash(data.password),
+            role="JOVEN",
+            is_active=True,
+        )
+        db.add(user)
+        db.flush()
+        if youth:
+            youth.user_id = user.id
+        inv.used_at = now
+        db.commit()
+        return ActivateResponse(success=True, message="Cuenta activada. Ya puedes iniciar sesión.")
+
+    prof_inv = db.query(ProfessionalInvitation).filter(ProfessionalInvitation.token == data.token).first()
+    if not prof_inv:
         return ActivateResponse(success=False, error="TOKEN_NOT_FOUND")
-    if inv.used_at:
+    if prof_inv.used_at:
         return ActivateResponse(success=False, error="TOKEN_USED")
-    if inv.expires_at < datetime.now(timezone.utc):
+    if prof_inv.expires_at < now:
         return ActivateResponse(success=False, error="TOKEN_EXPIRED")
-    youth = db.query(Youth).filter(Youth.id == inv.youth_id).first()
-    if youth and youth.user_id:
-        user = db.query(User).filter(User.id == youth.user_id).first()
-        if user:
-            if user.is_active:
-                if not data.current_password or not data.current_password.strip():
-                    return ActivateResponse(success=False, error="CURRENT_PASSWORD_REQUIRED")
-                if not verify_password(data.current_password, user.password_hash):
-                    return ActivateResponse(success=False, error="CURRENT_PASSWORD_INVALID")
-            else:
-                if not data.password or not data.password.strip():
-                    return ActivateResponse(success=False, error="PASSWORD_REQUIRED")
-            existing = db.query(User).filter(User.email.ilike(inv.email)).first()
-            if existing and existing.id != user.id:
-                return ActivateResponse(success=False, error="EMAIL_ALREADY_EXISTS")
-            user.email = inv.email.lower()
-            if data.password and data.password.strip():
-                user.password_hash = get_password_hash(data.password)
-            if not user.is_active:
-                user.is_active = True
-            inv.used_at = datetime.now(timezone.utc)
-            db.commit()
-            return ActivateResponse(success=True, message="Email actualizado. Ya puedes iniciar sesión.")
+
+    prof = db.query(Professional).filter(Professional.id == prof_inv.professional_id).first()
+    if not prof:
+        return ActivateResponse(success=False, error="TOKEN_NOT_FOUND")
+
+    user = db.query(User).filter(User.id == prof.user_id).first() if prof.user_id else None
+    is_change_email = user is not None and user.is_active
+    if is_change_email:
+        if not data.current_password or not data.current_password.strip():
+            return ActivateResponse(success=False, error="CURRENT_PASSWORD_REQUIRED")
+        if not verify_password(data.current_password, user.password_hash):
+            return ActivateResponse(success=False, error="CURRENT_PASSWORD_INVALID")
+        existing = db.query(User).filter(User.email.ilike(prof_inv.email)).first()
+        if existing and existing.id != user.id:
+            return ActivateResponse(success=False, error="EMAIL_ALREADY_EXISTS")
+        user.email = prof_inv.email.lower()
+        if data.password and data.password.strip():
+            user.password_hash = get_password_hash(data.password)
+        prof_inv.used_at = now
+        db.commit()
+        return ActivateResponse(success=True, message="Email actualizado. Ya puedes iniciar sesión.")
+
     if not data.password or not data.password.strip():
         return ActivateResponse(success=False, error="PASSWORD_REQUIRED")
-    existing = db.query(User).filter(User.email.ilike(inv.email)).first()
-    if existing:
-        return ActivateResponse(success=False, error="EMAIL_ALREADY_EXISTS")
-    user = User(
-        email=inv.email.lower(),
-        password_hash=get_password_hash(data.password),
-        role="JOVEN",
-        is_active=True,
-    )
-    db.add(user)
-    db.flush()
-    if youth:
-        youth.user_id = user.id
-    inv.used_at = datetime.now(timezone.utc)
+    if user is None:
+        existing = db.query(User).filter(User.email.ilike(prof_inv.email)).first()
+        if existing:
+            return ActivateResponse(success=False, error="EMAIL_ALREADY_EXISTS")
+        user = User(
+            email=prof_inv.email.lower(),
+            password_hash=get_password_hash(data.password),
+            role="PROFESIONAL",
+            is_active=True,
+        )
+        db.add(user)
+        db.flush()
+        prof.user_id = user.id
+    else:
+        existing = db.query(User).filter(User.email.ilike(prof_inv.email)).first()
+        if existing and existing.id != user.id:
+            return ActivateResponse(success=False, error="EMAIL_ALREADY_EXISTS")
+        user.email = prof_inv.email.lower()
+        user.password_hash = get_password_hash(data.password)
+        user.is_active = True
+
+    prof_inv.used_at = now
     db.commit()
     return ActivateResponse(success=True, message="Cuenta activada. Ya puedes iniciar sesión.")
-
 
 @router.post("/change-password")
 def change_password(
@@ -237,16 +314,11 @@ def change_email(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Solicita cambio de email para joven autenticado. Genera invitación y devuelve activation_url."""
-    if user.role != "JOVEN":
+    """Solicita cambio de email para usuario autenticado (joven o profesional). Genera invitación y devuelve activation_url."""
+    if user.role not in ("JOVEN", "PROFESIONAL"):
         raise HTTPException(status_code=403, detail="Acceso denegado")
     if not verify_password(data.current_password, user.password_hash):
         raise HTTPException(status_code=400, detail="Contraseña actual incorrecta")
-    youth = db.query(Youth).filter(Youth.user_id == user.id).first()
-    if not youth:
-        raise HTTPException(status_code=404, detail="Joven no encontrado")
-    if not youth.login_enabled:
-        raise HTTPException(status_code=400, detail="El joven no tiene login habilitado")
 
     new_email = data.new_email.lower().strip()
     if not new_email:
@@ -258,14 +330,30 @@ def change_email(
         raise HTTPException(status_code=409, detail="El email ya está registrado")
 
     now = datetime.now(timezone.utc)
-    (
-        db.query(YouthInvitation)
-        .filter(YouthInvitation.youth_id == youth.id, YouthInvitation.used_at.is_(None))
-        .update({"used_at": now}, synchronize_session=False)
-    )
     token = str(uuid.uuid4())
     expires = now + timedelta(days=7)
-    db.add(YouthInvitation(youth_id=youth.id, email=new_email, token=token, expires_at=expires))
+    if user.role == "JOVEN":
+        youth = db.query(Youth).filter(Youth.user_id == user.id).first()
+        if not youth:
+            raise HTTPException(status_code=404, detail="Joven no encontrado")
+        if not youth.login_enabled:
+            raise HTTPException(status_code=400, detail="El joven no tiene login habilitado")
+        (
+            db.query(YouthInvitation)
+            .filter(YouthInvitation.youth_id == youth.id, YouthInvitation.used_at.is_(None))
+            .update({"used_at": now}, synchronize_session=False)
+        )
+        db.add(YouthInvitation(youth_id=youth.id, email=new_email, token=token, expires_at=expires))
+    else:
+        prof = db.query(Professional).filter(Professional.user_id == user.id).first()
+        if not prof:
+            raise HTTPException(status_code=404, detail="Profesional no encontrado")
+        (
+            db.query(ProfessionalInvitation)
+            .filter(ProfessionalInvitation.professional_id == prof.id, ProfessionalInvitation.used_at.is_(None))
+            .update({"used_at": now}, synchronize_session=False)
+        )
+        db.add(ProfessionalInvitation(professional_id=prof.id, email=new_email, token=token, expires_at=expires))
     activation_url = f"{settings.APP_BASE_URL}/activar?token={token}"
     db.commit()
     return ChangeEmailResponse(

@@ -86,7 +86,7 @@
 
           <h3>Pendientes de retroalimentación</h3>
 
-          <p class="section-subtitle">Entrevistas completadas que aún requieren feedback.</p>
+          <p class="section-subtitle">Entrevistas completadas que an requieren feedback.</p>
 
         </div>
 
@@ -136,7 +136,7 @@
 
                     <span>{{ formatDate(s.started_at) }}</span>
 
-                    <span>·</span>
+                    <span></span>
 
                     <span>{{ modeLabel(s.mode) }}</span>
 
@@ -144,7 +144,7 @@
 
                   <div class="session-chips">
 
-                    <span class="session-chip">{{ s.templateLabel ?? 'Sin plantilla' }}</span>
+                    <span class="session-chip">{{ s.templateLabel  ?? 'Sin plantilla' }}</span>
 
                     @if (s.youthRut) {
 
@@ -260,7 +260,7 @@
 
                     <span>{{ formatDate(s.started_at) }}</span>
 
-                    <span>·</span>
+                    <span></span>
 
                     <span>{{ modeLabel(s.mode) }}</span>
 
@@ -268,7 +268,7 @@
 
                   <div class="session-chips">
 
-                    <span class="session-chip">{{ s.templateLabel ?? 'Sin plantilla' }}</span>
+                    <span class="session-chip">{{ s.templateLabel  ?? 'Sin plantilla' }}</span>
 
                     @if (s.youthRut) {
 
@@ -372,7 +372,7 @@
 
                     <span>{{ formatDate(s.started_at) }}</span>
 
-                    <span>·</span>
+                    <span></span>
 
                     <span>{{ modeLabel(s.mode) }}</span>
 
@@ -380,7 +380,7 @@
 
                   <div class="session-chips">
 
-                    <span class="session-chip">{{ s.templateLabel ?? 'Sin plantilla' }}</span>
+                    <span class="session-chip">{{ s.templateLabel  ?? 'Sin plantilla' }}</span>
 
                     @if (s.youthRut) {
 
@@ -426,7 +426,20 @@
 
   } @else {
 
-    <p class="loading">Cargando...</p>
+    <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
 
   }
 

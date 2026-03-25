@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, select
 
 from app.database import get_db
 from app.models.support_material import SupportMaterial
@@ -13,7 +14,7 @@ from app.models.youth import Youth
 from app.models.professional import Professional
 from app.models.assignment import Assignment
 from app.schemas.material import CreateMaterialRequest, SuggestMaterialRequest, RecordViewRequest
-from app.core.dependencies import get_current_user, get_current_professional, get_current_admin
+from app.core.dependencies import get_current_user, get_current_professional
 from app.services.notifications import upsert_youth_notification
 
 router = APIRouter(tags=["material"])
@@ -87,8 +88,19 @@ def list_support_material(
             q = q.filter(
                 (SupportMaterial.created_by.is_(None)) | (SupportMaterial.created_by == prof.id)
             )
-    # JOVEN ve material general + material de profesionales que lo tienen asignado (vía sugerencias)
-    # Por simplicidad MVP: joven ve todo el material activo (el filtro real sería por sugerencias)
+    elif user.role == "JOVEN":
+        youth = db.query(Youth).filter(Youth.user_id == user.id).first()
+        if not youth:
+            return []
+        suggested_ids = select(MaterialSuggestion.material_id).where(MaterialSuggestion.youth_id == youth.id)
+        q = q.filter(
+            or_(
+                SupportMaterial.created_by.is_(None),
+                SupportMaterial.id.in_(suggested_ids),
+            )
+        )
+    elif user.role != "ADMIN":
+        raise HTTPException(status_code=403, detail="Acceso denegado")
     use_pagination = bool(page or page_size)
     if use_pagination:
         page = page or 1

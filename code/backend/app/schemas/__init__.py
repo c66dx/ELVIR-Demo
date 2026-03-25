@@ -8,5 +8,5 @@ Uso recomendado:
     from app.schemas.auth import LoginRequest
 """
 
-__all__ = []
+__all__: list[str] = []
 

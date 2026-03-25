@@ -28,6 +28,7 @@ from app.models.session_transcript import SessionTranscript
 from app.models.user import User
 from app.models.youth import Youth
 from app.models.youth_invitation import YouthInvitation
+from app.models.professional_invitation import ProfessionalInvitation
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 UPLOADS_DIR = Path(__file__).resolve().parent.parent.parent / "uploads"
@@ -84,6 +85,7 @@ class AdminProfessionalRow(BaseModel):
     user_id: int
     display_name: str
     email: str | None = None
+    profile_photo_url: str | None = None
     is_active: bool
     login_type: str
     last_login_at: datetime | None = None
@@ -407,6 +409,7 @@ def get_users_overview(
                 user_id=p.user_id,
                 display_name=p.display_name,
                 email=email,
+                profile_photo_url=user.profile_photo_url if user else None,
                 is_active=p.is_active,
                 login_type=_resolve_login_type(bool(email)),
                 last_login_at=last_login_map.get(p.user_id),
@@ -440,6 +443,36 @@ def admin_delete_youth(
     (
         db.query(Assignment)
         .filter(Assignment.youth_id == youth_id, Assignment.status == "ACTIVO")
+        .update({"status": "INACTIVO", "ended_at": now}, synchronize_session=False)
+    )
+    db.commit()
+    return {"ok": True}
+
+
+@router.delete("/professionals/{professional_id}")
+def admin_delete_professional(
+    professional_id: int,
+    admin=Depends(get_current_admin),
+    db: DBSession = Depends(get_db),
+):
+    professional = db.query(Professional).filter(Professional.id == professional_id).first()
+    if not professional:
+        raise HTTPException(status_code=404, detail="Tutor no encontrado")
+    now = datetime.now(timezone.utc)
+    professional.is_active = False
+    if professional.user_id:
+        user = db.query(User).filter(User.id == professional.user_id).first()
+        if user:
+            user.is_active = False
+            user.email = f"disabled+{user.id}@invalid.local"
+    (
+        db.query(ProfessionalInvitation)
+        .filter(ProfessionalInvitation.professional_id == professional_id, ProfessionalInvitation.used_at.is_(None))
+        .update({"used_at": now}, synchronize_session=False)
+    )
+    (
+        db.query(Assignment)
+        .filter(Assignment.professional_id == professional_id, Assignment.status == "ACTIVO")
         .update({"status": "INACTIVO", "ended_at": now}, synchronize_session=False)
     )
     db.commit()

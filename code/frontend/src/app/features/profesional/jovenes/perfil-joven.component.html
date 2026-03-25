@@ -1,9 +1,22 @@
-@if (loading()) {
+﻿@if (loading()) {
 
 
 
 
-  <p>Cargando...</p>
+  <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
 
 
 
@@ -128,17 +141,17 @@
 
 
 
-              <span>{{ y.email ?? 'Sin correo' }}</span>
+              <span>{{ y.email  ?? 'Sin correo' }}</span>
 
 
 
 
-              <span>RUT: {{ y.rut ?? '-' }}</span>
+              <span>RUT: {{ y.rut  ??  '-' }}</span>
 
 
 
 
-              <span>ID: {{ y.identifier ?? '-' }}</span>
+              <span>ID: {{ y.identifier  ??  '-' }}</span>
 
 
 
@@ -193,7 +206,7 @@
 
 
 
-            <span class="metric-value">{{ metrics?.total ?? 0 }}</span>
+            <span class="metric-value">{{ metrics?.total  ?? 0 }}</span>
 
 
 
@@ -213,7 +226,7 @@
 
 
 
-            <span class="metric-value">{{ metrics?.completed ?? 0 }}</span>
+            <span class="metric-value">{{ metrics?.completed  ?? 0 }}</span>
 
 
 
@@ -233,12 +246,12 @@
 
 
 
-            <span class="metric-value">{{ metrics?.completionRate ?? 0 }}%</span>
+            <span class="metric-value">{{ metrics?.completionRate  ?? 0 }}%</span>
 
 
 
 
-            <span class="metric-label">Tasa de éxito</span>
+            <span class="metric-label">Tasa de xito</span>
 
 
 
@@ -683,7 +696,7 @@
 
 
 
-            <dd>{{ y.identifier ?? '-' }}</dd>
+            <dd>{{ y.identifier  ?? '-' }}</dd>
 
 
 
@@ -693,7 +706,7 @@
 
 
 
-            <dd>{{ y.rut ?? '-' }}</dd>
+            <dd>{{ y.rut  ?? '-' }}</dd>
 
 
 
@@ -703,7 +716,7 @@
 
 
 
-            <dd>{{ y.phone ?? '-' }}</dd>
+            <dd>{{ y.phone  ?? '-' }}</dd>
 
 
 
@@ -713,7 +726,7 @@
 
 
 
-            <dd>{{ y.year_of_birth ?? '-' }}</dd>
+            <dd>{{ y.year_of_birth  ?? '-' }}</dd>
 
 
 
@@ -723,7 +736,7 @@
 
 
 
-            <dd>{{ y.diagnosis ?? '-' }}</dd>
+            <dd>{{ y.diagnosis  ?? '-' }}</dd>
 
 
 
@@ -753,7 +766,7 @@
 
 
 
-            <dd>{{ y.general_notes ?? '-' }}</dd>
+            <dd>{{ y.general_notes  ?? '-' }}</dd>
 
 
 
@@ -953,12 +966,12 @@
 
 
 
-                        <td>{{ s.ended_at ? formatDate(s.ended_at) : 'En curso' }}</td>
+                        <td>{{ s.ended_at ?  formatDate(s.ended_at) : 'En curso' }}</td>
 
 
 
 
-                        <td>{{ s.ended_at ? formatDuration(durationBetween(s.started_at, s.ended_at)) : '-' }}</td>
+                        <td>{{ s.ended_at ?  formatDuration(durationBetween(s.started_at, s.ended_at)) : '-' }}</td>
 
 
 
@@ -993,7 +1006,7 @@
 
 
 
-                <span>Página {{ platformPage() }} de {{ totalPages(platformTotal(), platformPageSize) }} · Total {{ platformTotal() }}</span>
+                <span>Pgina {{ platformPage() }} de {{ totalPages(platformTotal(), platformPageSize) }}  Total {{ platformTotal() }}</span>
 
 
 
@@ -1248,7 +1261,7 @@
 
 
 
-          <p>Sin datos de desempeño todavía.</p>
+          <p>Sin datos de desempeño todava.</p>
 
 
 
@@ -1823,7 +1836,7 @@
 
 
 
-              <span>Página {{ sessionsPage() }} de {{ totalPages(sessionsTotal(), sessionsPageSize) }} · Total {{ sessionsTotal() }}</span>
+              <span>Pgina {{ sessionsPage() }} de {{ totalPages(sessionsTotal(), sessionsPageSize) }}  Total {{ sessionsTotal() }}</span>
 
 
 
@@ -1919,165 +1932,51 @@
 
 
             <form [formGroup]="suggestMaterialForm" (ngSubmit)="submitSuggestMaterial()">
-
-
-
-
-              <div class="suggest-grid">
-
-
-
-
-                <div class="field">
-
-
-
-
-                  <label for="material_id">Material *</label>
-
-
-
-
-                  <select id="material_id" formControlName="material_id">
-
-
-
-
-                    <option value="">Seleccione...</option>
-
-
-
-
+              <app-form-grid class="suggest-grid" [columns]="2">
+                <app-form-field
+                  label="Material"
+                  forId="material_id"
+                  [required]="true"
+                  hint="Elige el recurso que mejor apoye al joven."
+                >
+                  <app-select-input id="material_id" formControlName="material_id" placeholder="Seleccione...">
                     @for (m of supportMaterials(); track m.id) {
-
-
-
-
                       <option [value]="m.id">{{ m.title }} ({{ m.type }})</option>
-
-
-
-
                     }
-
-
-
-
-                  </select>
-
-
-
-
-                  <p class="field-help">Elige el recurso que mejor apoye al joven.</p>
-
-
-
-
-                </div>
-
-
-
-
-                <div class="field">
-
-
-
-
-                  <label for="session_id">Asociar a entrevista</label>
-
-
-
-
-                  <select id="session_id" formControlName="session_id">
-
-
-
-
-                    <option value="">Ninguna</option>
-
-
-
-
+                  </app-select-input>
+                </app-form-field>
+                <app-form-field
+                  label="Asociar a entrevista"
+                  forId="session_id"
+                  hint="Opcional: vincula la sugerencia a una entrevista."
+                >
+                  <app-select-input id="session_id" formControlName="session_id" placeholder="Ninguna">
                     @for (s of sessions(); track s.id) {
-
-
-
-
                       <option [value]="s.id">{{ formatDate(s.started_at) }} - {{ s.status }}</option>
-
-
-
-
                     }
+                  </app-select-input>
+                </app-form-field>
+                <app-form-field
+                  label="Razn"
+                  forId="reason"
+                  span="full"
+                  hint="Describe por qu este material es til para el joven."
+                >
+                  <app-textarea-input
+                    id="reason"
+                    formControlName="reason"
+                    [rows]="3"
+                    placeholder="Opcional"
+                  ></app-textarea-input>
+                </app-form-field>
+              </app-form-grid>
 
-
-
-
-                  </select>
-
-
-
-
-                  <p class="field-help">Opcional: vincula la sugerencia a una entrevista.</p>
-
-
-
-
-                </div>
-
-
-
-
-                <div class="field field-wide">
-
-
-
-
-                  <label for="reason">Razón</label>
-
-
-
-
-                  <textarea id="reason" formControlName="reason" rows="3" placeholder="Opcional"></textarea>
-
-
-
-
-                  <p class="field-help">Describe por qué este material es útil para el joven.</p>
-
-
-
-
-                </div>
-
-
-
-
-              </div>
-
-
-
-
-              <div class="form-actions suggest-actions">
-
-
-
-
-                <button type="submit" class="btn-primary" [disabled]="suggestMaterialForm.invalid || submittingSuggest()">Sugerir</button>
-
-
-
-
+              <app-form-actions [sticky]="false" class="suggest-actions">
+                <button type="submit" class="btn-primary" [disabled]="suggestMaterialForm.invalid || submittingSuggest()">
+                  Sugerir
+                </button>
                 <button type="button" class="btn-secondary" (click)="cancelSuggestMaterial()">Cancelar</button>
-
-
-
-
-              </div>
-
-
-
-
+              </app-form-actions>
             </form>
 
 
@@ -2123,7 +2022,15 @@
 
 
 
-              <p class="transcript-loading">Cargando transcripción...</p>
+              <div class="loading-state loading-state--compact">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando transcripción...</div>
+      <div class="loading-state__subtitle">Estamos preparando la transcripción.</div>
+    </div>
+  </div>
+</div>
 
 
 
@@ -2194,225 +2101,67 @@
 
 
             <form [formGroup]="summaryForm" (ngSubmit)="submitSummary()">
-
-
-
-
-              <div class="field">
-
-
-
-
-                <label for="summary_text">Retroalimentación *</label>
-
-
-
-
-                <textarea id="summary_text" formControlName="summary_text" rows="4"></textarea>
-
-
-
-
-              </div>
-
-
-
-
-              <div class="field">
-
-
-
-
-                <label for="competency_tags">Etiquetas de competencia (separadas por coma)</label>
-
-
-
-
-                <input id="competency_tags" type="text" formControlName="competency_tags" placeholder="comunicación, liderazgo" />
-
-
-
-
-              </div>
-
-
-
-
+              <app-form-grid [columns]="1">
+                <app-form-field label="Retroalimentación" forId="summary_text" [required]="true">
+                  <app-textarea-input id="summary_text" formControlName="summary_text" [rows]="4"></app-textarea-input>
+                </app-form-field>
+                <app-form-field
+                  label="Etiquetas de competencia (separadas por coma)"
+                  forId="competency_tags"
+                  hint="Ej: comunicación, liderazgo"
+                >
+                  <app-text-input
+                    id="competency_tags"
+                    type="text"
+                    formControlName="competency_tags"
+                    placeholder="comunicación, liderazgo"
+                  ></app-text-input>
+                </app-form-field>
+              </app-form-grid>
               @if (competencies().length > 0 && competencyLevels().length > 0) {
-
-
-
-
                 <div class="field">
-
-
-
-
                   <label>Evaluación por competencias (opcional)</label>
-
-
-
-
                   @if (loadingSessionCompetencies()) {
-
-
-
-
-                    <p class="small-muted">Cargando evaluación por competencias...</p>
-
-
-
-
+                    <div class="loading-state loading-state--compact">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando evaluación por competencias...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+</div>
                   } @else {
-
-
-
-
                     <div class="competencies-table">
-
-
-
-
                       <div class="competencies-header">
-
-
-
-
                         <span>Competencia</span>
-
-
-
-
                         <span>Nivel</span>
-
-
-
-
                       </div>
-
-
-
-
                       <div class="competencies-body">
-
-
-
-
                         @for (row of sessionCompetencies(); track row.competency_slug) {
-
-
-
-
                           <div class="competency-row">
-
-
-
-
                             <span class="competency-name">{{ getCompetencyName(row.competency_slug) }}</span>
-
-
-
-
                             <select
-
-
-
-
-                              [value]="row.level_slug ?? ''"
-
-
-
-
+                              [value]="row.level_slug  ?? ''"
                               (change)="onCompetencyLevelChange(row.competency_slug, $event)"
-
-
-
-
                             >
-
-
-
-
                               <option value="">Sin evaluar</option>
-
-
-
-
                               @for (lvl of competencyLevels(); track lvl.slug) {
-
-
-
-
                                 <option [value]="lvl.slug">{{ lvl.label }}</option>
-
-
-
-
                               }
-
-
-
-
                             </select>
-
-
-
-
                           </div>
-
-
-
-
                         }
-
-
-
-
                       </div>
-
-
-
-
                     </div>
-
-
-
-
                   }
-
-
-
-
                 </div>
-
-
-
-
               }
 
-
-
-
-              <div class="form-actions">
-
-
-
-
+              <app-form-actions [sticky]="false">
                 <button type="submit" class="btn-primary" [disabled]="summaryForm.invalid || submittingSummary()">Guardar</button>
-
-
-
-
                 <button type="button" class="btn-secondary" (click)="cancelSummaryForm()">Cancelar</button>
-
-
-
-
-              </div>
-
-
-
-
+              </app-form-actions>
             </form>
 
 
@@ -2454,6 +2203,7 @@
 
 
 }
+
 
 
 

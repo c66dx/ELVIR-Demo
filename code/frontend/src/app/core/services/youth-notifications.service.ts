@@ -73,7 +73,7 @@ export class YouthNotificationsService {
     if (diffHours < 24) return `Hace ${diffHours} h`;
     if (diffHours < 48) return 'Ayer';
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `Hace ${diffDays} dias`;
+    if (diffDays < 7) return `Hace ${diffDays} días`;
     return date.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' });
   }
 }

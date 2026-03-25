@@ -70,16 +70,19 @@ def list_simulation_templates(
     db: Session = Depends(get_db),
 ):
     """Lista plantillas cargo-caso. Filtros opcionales: job_role_id, case_id."""
-    q = db.query(SimulationTemplate).filter(SimulationTemplate.is_active == True)
+    q = (
+        db.query(SimulationTemplate, JobRole, Case)
+        .join(JobRole, SimulationTemplate.job_role_id == JobRole.id)
+        .join(Case, SimulationTemplate.case_id == Case.id)
+        .filter(SimulationTemplate.is_active == True)
+    )
     if job_role_id:
         q = q.filter(SimulationTemplate.job_role_id == job_role_id)
     if case_id:
         q = q.filter(SimulationTemplate.case_id == case_id)
-    templates = q.all()
+    rows = q.all()
     result = []
-    for t in templates:
-        jr = db.query(JobRole).filter(JobRole.id == t.job_role_id).first()
-        c = db.query(Case).filter(Case.id == t.case_id).first()
+    for t, jr, c in rows:
         result.append(
             SimulationTemplateResponse(
                 id=t.id,
@@ -101,18 +104,21 @@ def resolve_simulation_template(
     db: Session = Depends(get_db),
 ):
     """Resuelve plantilla cuando el usuario elige solo cargo: usa caso NORMAL por defecto."""
-    normal_case = db.query(Case).filter(Case.difficulty == "NORMAL", Case.is_active == True).first()
-    if not normal_case:
+    row = (
+        db.query(SimulationTemplate, JobRole, Case)
+        .join(JobRole, SimulationTemplate.job_role_id == JobRole.id)
+        .join(Case, SimulationTemplate.case_id == Case.id)
+        .filter(
+            SimulationTemplate.job_role_id == job_role_id,
+            SimulationTemplate.is_active == True,
+            Case.difficulty == "NORMAL",
+            Case.is_active == True,
+        )
+        .first()
+    )
+    if not row:
         return None
-    t = db.query(SimulationTemplate).filter(
-        SimulationTemplate.job_role_id == job_role_id,
-        SimulationTemplate.case_id == normal_case.id,
-        SimulationTemplate.is_active == True,
-    ).first()
-    if not t:
-        return None
-    jr = db.query(JobRole).filter(JobRole.id == t.job_role_id).first()
-    c = db.query(Case).filter(Case.id == t.case_id).first()
+    t, jr, c = row
     return SimulationTemplateResponse(
         id=t.id,
         job_role=JobRoleRef(id=jr.id, slug=jr.slug, name=jr.name),
@@ -152,11 +158,16 @@ def get_simulation_template(
     db: Session = Depends(get_db),
 ):
     """Obtiene detalle de una plantilla por ID."""
-    t = db.query(SimulationTemplate).filter(SimulationTemplate.id == template_id).first()
-    if not t:
+    row = (
+        db.query(SimulationTemplate, JobRole, Case)
+        .join(JobRole, SimulationTemplate.job_role_id == JobRole.id)
+        .join(Case, SimulationTemplate.case_id == Case.id)
+        .filter(SimulationTemplate.id == template_id)
+        .first()
+    )
+    if not row:
         return None
-    jr = db.query(JobRole).filter(JobRole.id == t.job_role_id).first()
-    c = db.query(Case).filter(Case.id == t.case_id).first()
+    t, jr, c = row
     return SimulationTemplateResponse(
         id=t.id,
         job_role=JobRoleRef(id=jr.id, slug=jr.slug, name=jr.name),

@@ -38,7 +38,7 @@
 
       @for (y of youthOptions; track y.id) {
 
-        <option [value]="y.id">{{ y.display_name }}{{ y.rut ? ' · ' + y.rut : '' }}</option>
+        <option [value]="y.id">{{ y.display_name }}{{ y.rut ? '  ' + y.rut : '' }}</option>
 
       }
 
@@ -118,7 +118,20 @@
 
 @if (loading) {
 
-  <p>Cargando...</p>
+  <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
 
 } @else {
 
@@ -190,7 +203,7 @@
 
               </td>
 
-              <td>{{ s.youthRut ?? '-' }}</td>
+              <td>{{ s.youthRut  ?? '-' }}</td>
 
               <td>{{ formatDate(s.started_at) }}</td>
 
@@ -200,7 +213,7 @@
 
               <td>{{ formatDuration(s.duration_seconds) }}</td>
 
-              <td>{{ s.templateLabel ?? '-' }}</td>
+              <td>{{ s.templateLabel  ?? '-' }}</td>
 
               <td class="actions">
 
@@ -222,7 +235,7 @@
 
     <div class="pager">
 
-      <span>Página {{ page }} de {{ totalPages() }} · Total {{ total }}</span>
+      <span>Pgina {{ page }} de {{ totalPages() }}  Total {{ total }}</span>
 
       <div class="pager-actions">
 

@@ -1,0 +1,19 @@
+<div class="form-field__meta">
+  @if (label) {
+    <label [attr.for]="forId">
+      {{ label }}
+      @if (required) {
+        <span class="form-field__required">*</span>
+      }
+    </label>
+  }
+  @if (hint) {
+    <span class="form-hint">{{ hint }}</span>
+  }
+  @if (error) {
+    <span class="form-error">{{ error }}</span>
+  }
+</div>
+<div class="form-field__control">
+  <ng-content></ng-content>
+</div>

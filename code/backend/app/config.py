@@ -29,6 +29,7 @@ class Settings(BaseSettings):
 
     # App
     APP_BASE_URL: str = "http://localhost:4200"  # Para activation_url
+    SESSION_IDLE_TIMEOUT_MINUTES: int = 5
 
     SECURITY_CSP: str = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
     AUTH_COOKIE_NAME: str = "elvir_access_token"

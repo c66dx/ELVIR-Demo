@@ -5,6 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -20,6 +21,8 @@ from app.core.middleware import (
     get_request_metrics_snapshot,
     audit_log_middleware,
 )
+from app.core.errors import ErrorCode, build_error_payload, get_request_id
+from app.schemas.common import ErrorResponse
 from app.models import (  # noqa: F401 - asegurar tablas creadas
     SessionTranscript,
     SessionAudio,
@@ -84,6 +87,66 @@ app.middleware("http")(security_headers_middleware)
 app.middleware("http")(csrf_protection_middleware)
 app.middleware("http")(audit_log_middleware)
 
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    error_schema = ErrorResponse.model_json_schema(ref_template="#/components/schemas/{model}")
+    definitions = error_schema.pop("$defs", {})
+    components = openapi_schema.setdefault("components", {})
+    schemas = components.setdefault("schemas", {})
+    for name, schema in definitions.items():
+        schemas.setdefault(name, schema)
+    schemas.setdefault("ErrorResponse", error_schema)
+    responses = components.setdefault("responses", {})
+    codes_desc = ", ".join(code.value for code in ErrorCode)
+    headers = components.setdefault("headers", {})
+    headers.setdefault(
+        "X-Request-ID",
+        {
+            "description": "Request identifier for tracing and debugging.",
+            "schema": {"type": "string"},
+        },
+    )
+    responses.setdefault(
+        "ErrorResponse",
+        {
+            "description": f"Error estándar de la API. Códigos: {codes_desc}.",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}},
+            "headers": {"X-Request-ID": {"$ref": "#/components/headers/X-Request-ID"}},
+        },
+    )
+    error_status_codes = ["400", "401", "403", "404", "409", "422", "500"]
+    for path_item in openapi_schema.get("paths", {}).values():
+        if not isinstance(path_item, dict):
+            continue
+        for method, operation in path_item.items():
+            if not isinstance(operation, dict):
+                continue
+            if method.startswith("x-"):
+                continue
+            responses = operation.setdefault("responses", {})
+            for code in error_status_codes:
+                if code == "422":
+                    responses[code] = {"$ref": "#/components/responses/ErrorResponse"}
+                else:
+                    responses.setdefault(code, {"$ref": "#/components/responses/ErrorResponse"})
+            for response in responses.values():
+                if not isinstance(response, dict) or "$ref" in response:
+                    continue
+                response_headers = response.setdefault("headers", {})
+                response_headers.setdefault("X-Request-ID", {"$ref": "#/components/headers/X-Request-ID"})
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
+
 
 def _attach_request_id(request: Request, response: JSONResponse) -> JSONResponse:
     request_id = getattr(request.state, "request_id", None)
@@ -95,13 +158,15 @@ def _attach_request_id(request: Request, response: JSONResponse) -> JSONResponse
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     headers = dict(exc.headers) if exc.headers else None
-    response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail}, headers=headers)
+    payload = build_error_payload(exc.detail, code=ErrorCode.HTTP_ERROR, request_id=get_request_id(request))
+    response = JSONResponse(status_code=exc.status_code, content=payload, headers=headers)
     return _attach_request_id(request, response)
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    response = JSONResponse(status_code=422, content={"detail": exc.errors()})
+    payload = build_error_payload(exc.errors(), code=ErrorCode.VALIDATION_ERROR, request_id=get_request_id(request))
+    response = JSONResponse(status_code=422, content=payload)
     return _attach_request_id(request, response)
 
 
@@ -109,7 +174,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def unhandled_exception_handler(request: Request, exc: Exception):
     request_id = getattr(request.state, "request_id", "unknown")
     logger.exception("request_id=%s unhandled_exception", request_id)
-    response = JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
+    payload = build_error_payload("Internal Server Error", code=ErrorCode.INTERNAL_SERVER_ERROR, request_id=request_id)
+    response = JSONResponse(status_code=500, content=payload)
     return _attach_request_id(request, response)
 
 @app.get("/")

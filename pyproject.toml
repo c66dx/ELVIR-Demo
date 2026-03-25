@@ -1,0 +1,33 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+src = ["code/backend"]
+exclude = [
+  "code/backend/alembic/versions",
+  "code/backend/.venv",
+  "code/frontend",
+  "docs",
+]
+
+[tool.ruff.lint]
+select = ["E9", "F"]
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+exclude = '''
+/(
+  code/backend/alembic/versions
+)/
+'''
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_return_any = false
+no_implicit_optional = false
+pretty = true
+files = ["app/core", "app/schemas"]
+exclude = "code/backend/alembic/versions"
+disable_error_code = ["import-untyped"]

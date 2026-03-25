@@ -1,7 +1,6 @@
 """Modelo SESSIONS."""
 from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, func
 from sqlalchemy import JSON
-from sqlalchemy.orm import relationship
 
 from app.database import Base
 
@@ -17,6 +16,7 @@ class Session(Base):
     liveavatar_session_id = Column(String(255), nullable=True)
     started_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     ended_at = Column(DateTime(timezone=True), nullable=True)
+    last_heartbeat_at = Column(DateTime(timezone=True), nullable=True, index=True)
     status = Column(String(20), nullable=False, default="EN_CURSO")  # EN_CURSO, COMPLETADA, CANCELADA, ERROR
     duration_seconds = Column(Integer, nullable=True)
     metrics = Column(JSON, nullable=True)

@@ -14,6 +14,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from app.config import settings
+from app.core.errors import ErrorCode, build_error_payload, get_request_id
 from app.core.security import decode_token, decode_csrf_token
 from app.database import SessionLocal
 from app.models.audit_log import AuditLog
@@ -21,7 +22,7 @@ from app.models.audit_log import AuditLog
 logger = logging.getLogger("elvir.api")
 
 REQUEST_METRICS_LOCK = Lock()
-REQUEST_METRICS = Counter()
+REQUEST_METRICS: Counter[str] = Counter()
 
 
 def _record_request_metric(method: str, path: str, status_code: int):
@@ -233,22 +234,36 @@ async def csrf_protection_middleware(request: Request, call_next):
 
         auth_cookie = (request.cookies.get(settings.AUTH_COOKIE_NAME) or "").strip()
         if auth_cookie:
+            def _csrf_forbidden(message: str) -> JSONResponse:
+                request_id = get_request_id(request)
+                if not request_id:
+                    request_id = uuid4().hex
+                    request.state.request_id = request_id
+                payload = build_error_payload(
+                    message,
+                    code=ErrorCode.CSRF_FORBIDDEN,
+                    request_id=request_id,
+                )
+                response = JSONResponse(status_code=403, content=payload)
+                response.headers["X-Request-ID"] = request_id
+                return response
+
             origin = (request.headers.get("Origin") or "").strip()
             referer_origin = _extract_origin_from_referer(request.headers.get("Referer"))
             effective_origin = origin or referer_origin
             if not _is_allowed_origin(effective_origin):
-                return JSONResponse(status_code=403, content={"detail": "Origen no permitido"})
+                return _csrf_forbidden("Origen no permitido")
 
             csrf_cookie = (request.cookies.get(settings.CSRF_COOKIE_NAME) or "").strip()
             csrf_header = (request.headers.get(settings.CSRF_HEADER_NAME) or "").strip()
             csrf_match = bool(csrf_cookie and csrf_header) and hmac.compare_digest(csrf_cookie, csrf_header)
             if not csrf_match:
-                return JSONResponse(status_code=403, content={"detail": "CSRF token inválido o ausente"})
+                return _csrf_forbidden("CSRF token inválido o ausente")
 
             csrf_payload = decode_csrf_token(csrf_cookie)
             access_payload = decode_token(auth_cookie)
             if not csrf_payload or not access_payload or csrf_payload.get("sub") != access_payload.get("sub"):
-                return JSONResponse(status_code=403, content={"detail": "CSRF token inválido o desalineado"})
+                return _csrf_forbidden("CSRF token inválido o desalineado")
 
     return await call_next(request)
 

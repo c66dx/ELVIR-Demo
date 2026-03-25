@@ -49,7 +49,9 @@ export class SimulacionRuntimeService {
     context: SessionContextInfo | null;
     sessionId: string;
   }): SessionEndData {
-    const shouldAttachSummary = params.status === 'COMPLETADA' && (params.session?.duration_seconds || params.context);
+    const shouldAttachSummary =
+      params.status === 'COMPLETADA' && (params.session?.duration_seconds || params.context);
+
     return {
       status: params.status,
       motivo: params.motivo,

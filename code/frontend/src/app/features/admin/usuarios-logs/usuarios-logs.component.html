@@ -22,7 +22,20 @@
 
 @if (loading) {
 
-  <p>Cargando...</p>
+  <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
 
 } @else {
 
@@ -92,11 +105,11 @@
 
                 <td class="cell--name">{{ y.display_name }}</td>
 
-                <td>{{ y.rut ?? '-' }}</td>
+                <td>{{ y.rut  ?? '-' }}</td>
 
-                <td class="cell--id">{{ y.identifier ?? '-' }}</td>
+                <td class="cell--id">{{ y.identifier  ?? '-' }}</td>
 
-                <td>{{ y.email ?? '-' }}</td>
+                <td>{{ y.email  ?? '-' }}</td>
 
                 <td>{{ loginTypeLabel(y.login_type) }}</td>
 
@@ -108,7 +121,7 @@
 
                   <span class="muted">
 
-                    {{ y.last_interview_status ? formatStatusLabel(y.last_interview_status) : '' }}
+                    {{ y.last_interview_status ?  formatStatusLabel(y.last_interview_status) : '' }}
 
                   </span>
 
@@ -116,9 +129,9 @@
 
                 <td>
 
-                  {{ y.assigned_professional?.display_name ?? '-' }}
+                  {{ y.assigned_professional?.display_name  ?? '-' }}
 
-                  <span class="muted">{{ y.assigned_professional?.email ?? '' }}</span>
+                  <span class="muted">{{ y.assigned_professional?.email  ?? '' }}</span>
 
                 </td>
 
@@ -190,6 +203,8 @@
 
             <tr>
 
+              <th>Foto</th>
+
               <th>Nombre</th>
 
               <th>Email</th>
@@ -210,9 +225,27 @@
 
               <tr [class.inactive]="!p.is_active">
 
+                <td>
+
+                  <div class="avatar" [class.avatar--image]="p.profile_photo_url">
+
+                    @if (p.profile_photo_url) {
+
+                      <img [src]="p.profile_photo_url" alt="Foto del tutor" />
+
+                    } @else {
+
+                      <span>{{ initials(p.display_name) }}</span>
+
+                    }
+
+                  </div>
+
+                </td>
+
                 <td class="cell--name">{{ p.display_name }}</td>
 
-                <td>{{ p.email ?? '-' }}</td>
+                <td>{{ p.email  ?? '-' }}</td>
 
                 <td>{{ loginTypeLabel(p.login_type) }}</td>
 
@@ -306,7 +339,20 @@
 
       @if (logsLoading) {
 
-        <p>Cargando logs...</p>
+        <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando logs...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
 
       } @else if (logsError) {
 
@@ -342,7 +388,7 @@
 
                     <div>{{ formatDate(p.started_at) }}</div>
 
-                    <div>{{ p.ended_at ? formatDate(p.ended_at) : 'Activa' }}</div>
+                    <div>{{ p.ended_at ?  formatDate(p.ended_at) : 'Activa' }}</div>
 
                   </div>
 
@@ -420,7 +466,7 @@
 
                     <div>{{ s.professional_name || '-' }}</div>
 
-                    <div>{{ s.ended_at ? formatDate(s.ended_at) : '-' }}</div>
+                    <div>{{ s.ended_at ?  formatDate(s.ended_at) : '-' }}</div>
 
                   </div>
 

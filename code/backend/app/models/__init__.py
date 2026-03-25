@@ -4,6 +4,7 @@ from app.models.user import User
 from app.models.youth import Youth
 from app.models.professional import Professional
 from app.models.youth_invitation import YouthInvitation
+from app.models.professional_invitation import ProfessionalInvitation
 from app.models.assignment import Assignment
 from app.models.job_role import JobRole
 from app.models.case import Case
@@ -29,6 +30,7 @@ __all__ = [
     "Youth",
     "Professional",
     "YouthInvitation",
+    "ProfessionalInvitation",
     "Assignment",
     "JobRole",
     "Case",

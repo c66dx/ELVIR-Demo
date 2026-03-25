@@ -1,6 +1,6 @@
 ﻿"""Configuración de base de datos con SQLAlchemy (PostgreSQL)."""
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.config import settings

@@ -1,224 +1,104 @@
-.field {
-  margin-bottom: var(--space-3);
-
-  label {
-    display: block;
-    margin-bottom: var(--space-2);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-text-muted);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  input[type='text'],
-  input[type='number'],
-  input[type='email'],
-  textarea,
-  select {
-    width: 100%;
-    max-width: 100%;
-    padding: 0.65rem 0.9rem;
-    border: 1px solid var(--color-input-border);
-    border-radius: 12px;
-    font-size: 0.95rem;
-    background: var(--color-input-bg);
-    color: var(--color-text);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-    transition: border-color 0.2s, box-shadow 0.2s;
-
-    &:focus {
-      outline: none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px var(--color-input-focus);
-    }
-  }
-
-  &.checkbox label {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    cursor: pointer;
-  }
-
-  &.checkbox input[type='checkbox'] {
-    width: 16px;
-    height: 16px;
-    min-width: 16px;
-    min-height: 16px;
-    margin: 0;
-    padding: 0;
-    flex-shrink: 0;
-  }
-}
-
-.field-readonly {
-  .readonly-value {
-    display: block;
-    padding: var(--space-3) var(--space-4);
-    background: var(--color-surface-alt);
-    border-radius: var(--radius-sm);
-    font-size: 0.95rem;
-    color: var(--color-text);
-  }
-
-  .readonly-with-action {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-
-    .readonly-value {
-      flex: 1;
-    }
-
-    .btn-sm {
-      padding: 0.45rem 0.8rem;
-      font-size: 0.82rem;
-    }
-  }
-}
-
-.field-hint {
+﻿:host {
   display: block;
-  margin-top: var(--space-1);
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
-
-.field-error {
-  display: block;
-  margin-top: var(--space-1);
-  font-size: 0.8rem;
-  color: var(--color-danger);
-}
-
-.checklist-field {
-  .checklist-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: var(--space-2);
-    margin-top: var(--space-2);
-  }
-
-  .checklist-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: var(--space-2);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    transition: background 0.2s;
-
-    &:hover {
-      background: var(--color-primary-light);
-    }
-
-    input[type='checkbox'] {
-      width: 16px;
-      height: 16px;
-      min-width: 16px;
-      min-height: 16px;
-      margin: 0;
-      flex-shrink: 0;
-    }
-  }
 }
 
 .activation-success {
-  padding: var(--space-6);
-  background: var(--color-success-light);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  border-radius: var(--radius-md);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.activation-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 .activation-success-title {
-  margin: 0 0 var(--space-2);
-  font-size: 1.1rem;
+  margin: 0;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-text);
 }
 
 .activation-success-msg {
-  margin: 0 0 var(--space-4);
-  font-size: 0.9rem;
+  margin: var(--space-1) 0 0;
+  font-size: 0.82rem;
   color: var(--color-text-muted);
+  max-width: 52ch;
 }
 
 .activation-url-wrap {
   display: flex;
+  align-items: center;
   gap: var(--space-3);
-  margin-bottom: var(--space-4);
-
-  .activation-url-input {
-    flex: 1;
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    background: var(--color-card);
-  }
+  flex-wrap: wrap;
 }
 
-.error {
-  color: var(--color-danger);
-  margin-bottom: var(--space-4);
-  padding: var(--space-2);
-  background: var(--color-danger-light);
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
+.activation-url-input {
+  flex: 1 1 360px;
+  min-width: 240px;
 }
 
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(15, 23, 42, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  padding: var(--space-4);
+  z-index: 100;
+  backdrop-filter: blur(2px);
 }
 
 .modal-content {
-  background: var(--color-card);
-  padding: var(--space-6);
-  border-radius: var(--radius-lg);
+  width: min(560px, 100%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: var(--space-4) var(--space-5);
   box-shadow: var(--shadow-lg);
-  max-width: 420px;
-  width: 90%;
+  display: grid;
+  gap: var(--space-3);
+}
 
-  h3 {
-    margin: 0 0 var(--space-3);
-    font-size: 1.25rem;
+.modal-content h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.modal-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .activation-header {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .modal-hint {
-    margin: 0 0 var(--space-4);
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
+  .activation-url-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-content {
+    padding: var(--space-4);
   }
 
   .modal-actions {
-    display: flex;
-    gap: var(--space-3);
-    margin-top: var(--space-4);
-  }
-}
-
-.actions {
-  display: flex;
-  gap: var(--space-3);
-  align-items: center;
-  margin-top: var(--space-4);
-
-  .btn-link {
-    color: var(--color-primary);
-    font-size: 0.9rem;
-    font-weight: 500;
-
-    &:hover {
-      text-decoration: underline;
-    }
+    flex-direction: column-reverse;
+    align-items: stretch;
   }
 }

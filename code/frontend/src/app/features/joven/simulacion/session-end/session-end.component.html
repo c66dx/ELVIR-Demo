@@ -1,4 +1,4 @@
-@if (status) {
+﻿@if (status) {
 
   <div class="report-shell" [class.report-shell--success]="variant === 'success'" [class.report-shell--warning]="variant === 'warning'" [class.report-shell--error]="variant === 'error'">
 
@@ -52,7 +52,7 @@
 
           @if (sessionSummary?.caseName; as caseName) {
 
-            en un escenario {{ (caseName ?? '') | lowercase }}.
+            en un escenario {{ (caseName  ?? '') | lowercase }}.
 
           } @else {
 
@@ -86,7 +86,7 @@
 
               } @else {
 
-                —
+                
 
               }
 
@@ -98,7 +98,7 @@
 
             <span class="metric-label">Cargo</span>
 
-            <span class="metric-value">{{ sessionSummary?.jobRoleName || '—' }}</span>
+            <span class="metric-value">{{ sessionSummary?.jobRoleName || '' }}</span>
 
           </div>
 
@@ -106,7 +106,7 @@
 
             <span class="metric-label">Caso</span>
 
-            <span class="metric-value">{{ sessionSummary?.caseName || '—' }}</span>
+            <span class="metric-value">{{ sessionSummary?.caseName || '' }}</span>
 
           </div>
 
@@ -136,7 +136,7 @@
 
         <p>
 
-          El tutor revisará esta entrevista y dejará comentarios cuando estén disponibles.
+          El tutor revisar esta entrevista y dejar comentarios cuando estn disponibles.
 
           Puedes revisarlos luego en tu historial.
 
@@ -158,7 +158,7 @@
 
             <li>Vuelve a practicar para ganar confianza.</li>
 
-            <li>Consulta tu historial cuando esté la retroalimentación.</li>
+            <li>Consulta tu historial cuando está la retroalimentación.</li>
 
           } @else if (status === 'COMPLETADA' && isProfesional) {
 
@@ -198,7 +198,7 @@
 
         }
 
-        <button type="button" class="btn-secondary" (click)="onVolver()">Volver a entrevista</button>
+        <button type="button" class="btn-secondary" (click)="onVolver()">← Volver a entrevista</button>
 
       </div>
 
@@ -207,5 +207,6 @@
   </div>
 
 }
+
 
 

@@ -1,7 +1,7 @@
 ﻿"""Esquemas comunes: catálogos, plantillas."""
-from typing import Optional, List, Any
+from typing import Optional, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class JobRoleResponse(BaseModel):
@@ -54,4 +54,15 @@ class SimulationTemplateResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ErrorDetail(BaseModel):
+    message: str = Field(..., description="Mensaje legible del error.")
+    code: Optional[str] = Field(None, description="Codigo estandar del error.")
+    request_id: Optional[str] = Field(None, description="ID de trazabilidad de la request.")
+
+
+class ErrorResponse(BaseModel):
+    detail: Any = Field(..., description="Detalle del error (string o lista para validacion).")
+    error: ErrorDetail = Field(..., description="Metadatos del error.")
 

@@ -3,12 +3,12 @@ import logging
 import uuid
 import re
 from pathlib import Path
-from datetime import datetime, date, time, timezone
+from datetime import datetime, date, time, timezone, timedelta
 from typing import Any
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, UploadFile, File, Form, Header
-from sqlalchemy import case, func, select, or_
+from sqlalchemy import case, func, select, or_, and_
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -99,6 +99,11 @@ class SessionEvaluationRequest(BaseModel):
     source: str | None = None
 
 
+class SessionEventCreate(BaseModel):
+    event_type: str
+    payload: dict | None = None
+
+
 def _check_youth_access(db: Session, user: User, youth_id: int) -> bool:
     """Verifica si el usuario tiene permiso para acceder al joven (propio o asignado)."""
     if user.role == "JOVEN":
@@ -113,6 +118,45 @@ def _check_youth_access(db: Session, user: User, youth_id: int) -> bool:
         ).first()
         return assign is not None
     return False
+
+
+def _expire_stale_sessions(db: Session) -> int:
+    """Cancela sesiones EN_CURSO sin heartbeat reciente."""
+    timeout_minutes = getattr(settings, "SESSION_IDLE_TIMEOUT_MINUTES", 0) or 0
+    if timeout_minutes <= 0:
+        return 0
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(minutes=timeout_minutes)
+    stale_q = db.query(SessionModel).filter(
+        SessionModel.status == "EN_CURSO",
+        or_(
+            SessionModel.last_heartbeat_at < cutoff,
+            and_(
+                SessionModel.last_heartbeat_at.is_(None),
+                SessionModel.started_at < cutoff,
+            ),
+        ),
+    )
+    stale_sessions = stale_q.all()
+    if not stale_sessions:
+        return 0
+    for session in stale_sessions:
+        session.status = "CANCELADA"
+        session.ended_at = now
+        metrics = dict(session.metrics) if session.metrics else {}
+        metrics["motivo"] = "ABANDONO_TIMEOUT"
+        metrics["auto_cancelled"] = True
+        metrics["idle_timeout_minutes"] = timeout_minutes
+        session.metrics = metrics
+        if session.started_at:
+            session.duration_seconds = int((now - session.started_at).total_seconds())
+        db.add(SessionEvent(
+            session_id=session.id,
+            event_type="AUTO_CANCELLED",
+            payload={"motivo": "ABANDONO_TIMEOUT", "idle_timeout_minutes": timeout_minutes},
+        ))
+    db.commit()
+    return len(stale_sessions)
 
 
 def _build_sessions_query(db: Session, user: User, youth_id: int | None):
@@ -151,12 +195,28 @@ def create_session(
     """Crea una nueva sesión de simulación (status EN_CURSO). Requiere acceso al joven."""
     if not _check_youth_access(db, user, data.youth_id):
         raise HTTPException(status_code=403, detail="Acceso denegado al joven")
+    professional_id = data.professional_id
+    if data.mode == "SUPERVISADA":
+        if user.role != "PROFESIONAL":
+            raise HTTPException(status_code=403, detail="Solo profesionales pueden crear sesiones supervisadas")
+        prof = db.query(Professional).filter(Professional.user_id == user.id, Professional.is_active == True).first()
+        if not prof:
+            raise HTTPException(status_code=403, detail="Acceso denegado: profesional no encontrado")
+        if professional_id is None:
+            professional_id = prof.id
+        elif professional_id != prof.id:
+            raise HTTPException(status_code=403, detail="professional_id no coincide con el profesional autenticado")
+    else:
+        if professional_id is not None:
+            raise HTTPException(status_code=400, detail="professional_id no permitido en sesiones autogestionadas")
+        professional_id = None
     session = SessionModel(
         youth_id=data.youth_id,
-        professional_id=data.professional_id,
+        professional_id=professional_id,
         simulation_template_id=data.simulation_template_id,
         mode=data.mode,
         status="EN_CURSO",
+        last_heartbeat_at=datetime.now(timezone.utc),
     )
     db.add(session)
     db.flush()
@@ -190,6 +250,8 @@ def list_sessions(
     if use_pagination:
         page = page or 1
         page_size = page_size or 50
+
+    _expire_stale_sessions(db)
 
     sessions_q = _build_sessions_query(db, user, youth_id)
     if sessions_q is None:
@@ -304,21 +366,43 @@ def get_session_stats(
         func.sum(case((SessionModel.status == "EN_CURSO", 1), else_=0)).label("in_progress"),
     ).first()
 
-    month_rows = (
-        sessions_q
-        .filter(
-            SessionModel.status == "COMPLETADA",
-            SessionModel.ended_at.isnot(None),
-            SessionModel.ended_at >= start_date,
+    month_counts: dict[str, int] = {}
+    bind = db.get_bind()
+    dialect = bind.dialect.name if bind is not None else ""
+    if dialect == "postgresql":
+        month_rows = (
+            sessions_q
+            .filter(
+                SessionModel.status == "COMPLETADA",
+                SessionModel.ended_at.isnot(None),
+                SessionModel.ended_at >= start_date,
+            )
+            .with_entities(func.date_trunc("month", SessionModel.ended_at).label("month"), func.count(SessionModel.id))
+            .group_by("month")
+            .all()
         )
-        .with_entities(func.date_trunc("month", SessionModel.ended_at).label("month"), func.count(SessionModel.id))
-        .group_by("month")
-        .all()
-    )
-    month_counts = {}
-    for month_dt, count in month_rows:
-        if month_dt:
-            month_counts[_month_key(month_dt.year, month_dt.month)] = int(count or 0)
+        for month_dt, count in month_rows:
+            if month_dt:
+                month_counts[_month_key(month_dt.year, month_dt.month)] = int(count or 0)
+    else:
+        rows = (
+            sessions_q
+            .filter(
+                SessionModel.status == "COMPLETADA",
+                SessionModel.ended_at.isnot(None),
+                SessionModel.ended_at >= start_date,
+            )
+            .with_entities(SessionModel.ended_at)
+            .all()
+        )
+        for (ended_at,) in rows:
+            if not ended_at:
+                continue
+            key = _month_key(ended_at.year, ended_at.month)
+            if key in month_counts:
+                month_counts[key] += 1
+            else:
+                month_counts[key] = 1
 
     return SessionStatsResponse(
         total=int(totals.total or 0),
@@ -337,22 +421,25 @@ def get_session_context(
     db: Session = Depends(get_db),
 ):
     """Retorna jobRoleName y caseName para mostrar en la UI de simulación."""
-    from app.models.simulation_template import SimulationTemplate
-    from app.models.job_role import JobRole
-    from app.models.case import Case
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
     if not _check_youth_access(db, user, session.youth_id):
         raise HTTPException(status_code=403, detail="Acceso denegado")
-    t = db.query(SimulationTemplate).filter(SimulationTemplate.id == session.simulation_template_id).first()
-    if not t:
+    from app.models.simulation_template import SimulationTemplate
+    from app.models.job_role import JobRole
+    from app.models.case import Case
+    row = (
+        db.query(JobRole.name, Case.name)
+        .join(SimulationTemplate, SimulationTemplate.job_role_id == JobRole.id)
+        .join(Case, SimulationTemplate.case_id == Case.id)
+        .filter(SimulationTemplate.id == session.simulation_template_id)
+        .first()
+    )
+    if not row:
         return None
-    jr = db.query(JobRole).filter(JobRole.id == t.job_role_id).first()
-    c = db.query(Case).filter(Case.id == t.case_id).first()
-    if not jr or not c:
-        return None
-    return {"jobRoleName": jr.name, "caseName": c.name}
+    job_role_name, case_name = row
+    return {"jobRoleName": job_role_name, "caseName": case_name}
 
 
 @router.get("/{session_id}", response_model=SessionResponse)
@@ -362,12 +449,32 @@ def get_session(
     db: Session = Depends(get_db),
 ):
     """Obtiene el detalle de una sesión. Requiere acceso al joven de la sesión."""
+    _expire_stale_sessions(db)
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
     if not _check_youth_access(db, user, session.youth_id):
         raise HTTPException(status_code=403, detail="Acceso denegado")
     return SessionResponse.model_validate(session)
+
+
+@router.post("/{session_id}/heartbeat")
+def heartbeat_session(
+    session_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Actualiza last_heartbeat_at de una sesión en curso."""
+    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Sesión no encontrada")
+    if not _check_youth_access(db, user, session.youth_id):
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+    if session.status != "EN_CURSO":
+        return {"ok": False, "status": session.status}
+    session.last_heartbeat_at = datetime.now(timezone.utc)
+    db.commit()
+    return {"ok": True}
 
 
 @router.post("/{session_id}/start", response_model=SessionStartResponse)
@@ -390,11 +497,15 @@ def start_session(
 
     request_id = getattr(request.state, "request_id", "unknown")
 
+    _expire_stale_sessions(db)
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
+    if session.status != "EN_CURSO":
+        raise HTTPException(status_code=409, detail="Sesión ya cerrada")
     if not _check_youth_access(db, user, session.youth_id):
         raise HTTPException(status_code=403, detail="Acceso denegado")
+    session.last_heartbeat_at = datetime.now(timezone.utc)
 
     template = db.query(SimulationTemplate).filter(
         SimulationTemplate.id == session.simulation_template_id
@@ -538,7 +649,7 @@ def close_session(
     # Obtener transcripción desde LiveAvatar si aplica (no bloquea el cierre si falla)
     request_id = getattr(request.state, "request_id", "unknown")
 
-    if session.liveavatar_session_id:
+    if data.status == "COMPLETADA" and session.liveavatar_session_id:
         transcript_data = get_session_transcript(session.liveavatar_session_id, request_id=request_id)
         if transcript_data:
             existing = db.query(SessionTranscript).filter(SessionTranscript.session_id == session_id).first()
@@ -691,6 +802,8 @@ def upload_session_audio(
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
     if not _check_youth_access(db, user, session.youth_id):
         raise HTTPException(status_code=403, detail="Acceso denegado")
+    if session.status != "COMPLETADA":
+        raise HTTPException(status_code=409, detail="Audio disponible solo para sesiones completadas")
     if not file.filename:
         raise HTTPException(status_code=400, detail="Nombre de archivo vacío")
 
@@ -790,6 +903,39 @@ def list_session_events(
     return [SessionEventResponse.model_validate(e) for e in events]
 
 
+@router.post("/{session_id}/events", response_model=SessionEventResponse)
+def create_session_event(
+    session_id: int,
+    data: SessionEventCreate,
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Registra evento manual para una sesión. Requiere acceso a la sesión."""
+    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Sesión no encontrada")
+    if not _check_youth_access(db, user, session.youth_id):
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+    event_type = (data.event_type or "").strip()
+    if not event_type:
+        raise HTTPException(status_code=400, detail="event_type requerido")
+    payload = data.payload
+    request_id = getattr(request.state, "request_id", None)
+    if isinstance(payload, dict) and request_id and "request_id" not in payload:
+        payload = dict(payload)
+        payload["request_id"] = request_id
+    event = SessionEvent(
+        session_id=session_id,
+        event_type=event_type,
+        payload=payload,
+    )
+    db.add(event)
+    db.commit()
+    db.refresh(event)
+    return SessionEventResponse.model_validate(event)
+
+
 @router.post("/{session_id}/competencies")
 def create_or_update_session_competencies(
     session_id: int,
@@ -837,16 +983,26 @@ def get_session_competencies(
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
     if not _check_youth_access(db, user, session.youth_id):
         raise HTTPException(status_code=403, detail="Acceso denegado")
-    items = db.query(SessionCompetency).filter(SessionCompetency.session_id == session_id).all()
-    result = []
-    for sc in items:
-        comp = db.query(Competency).filter(Competency.id == sc.competency_id).first()
-        level = db.query(CompetencyLevel).filter(CompetencyLevel.id == sc.level_id).first()
-        if comp and level:
-            result.append({
-                "competency": {"slug": comp.slug, "name": comp.name},
-                "level": {"slug": level.slug, "label": level.label},
-                "comment": sc.comment,
-            })
+    rows = (
+        db.query(
+            SessionCompetency.comment,
+            Competency.slug,
+            Competency.name,
+            CompetencyLevel.slug,
+            CompetencyLevel.label,
+        )
+        .join(Competency, Competency.id == SessionCompetency.competency_id)
+        .join(CompetencyLevel, CompetencyLevel.id == SessionCompetency.level_id)
+        .filter(SessionCompetency.session_id == session_id)
+        .all()
+    )
+    result = [
+        {
+            "competency": {"slug": comp_slug, "name": comp_name},
+            "level": {"slug": level_slug, "label": level_label},
+            "comment": comment,
+        }
+        for comment, comp_slug, comp_name, level_slug, level_label in rows
+    ]
     return {"session_id": session_id, "items": result}
 

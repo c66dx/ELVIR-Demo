@@ -1,6 +1,5 @@
 """Modelo MATERIAL_SUGGESTIONS."""
 from sqlalchemy import Column, DateTime, Integer, Text, ForeignKey, func
-from sqlalchemy.orm import relationship
 
 from app.database import Base
 

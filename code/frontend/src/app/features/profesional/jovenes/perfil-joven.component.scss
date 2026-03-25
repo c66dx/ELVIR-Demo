@@ -163,6 +163,13 @@
   font-size: 0.9rem;
   color: var(--color-text-muted);
 
+  &::before {
+    content: '←';
+    font-size: 1rem;
+    line-height: 1;
+    color: currentColor;
+  }
+
   &:hover {
     text-decoration: underline;
     color: var(--color-primary);

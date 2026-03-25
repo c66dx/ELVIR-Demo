@@ -69,6 +69,7 @@ export interface AdminProfessionalLogRow {
   user_id: string;
   display_name: string;
   email?: string;
+  profile_photo_url?: string;
   is_active: boolean;
   login_type: string;
   last_login_at?: string;
@@ -734,6 +735,7 @@ export class ApiService {
             user_id: str(p.user_id),
             display_name: (p.display_name as string) ?? '',
             email: p.email as string | undefined,
+            profile_photo_url: p.profile_photo_url as string | undefined,
             is_active: (p.is_active as boolean) ?? true,
             login_type: (p.login_type as string) ?? '',
             last_login_at: p.last_login_at as string | undefined,
@@ -769,6 +771,18 @@ export class ApiService {
       catchError((err) => {
         const d = err.error?.detail;
         const msg = typeof d === 'string' ? d : 'Error al eliminar joven';
+        return of({ error: withRequestId(msg, err) });
+      })
+    );
+  }
+
+  /** Admin: elimina un tutor (lógico). */
+  deleteProfessionalAsAdmin(professionalId: string): Observable<{ ok: true } | { error: string }> {
+    return this.http.delete<Record<string, unknown>>(`${API_BASE}/admin/professionals/${professionalId}`).pipe(
+      map(() => ({ ok: true as const })),
+      catchError((err) => {
+        const d = err.error?.detail;
+        const msg = typeof d === 'string' ? d : 'Error al eliminar tutor';
         return of({ error: withRequestId(msg, err) });
       })
     );
@@ -1163,6 +1177,13 @@ export class ApiService {
       );
   }
 
+  /** Mantiene viva una sesión en curso actualizando last_heartbeat_at. */
+  heartbeatSession(id: string): Observable<{ ok: boolean; status?: string } | null> {
+    return this.http
+      .post<{ ok: boolean; status?: string }>(`${API_BASE}/sessions/${id}/heartbeat`, {})
+      .pipe(catchError(() => of(null)));
+  }
+
   closeSession(
     id: string,
     data: { status: SessionStatus; metrics?: Record<string, unknown>; motivo?: string }
@@ -1189,7 +1210,7 @@ export class ApiService {
       );
   }
 
-  getProfessionals(): Observable<{ id: string; user_id: string; display_name: string; specialty?: string; institution?: string; is_active: boolean; created_at: string; updated_at: string }[]> {
+  getProfessionals(): Observable<{ id: string; user_id: string; display_name: string; specialty?: string; institution?: string; is_active: boolean; profile_photo_url?: string; created_at: string; updated_at: string }[]> {
     return this.http
       .get<unknown[]>(`${API_BASE}/professionals`)
       .pipe(
@@ -1201,6 +1222,7 @@ export class ApiService {
             specialty: p.specialty as string | undefined,
             institution: p.institution as string | undefined,
             is_active: (p.is_active as boolean) ?? true,
+            profile_photo_url: p.profile_photo_url as string | undefined,
             created_at: (p.created_at as string) ?? '',
             updated_at: (p.updated_at as string) ?? '',
           }))
@@ -1209,7 +1231,7 @@ export class ApiService {
       );
   }
 
-  getProfessionalsPaged(params?: { page?: number; page_size?: number }): Observable<PagedResult<{ id: string; user_id: string; display_name: string; specialty?: string; institution?: string; is_active: boolean; created_at: string; updated_at: string }>> {
+  getProfessionalsPaged(params?: { page?: number; page_size?: number }): Observable<PagedResult<{ id: string; user_id: string; display_name: string; specialty?: string; institution?: string; is_active: boolean; profile_photo_url?: string; created_at: string; updated_at: string }>> {
     let httpParams = new HttpParams();
     if (params?.page) httpParams = httpParams.set('page', String(params.page));
     if (params?.page_size) httpParams = httpParams.set('page_size', String(params.page_size));
@@ -1226,6 +1248,7 @@ export class ApiService {
           specialty: p.specialty as string | undefined,
           institution: p.institution as string | undefined,
           is_active: (p.is_active as boolean) ?? true,
+          profile_photo_url: p.profile_photo_url as string | undefined,
           created_at: (p.created_at as string) ?? '',
           updated_at: (p.updated_at as string) ?? '',
         }));
@@ -1237,7 +1260,7 @@ export class ApiService {
 
   getProfessional(
     id: string
-  ): Observable<{ id: string; user_id: string; display_name: string; specialty?: string; institution?: string; is_active: boolean; created_at: string; updated_at: string } | null> {
+  ): Observable<{ id: string; user_id: string; display_name: string; specialty?: string; institution?: string; is_active: boolean; profile_photo_url?: string; created_at: string; updated_at: string } | null> {
     return this.http
       .get<Record<string, unknown>>(`${API_BASE}/professionals/${id}`)
       .pipe(
@@ -1250,6 +1273,7 @@ export class ApiService {
                 specialty: p.specialty as string | undefined,
                 institution: p.institution as string | undefined,
                 is_active: (p.is_active as boolean) ?? true,
+                profile_photo_url: p.profile_photo_url as string | undefined,
                 created_at: (p.created_at as string) ?? '',
                 updated_at: (p.updated_at as string) ?? '',
               }
@@ -1261,11 +1285,10 @@ export class ApiService {
 
   createProfessional(data: {
     email: string;
-    password: string;
     display_name: string;
     specialty?: string;
     institution?: string;
-  }): Observable<{ id: string; user_id: string; display_name: string } | { error: string }> {
+  }): Observable<{ id: string; user_id: string; display_name: string; activation_url?: string } | { error: string }> {
     return this.http
       .post<Record<string, unknown>>(`${API_BASE}/professionals`, data)
       .pipe(
@@ -1273,6 +1296,7 @@ export class ApiService {
           id: str(r.id),
           user_id: str(r.user_id),
           display_name: r.display_name as string,
+          activation_url: (r.activation_url as string | undefined) ?? (r.activationUrl as string | undefined),
         })),
         catchError((err) => {
           const d = err.error?.detail;
@@ -1794,5 +1818,3 @@ export class ApiService {
     return this.http.patch<Record<string, unknown>>(`${API_BASE}/assignments/${assignmentId}/end`, {});
   }
 }
-
-

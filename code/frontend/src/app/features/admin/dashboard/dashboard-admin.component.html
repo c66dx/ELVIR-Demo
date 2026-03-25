@@ -1,47 +1,299 @@
-<div class="dashboard">
+﻿<div class="dashboard">
   <header class="dashboard-header page-header">
-    <h2>Panel de Administración</h2>
+    <div class="page-header-left">
+      <h2>Panel de administración</h2>
+      <p class="page-subtitle">Visión general de tutores, usuarios, contenido y actividad reciente.</p>
+      <div class="header-meta">
+        <span class="meta-pill">Última actualización: hoy</span>
+        <span class="meta-pill meta-pill--live">Monitoreo activo</span>
+      </div>
+    </div>
+    <div class="page-header-actions">
+      <a routerLink="/admin/profesionales/nuevo" class="btn-secondary">Crear tutor</a>
+      <a routerLink="/admin/material/nuevo" class="btn-primary">Crear material</a>
+    </div>
   </header>
 
-  <div class="admin-actions">
-    <a routerLink="/admin/profesionales" class="action-card">
-      <span class="action-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <line x1="19" y1="8" x2="19" y2="14"/>
-          <line x1="22" y1="11" x2="16" y2="11"/>
-        </svg>
-      </span>
-      <span class="action-title">Tutores</span>
-      <span class="action-desc">Ver lista y crear nuevos tutores</span>
-    </a>
-    <a routerLink="/admin/usuarios" class="action-card">
-      <span class="action-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M22 11.5a3.5 3.5 0 1 1-6.6-1.6"/>
-          <line x1="22" y1="11.5" x2="19" y2="11.5"/>
-        </svg>
-      </span>
-      <span class="action-title">Usuarios y logs</span>
-      <span class="action-desc">Ver jóvenes y tutores con últimos accesos</span>
-    </a>
-    <a routerLink="/admin/material/nuevo" class="action-card">
-      <span class="action-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
-          <polyline points="10 9 9 9 8 9"/>
-        </svg>
-      </span>
-      <span class="action-title">Crear material</span>
-      <span class="action-desc">Agregar material de apoyo general (visible para todos)</span>
-    </a>
-  </div>
+  <section class="kpi-grid">
+    <article class="kpi-card kpi-card--primary">
+      <div class="kpi-head">
+        <span class="kpi-label">Tutores activos</span>
+        <span class="kpi-change kpi-change--up">+12%</span>
+      </div>
+      <div class="kpi-value">48</div>
+      <div class="kpi-meta">Operativos este mes</div>
+      <div class="kpi-spark">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </article>
+
+    <article class="kpi-card kpi-card--info">
+      <div class="kpi-head">
+        <span class="kpi-label">Usuarios registrados</span>
+        <span class="kpi-change kpi-change--up">+8%</span>
+      </div>
+      <div class="kpi-value">1.284</div>
+      <div class="kpi-meta">Jóvenes + tutores</div>
+      <div class="kpi-spark">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </article>
+
+    <article class="kpi-card kpi-card--accent">
+      <div class="kpi-head">
+        <span class="kpi-label">Accesos hoy</span>
+        <span class="kpi-change kpi-change--up">+21%</span>
+      </div>
+      <div class="kpi-value">236</div>
+      <div class="kpi-meta">Últimas 24 horas</div>
+      <div class="kpi-spark">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </article>
+
+    <article class="kpi-card kpi-card--success">
+      <div class="kpi-head">
+        <span class="kpi-label">Material publicado</span>
+        <span class="kpi-change kpi-change--up">+4%</span>
+      </div>
+      <div class="kpi-value">96</div>
+      <div class="kpi-meta">Biblioteca activa</div>
+      <div class="kpi-spark">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </article>
+
+    <article class="kpi-card kpi-card--warning">
+      <div class="kpi-head">
+        <span class="kpi-label">Alertas abiertas</span>
+        <span class="kpi-change kpi-change--down">-2</span>
+      </div>
+      <div class="kpi-value">3</div>
+      <div class="kpi-meta">Requieren revisión</div>
+      <div class="kpi-spark">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </article>
+  </section>
+
+  <section class="dashboard-section admin-section">
+    <div class="section-header">
+      <div>
+        <h3>Gestión principal</h3>
+        <p class="section-subtitle">Acciones clave para la operación diaria.</p>
+      </div>
+    </div>
+
+    <div class="admin-grid">
+      <article class="admin-card">
+        <div class="admin-card-top">
+          <span class="admin-icon admin-icon--primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <line x1="19" y1="8" x2="19" y2="14"/>
+              <line x1="22" y1="11" x2="16" y2="11"/>
+            </svg>
+          </span>
+          <div class="admin-metric">
+            <span class="metric-value">128</span>
+            <span class="metric-label">tutores registrados</span>
+          </div>
+        </div>
+        <h4 class="admin-title">Gestión de tutores</h4>
+        <p class="admin-desc">Altas, bajas y supervisión del desempeño en plataforma.</p>
+        <div class="admin-card-meta">
+          <span class="admin-pill">14 pendientes</span>
+          <span class="admin-pill">5 nuevos</span>
+        </div>
+        <div class="admin-card-actions">
+          <a routerLink="/admin/profesionales" class="btn-secondary">Ver tutores</a>
+        </div>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-top">
+          <span class="admin-icon admin-icon--info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M21 8a4 4 0 0 1-4 4"/>
+            </svg>
+          </span>
+          <div class="admin-metric">
+            <span class="metric-value">1.284</span>
+            <span class="metric-label">usuarios activos</span>
+          </div>
+        </div>
+        <h4 class="admin-title">Usuarios y logs</h4>
+        <p class="admin-desc">Seguimiento de accesos, sesiones y actividad relevante.</p>
+        <div class="admin-card-meta">
+          <span class="admin-pill">236 accesos hoy</span>
+          <span class="admin-pill">12 eventos críticos</span>
+        </div>
+        <div class="admin-card-actions">
+          <a routerLink="/admin/usuarios" class="btn-secondary">Ver actividad</a>
+        </div>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-top">
+          <span class="admin-icon admin-icon--accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </span>
+          <div class="admin-metric">
+            <span class="metric-value">96</span>
+            <span class="metric-label">materiales activos</span>
+          </div>
+        </div>
+        <h4 class="admin-title">Biblioteca de material</h4>
+        <p class="admin-desc">Publica, revisa y organiza material de apoyo general.</p>
+        <div class="admin-card-meta">
+          <span class="admin-pill">8 por revisar</span>
+          <span class="admin-pill">12 nuevos</span>
+        </div>
+        <div class="admin-card-actions">
+          <a routerLink="/admin/material" class="btn-secondary">Gestionar material</a>
+        </div>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-top">
+          <span class="admin-icon admin-icon--warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M12 7v5"/>
+              <circle cx="12" cy="16" r="1"/>
+            </svg>
+          </span>
+          <div class="admin-metric">
+            <span class="metric-value">43</span>
+            <span class="metric-label">eventos auditados</span>
+          </div>
+        </div>
+        <h4 class="admin-title">Auditoría y control</h4>
+        <p class="admin-desc">Registro histórico de acciones administrativas.</p>
+        <div class="admin-card-meta">
+          <span class="admin-pill">Últimas 24 h</span>
+          <span class="admin-pill">3 alertas</span>
+        </div>
+        <div class="admin-card-actions">
+          <a routerLink="/admin/auditoria" class="btn-secondary">Ver auditoría</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="dashboard-section activity-section">
+    <div class="section-header">
+      <div>
+        <h3>Actividad reciente</h3>
+        <p class="section-subtitle">Últimas acciones administrativas y accesos relevantes.</p>
+      </div>
+      <a routerLink="/admin/auditoria" class="link-more">Ver auditoría</a>
+    </div>
+
+    <div class="activity-card">
+      <div class="activity-row">
+        <span class="activity-icon activity-icon--success">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+          </svg>
+        </span>
+        <div class="activity-body">
+          <span class="activity-title">Nuevo tutor creado</span>
+          <span class="activity-meta">María Pérez · Planificación laboral · hace 12 min</span>
+        </div>
+        <span class="activity-tag activity-tag--success">Creación</span>
+      </div>
+
+      <div class="activity-row">
+        <span class="activity-icon activity-icon--info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 3h18v4H3z"/>
+            <path d="M3 10h18v11H3z"/>
+            <path d="M7 14h10"/>
+            <path d="M7 18h6"/>
+          </svg>
+        </span>
+        <div class="activity-body">
+          <span class="activity-title">Material actualizado</span>
+          <span class="activity-meta">Guía de entrevistas · Versión 2.1 · hace 1 h</span>
+        </div>
+        <span class="activity-tag activity-tag--info">Contenido</span>
+      </div>
+
+      <div class="activity-row">
+        <span class="activity-icon activity-icon--primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 3v18"/>
+            <path d="M5 10l7-7 7 7"/>
+          </svg>
+        </span>
+        <div class="activity-body">
+          <span class="activity-title">Pico de accesos</span>
+          <span class="activity-meta">236 accesos en 24 h · Mayor actividad desde 09:00</span>
+        </div>
+        <span class="activity-tag activity-tag--neutral">Tendencia</span>
+      </div>
+
+      <div class="activity-row">
+        <span class="activity-icon activity-icon--warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5"/>
+            <circle cx="12" cy="16" r="1"/>
+          </svg>
+        </span>
+        <div class="activity-body">
+          <span class="activity-title">Acceso fuera de horario</span>
+          <span class="activity-meta">Usuario admin&#64;test.cl · 23:14 · hace 3 h</span>
+        </div>
+        <span class="activity-tag activity-tag--warning">Alerta</span>
+      </div>
+
+      <div class="activity-row">
+        <span class="activity-icon activity-icon--danger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 6h18"/>
+            <path d="M8 6v12"/>
+            <path d="M16 6v12"/>
+            <path d="M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"/>
+          </svg>
+        </span>
+        <div class="activity-body">
+          <span class="activity-title">Tutor desactivado</span>
+          <span class="activity-meta">Carlos Núñez · Razón: inactividad · hace 6 h</span>
+        </div>
+        <span class="activity-tag activity-tag--danger">Acción</span>
+      </div>
+    </div>
+  </section>
 </div>
-
-

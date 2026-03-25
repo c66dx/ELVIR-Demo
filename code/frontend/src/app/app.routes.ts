@@ -6,7 +6,8 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 import { redirectToDashboardGuard } from './core/guards/redirect-dashboard.guard';
-import { jovenGuard, profesionalGuard, adminGuard } from './core/guards/role.guard';
+import { jovenGuard, profesionalGuard, adminGuard } from './core/guards/role.guard';
+import { interviewLeaveGuard } from './core/guards/interview-leave.guard';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { NuevaSimulacionComponent } from './features/joven/simulacion/nueva-simulacion.component';
@@ -92,6 +93,7 @@ export const routes: Routes = [
       {
         path: 'joven/simulacion/:sessionId',
         canActivate: [jovenGuard],
+        canDeactivate: [interviewLeaveGuard],
         component: SimulacionDetailComponent,
       },
       {
@@ -126,7 +128,7 @@ export const routes: Routes = [
             component: InterviewWaitingRoomComponent,
             data: { target: 'profesional' },
           },
-          { path: 'simulacion/:sessionId', component: SimulacionDetailComponent },
+          { path: 'simulacion/:sessionId', component: SimulacionDetailComponent, canDeactivate: [interviewLeaveGuard] },
           { path: 'cuenta', component: ProfessionalAccountComponent },
           {
             path: 'jovenes',

@@ -1,4 +1,4 @@
-<div class="lobby-page">
+﻿<div class="lobby-page">
   <div class="lobby-header">
     <div class="lobby-title">
       <h2>Sala previa de entrevista</h2>
@@ -36,13 +36,26 @@
       <span class="step-index">4</span>
       <div>
         <span class="step-title">Ingreso</span>
-        <span class="step-desc">Conectarse</span>
+        <span class="step-desc">Conectaráse</span>
       </div>
     </div>
   </div>
 
   @if (loading) {
-    <p>Cargando...</p>
+    <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
   } @else {
     <form id="simulacion-form" [formGroup]="form" (ngSubmit)="onSubmit()">
       @if (currentStep() === 1) {
@@ -108,7 +121,7 @@
           <div>
             <span class="section-kicker">Paso 2</span>
             <h3>Selecciona el escenario de entrevista</h3>
-            <p>Elige el nivel de exigencia y el tono con el que se desarrollará la entrevista.</p>
+            <p>Elige el nivel de exigencia y el tono con el que se desarrollar la entrevista.</p>
           </div>
         </div>
         <div class="case-grid">
@@ -188,7 +201,7 @@
             </div>
             <div class="briefing-footer">
               <span>Modalidad: Videollamada</span>
-              <span>Duración estimada: {{ selectedCase() ? estimatedDuration(selectedCase()!.difficulty) : '8-12 min' }}</span>
+              <span>Duración estimada: {{ selectedCase() ?  estimatedDuration(selectedCase()!.difficulty) : '8-12 min' }}</span>
             </div>
           } @else {
             <p class="briefing-empty">Selecciona un rol y un escenario para generar el briefing.</p>
@@ -203,7 +216,7 @@
 
       <div class="lobby-actions">
         <button type="button" class="btn-secondary" (click)="goBack()" [disabled]="currentStep() === 1">
-          Volver
+          ← Volver
         </button>
         <div class="lobby-actions-right">
           @if (currentStep() < 3) {
@@ -223,3 +236,4 @@
     </form>
   }
 </div>
+

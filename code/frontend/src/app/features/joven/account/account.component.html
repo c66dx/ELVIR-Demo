@@ -7,13 +7,28 @@
   </header>
 
   @if (loading()) {
-    <div class="account-loading">Cargando...</div>
+    <div class="account-loading">
+<div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
+</div>
   } @else {
     <div class="account-grid">
       <section class="account-card">
         <div class="card-title">
           <h3>Perfil</h3>
-          <span class="card-subtitle">Foto y datos básicos</span>
+          <span class="card-subtitle">Foto y datos bsicos</span>
         </div>
         <div class="profile-row">
           <div class="avatar" [class.avatar--image]="photoUrl()">
@@ -36,7 +51,7 @@
             <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onPhotoSelected($event)" />
           </label>
         </div>
-        <p class="card-hint">Formatos: JPG, PNG o WEBP. Máximo 5 MB.</p>
+        <p class="card-hint">Formatos: JPG, PNG o WEBP. Mximo 5 MB.</p>
         @if (photoError()) {
           <p class="card-error">{{ photoError() }}</p>
         }
@@ -48,15 +63,29 @@
           <span class="card-subtitle">Requiere confirmar con tu contraseña</span>
         </div>
         <form class="account-form" [formGroup]="emailForm" (ngSubmit)="onChangeEmail()">
-          <label>
-            Nuevo correo
-            <input type="email" formControlName="new_email" placeholder="nuevo@correo.cl" />
-          </label>
-          <label>
-            Contraseña actual
-            <input type="password" formControlName="current_password" placeholder="Tu contraseña" />
-          </label>
-          <button type="submit" class="btn-primary" [disabled]="emailForm.invalid">Solicitar cambio</button>
+          <app-form-grid [columns]="1">
+            <app-form-field label="Nuevo correo" forId="new_email" [required]="true">
+              <app-text-input
+                id="new_email"
+                type="email"
+                formControlName="new_email"
+                placeholder="nuevo@correo.cl"
+                autocomplete="email"
+              ></app-text-input>
+            </app-form-field>
+            <app-form-field label="Contraseña actual" forId="current_password" [required]="true">
+              <app-text-input
+                id="current_password"
+                type="password"
+                formControlName="current_password"
+                placeholder="Tu contraseña"
+                autocomplete="current-password"
+              ></app-text-input>
+            </app-form-field>
+          </app-form-grid>
+          <app-form-actions [sticky]="false" align="start">
+            <button type="submit" class="btn-primary" [disabled]="emailForm.invalid">Solicitar cambio</button>
+          </app-form-actions>
         </form>
         @if (emailError()) {
           <p class="card-error">{{ emailError() }}</p>
@@ -66,7 +95,7 @@
         }
         @if (activationUrl()) {
           <div class="activation-url">
-            <span>Enlace de confirmación:</span>
+            <span>Enlace de confirmacin:</span>
             <a [href]="activationUrl()!" target="_blank" rel="noopener">{{ activationUrl() }}</a>
           </div>
         }
@@ -77,7 +106,7 @@
           <h3>Contraseña</h3>
           <span class="card-subtitle">Actualiza tu contraseña cuando lo necesites</span>
         </div>
-        <p class="card-text">Para mayor seguridad, cambia tu contraseña periódicamente.</p>
+        <p class="card-text">Para mayor seguridad, cambia tu contraseña peródicamente.</p>
         <a routerLink="/cambiar-contrasena" class="btn-secondary">Cambiar contraseña</a>
       </section>
     </div>

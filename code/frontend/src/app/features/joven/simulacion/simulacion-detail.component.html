@@ -94,7 +94,7 @@
                 <span class="meta-label">Cargo</span>
 
 
-                <span class="meta-value">{{ data.jobRoleName || '—' }}</span>
+                <span class="meta-value">{{ data.jobRoleName || '' }}</span>
 
 
                 <span class="meta-sub">{{ data.caseName || 'Entrevista simulada' }}</span>
@@ -181,7 +181,7 @@
                 <span class="metric-label">Tipo de entrevista</span>
 
 
-                <span class="metric-value">{{ data.caseName || 'Escenario estándar' }}</span>
+                <span class="metric-value">{{ data.caseName || 'Escenario estndar' }}</span>
 
 
               </div>
@@ -220,7 +220,7 @@
                 <h4>Retroalimentación del tutor</h4>
 
 
-                <p class="feedback-subtitle">Se publicará cuando el tutor revise la entrevista.</p>
+                <p class="feedback-subtitle">Se publicar cuando el tutor revise la entrevista.</p>
 
 
               </div>
@@ -283,7 +283,7 @@
               } @else {
 
 
-                <p>Tu tutor revisará esta entrevista y dejará comentarios cuando estén disponibles.</p>
+                <p>Tu tutor revisar esta entrevista y dejar comentarios cuando estn disponibles.</p>
 
 
                 <a [routerLink]="['/joven/retroalimentacion', sessionId]" class="btn-secondary">Ir a retroalimentación</a>
@@ -304,7 +304,7 @@
           <section class="report-section report-next">
 
 
-            <h4>Qué puedes hacer ahora</h4>
+            <h4>Qu puedes hacer ahora</h4>
 
 
             <ul class="next-steps">
@@ -319,7 +319,7 @@
                 <li>Vuelve a practicar para ganar confianza.</li>
 
 
-                <li>Consulta tu historial cuando esté la retroalimentación.</li>
+                <li>Consulta tu historial cuando está la retroalimentación.</li>
 
 
               } @else if (data.status === 'COMPLETADA' && isProfessionalView()) {
@@ -409,7 +409,7 @@
         <div class="banner-session-not-found">
 
 
-          <p>Esta entrevista no existe o expiró.</p>
+          <p>Esta entrevista no existe o expir.</p>
 
 
           <p class="banner-hint">Para iniciar una entrevista, primero debes elegir cargo y caso.</p>
@@ -454,7 +454,20 @@
       } @else if (loading()) {
 
 
-        <p>Cargando...</p>
+        <div class="call-loading">
+          <div class="loading-card">
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <div>
+              <h3>Preparando la entrevista</h3>
+              <p>Estamos conectando la sala y ajustando los recursos de audio y video.</p>
+            </div>
+          </div>
+          <div class="loading-skeleton">
+            <span class="skeleton-line skeleton-line--lg"></span>
+            <span class="skeleton-line"></span>
+            <span class="skeleton-line skeleton-line--sm"></span>
+          </div>
+        </div>
 
 
       } @else if (embedUrl() || useLiveKit()) {
@@ -481,37 +494,31 @@
                 </div>
 
 
-                <div class="meta-details">
+                @if (sessionContext(); as ctx) {
 
 
-                  @if (sessionContext(); as ctx) {
+                  <div class="session-context">
 
 
-                    <span class="call-subtitle">Caso: {{ ctx.caseName }} · Javiera (IA)</span>
+                    <span class="context-badge context-badge--ai">Javiera (IA)</span>
 
 
-                    <div class="session-context">
+                    <span class="context-badge">Cargo: {{ ctx.jobRoleName }}</span>
 
 
-                      <span class="context-badge">Cargo: {{ ctx.jobRoleName }}</span>
+                    <span class="context-badge">Caso: {{ ctx.caseName }}</span>
 
 
-                      <span class="context-badge">Caso: {{ ctx.caseName }}</span>
+                  </div>
 
 
-                    </div>
+                } @else {
 
 
-                  } @else {
+                  <span class="call-subtitle">Conexión en línea con Javiera (IA)</span>
 
 
-                    <span class="call-subtitle">Conexión en línea con Javiera (IA)</span>
-
-
-                  }
-
-
-                </div>
+                }
 
 
               </div>
@@ -661,66 +668,6 @@
                   <div class="turn-indicator">{{ turnIndicator() }}</div>
 
 
-                  @if (captionsEnabled() && captionLines().length) {
-
-
-                    <div
-
-
-                      class="caption-overlay"
-
-
-                      [class.caption-overlay--avatar]="captionRole() === 'avatar'"
-
-
-                      [class.caption-overlay--user]="captionRole() === 'user'"
-
-
-                    >
-
-
-                      <span class="caption-role">{{ captionRoleLabel() }}</span>
-
-
-                      <span class="caption-text">{{ captionLines().join('\n') }}</span>
-
-
-                    </div>
-
-
-                  }
-
-
-                  @if (captionsEnabled() && chatAvailable()) {
-
-
-                    <div class="chat-overlay">
-
-
-                      <div class="chat-header">Mensajes IA</div>
-
-
-                      <div class="chat-messages">
-
-
-                        @for (msg of chatMessages(); track msg.id) {
-
-
-                          <div class="chat-message">{{ msg.text }}</div>
-
-
-                        }
-
-
-                      </div>
-
-
-                    </div>
-
-
-                  }
-
-
                 </div>
 
 
@@ -845,24 +792,6 @@
 
 
                   </div>
-
-
-                  @if (captionsAvailable()) {
-
-
-                    <button type="button" class="caption-toggle" [class.is-active]="captionsEnabled()" (click)="toggleCaptions()">
-
-
-                      <span class="caption-icon">CC</span>
-
-
-                      <span class="caption-label">Subtítulos</span>
-
-
-                    </button>
-
-
-                  }
 
 
                 }

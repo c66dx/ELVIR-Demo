@@ -1,10 +1,23 @@
-@if (vm$ | async; as vm) {
+﻿@if (vm$ | async; as vm) {
 
 
   @if (vm.state === 'loading') {
 
 
-    <p>Cargando...</p>
+    <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
 
 
   } @else if (vm.state === 'notfound') {
@@ -19,7 +32,7 @@
       <p>No se encontró una entrevista válida para mostrar retroalimentación.</p>
 
 
-      <a routerLink="/joven/retroalimentacion" class="btn-secondary">Volver a retroalimentación</a>
+      <a routerLink="/joven/retroalimentacion" class="btn-secondary">← Volver a retroalimentación</a>
 
 
     </div>
@@ -46,7 +59,7 @@
       <div class="page-actions">
 
 
-        <a routerLink="/joven/retroalimentacion" class="btn-secondary">Volver</a>
+        <a routerLink="/joven/retroalimentacion" class="btn-secondary">← Volver</a>
 
 
         <a [routerLink]="['/joven/simulacion', vm.detail.sessionId]" class="btn-primary">Ver entrevista</a>
@@ -242,5 +255,6 @@
 
 
 }
+
 
 

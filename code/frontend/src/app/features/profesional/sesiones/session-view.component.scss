@@ -29,9 +29,18 @@
 }
 
 .back-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.9rem;
   color: var(--color-text-muted);
+
+  &::before {
+    content: '←';
+    font-size: 1rem;
+    line-height: 1;
+    color: currentColor;
+  }
 
   &:hover {
     color: var(--color-primary);

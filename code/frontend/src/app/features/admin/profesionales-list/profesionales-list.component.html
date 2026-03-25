@@ -1,116 +1,88 @@
 <div class="list-page">
-
   <header class="page-header">
-
     <h2>Tutores</h2>
-
     <a routerLink="/admin/profesionales/nuevo" class="btn-primary">Crear tutor</a>
-
   </header>
 
-
-
   @if (loading) {
-
-    <p class="loading">Cargando...</p>
-
+    <div class="loading-state">
+      <div class="loading-state__card">
+        <span class="loading-state__spinner" aria-hidden="true"></span>
+        <div>
+          <div class="loading-state__title">Cargando...</div>
+          <div class="loading-state__subtitle">Estamos preparando la información.</div>
+        </div>
+      </div>
+      <div class="loading-state__skeleton">
+        <span class="loading-state__line loading-state__line--lg"></span>
+        <span class="loading-state__line"></span>
+        <span class="loading-state__line loading-state__line--sm"></span>
+      </div>
+    </div>
   } @else if (total === 0) {
-
     <p class="empty">No hay tutores registrados. <a routerLink="/admin/profesionales/nuevo">Crear el primero</a></p>
-
   } @else {
-
     <div class="table-wrap">
-
       <table class="data-table">
-
         <thead>
-
           <tr>
-
-            <th>Nombre</th>
-
+            <th>Tutor</th>
             <th>Especialidad</th>
-
             <th>Institución</th>
-
             <th>Estado</th>
-
-            <th></th>
-
+            <th class="col-actions">Acciones</th>
           </tr>
-
         </thead>
-
         <tbody>
-
           @for (p of professionals; track p.id) {
-
-            <tr>
-
-              <td>{{ p.display_name }}</td>
-
-              <td>{{ p.specialty || '-' }}</td>
-
-              <td>{{ p.institution || '-' }}</td>
-
+            <tr [class.inactive]="!p.is_active">
               <td>
-
+                <div class="user-cell">
+                  <div class="avatar" [class.avatar--image]="p.profile_photo_url">
+                    @if (p.profile_photo_url) {
+                      <img [src]="p.profile_photo_url" alt="Foto del tutor" />
+                    } @else {
+                      <span>{{ initials(p.display_name) }}</span>
+                    }
+                  </div>
+                  <div>
+                    <div class="user-name">{{ p.display_name }}</div>
+                    <div class="user-meta">{{ p.specialty || 'Sin especialidad' }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>{{ p.specialty || '-' }}</td>
+              <td>{{ p.institution || '-' }}</td>
+              <td>
                 <span class="badge" [class.badge-active]="p.is_active" [class.badge-inactive]="!p.is_active">
-
                   {{ p.is_active ? 'Activo' : 'Inactivo' }}
-
                 </span>
-
               </td>
-
-              <td class="actions-cell">
-
-                <a [routerLink]="['/admin/profesionales', p.id, 'editar']" class="btn-link">Editar</a>
-
+              <td class="actions">
+                <div class="actions-wrap">
+                  <a [routerLink]="['/admin/profesionales', p.id, 'editar']" class="action-btn action-btn--view">Ver perfil</a>
+                  @if (p.is_active) {
+                    <button type="button" class="action-btn action-btn--delete" (click)="onDeactivate(p)">Desactivar</button>
+                  } @else {
+                    <button type="button" class="action-btn" (click)="onActivate(p)">Activar</button>
+                  }
+                  <button type="button" class="action-btn action-btn--hard" (click)="onDelete(p)">Eliminar</button>
+                </div>
               </td>
-
             </tr>
-
           }
-
         </tbody>
-
       </table>
-
     </div>
 
     <div class="pager">
-
       <span>Página {{ page }} de {{ totalPages() }} · Total {{ total }}</span>
-
       <div class="pager-actions">
-
         <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="page <= 1">Anterior</button>
-
-        <button
-
-          type="button"
-
-          class="pager-btn"
-
-          (click)="nextPage()"
-
-          [disabled]="page >= totalPages()"
-
-        >
-
+        <button type="button" class="pager-btn" (click)="nextPage()" [disabled]="page >= totalPages()">
           Siguiente
-
         </button>
-
       </div>
-
     </div>
-
   }
-
 </div>
-
-
-

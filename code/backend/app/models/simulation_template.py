@@ -1,6 +1,5 @@
 """Modelo SIMULATION_TEMPLATES."""
 from sqlalchemy import Column, DateTime, Integer, String, Boolean, ForeignKey, UniqueConstraint, func
-from sqlalchemy.orm import relationship
 
 from app.database import Base
 

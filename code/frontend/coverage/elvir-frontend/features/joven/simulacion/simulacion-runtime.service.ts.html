@@ -273,7 +273,7 @@ export class SimulacionRuntimeService {
       returnUrl: params.returnUrl,
       youthId: params.youthId,
       sessionSummary: shouldAttachSummary
-        ? {
+        ?? {
             duration_seconds: params.session?.duration_seconds,
             jobRoleName: params.context?.jobRoleName,
             caseName: params.context?.caseName,

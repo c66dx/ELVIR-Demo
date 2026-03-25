@@ -11,6 +11,10 @@ Este documento describe los endpoints principales de la API REST del backend de 
 
 ## 1. Convenciones generales
 
+- Header de trazabilidad en respuestas: `X-Request-ID` (puedes enviarlo en la request para propagarlo).
+- Errores estandarizados: ver `docs/errors.md`.
+
+
 - Base URL (ejemplo):
 
   `/api/v1`

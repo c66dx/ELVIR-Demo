@@ -337,7 +337,7 @@
   color: var(--color-primary);
 }
 
-.input-wrap input {
+:host ::ng-deep .input-wrap .form-control {
   width: 100%;
   padding: var(--space-3) var(--space-4) var(--space-3) 3rem;
   border: 1.5px solid var(--color-border);
@@ -356,6 +356,11 @@
     border-color: var(--color-primary);
     box-shadow: 0 0 0 4px var(--color-primary-light);
   }
+}
+
+:host ::ng-deep .input-wrap app-text-input {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .error {

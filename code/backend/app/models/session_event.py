@@ -1,7 +1,6 @@
 """Modelo SESSION_EVENTS."""
 from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, func
 from sqlalchemy import JSON
-from sqlalchemy.orm import relationship
 
 from app.database import Base
 

@@ -79,6 +79,84 @@
   width: 100%;
 }
 
+.call-loading {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.loading-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+
+  h3 {
+    margin: 0 0 var(--space-1);
+    font-size: 1.05rem;
+    color: var(--color-text);
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+}
+
+.loading-spinner {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid rgba(15, 118, 110, 0.2);
+  border-top-color: var(--color-primary);
+  animation: spin 1s linear infinite;
+}
+
+.loading-skeleton {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(15, 118, 110, 0.12), rgba(15, 118, 110, 0.25), rgba(15, 118, 110, 0.12));
+  background-size: 180% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.skeleton-line--lg {
+  height: 16px;
+  width: 70%;
+}
+
+.skeleton-line--sm {
+  width: 45%;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
 :host-context(.theme-dark) .simulacion-page .call-deck {
   background: var(--color-surface);
   border-color: var(--color-border);
@@ -202,7 +280,7 @@
 .simulacion-meta {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-3);
   padding: 0 0 var(--space-3);
   margin-bottom: var(--space-3);
@@ -220,25 +298,27 @@
 }
 
 .meta-left {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: var(--space-2);
 }
 
 .meta-right {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-end;
-  gap: var(--space-1);
+  gap: var(--space-2);
   min-width: 220px;
+  align-self: flex-start;
 }
 
 .call-title {
   display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-2);
+  align-items: flex-start;
+  gap: 0.15rem;
+  flex-direction: column;
   min-width: 180px;
 }
 
@@ -253,12 +333,10 @@
 }
 
 .call-subtitle {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--call-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 320px;
+  white-space: normal;
+  max-width: 520px;
 }
 
 .status-strip {
@@ -266,7 +344,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 .audio-controls {
@@ -509,6 +587,11 @@
   font-size: 0.9rem;
   font-weight: 600;
   box-shadow: none;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
 }
 
 .call-control-icon {
@@ -538,15 +621,18 @@
   background: var(--call-danger);
   color: #fff;
   border: none;
+  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.22);
 }
 
 .simulacion-controls .call-control.call-control--end:hover {
   background: var(--call-danger-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(239, 68, 68, 0.28);
 }
 
-.meta-details {
-  display: grid;
-  gap: var(--space-1);
+.simulacion-controls .call-control.call-control--end:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.22);
 }
 
 .session-report {
@@ -980,13 +1066,7 @@
   display: flex;
   justify-content: flex-start;
   gap: var(--space-2);
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  flex-wrap: wrap;
 
   .context-badge {
     display: inline-block;
@@ -997,6 +1077,12 @@
     font-weight: 600;
     border-radius: 999px;
     border: 1px solid rgba(79, 107, 138, 0.25);
+  }
+
+  .context-badge--ai {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
+    color: #2563eb;
+    border-color: rgba(59, 130, 246, 0.28);
   }
 }
 

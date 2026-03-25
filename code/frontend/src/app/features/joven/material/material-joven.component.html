@@ -1,13 +1,23 @@
-<div class="page-header">
-  <h2>Material</h2>
-</div>
-
-<section class="section">
-  <h3>Sugerido para ti</h3>
-  @if (suggested$ | async; as suggested) {
-    @if (suggested.items.length === 0) {
-      <p class="empty-hint">No hay material sugerido. Tu tutor puede sugerirte material desde tu perfil (asociado a una entrevista o en general).</p>
-    } @else {
+<div class="page-header">
+
+  <h2>Material</h2>
+
+</div>
+
+
+
+<section class="section">
+
+  <h3>Sugerido para ti</h3>
+
+  @if (suggested$ | async; as suggested) {
+
+    @if (suggested.items.length === 0) {
+
+      <p class="empty-hint">No hay material sugerido. Tu tutor puede sugerirte material desde tu perfil (asociado a una entrevista o en general).</p>
+
+    } @else {
+
       <ul class="material-list">
         @for (s of suggested.items; track s.id) {
           <li class="material-card">
@@ -36,31 +46,69 @@
               <span>Material no encontrado</span>
             }
           </li>
-        }
-      </ul>
-      <div class="pager">
-        <span>Página {{ suggested.page }} de {{ totalPages(suggested.total, suggested.page_size) }} · Total {{ suggested.total }}</span>
-        <div class="pager-actions">
-          <button type="button" class="pager-btn" (click)="prevSuggested()" [disabled]="suggested.page <= 1">Anterior</button>
-          <button
-            type="button"
-            class="pager-btn"
-            (click)="nextSuggested(suggested.total)"
-            [disabled]="suggested.page >= totalPages(suggested.total, suggested.page_size)"
-          >
-            Siguiente
-          </button>
-        </div>
-      </div>
-    }
-  } @else {
-    <p>Cargando...</p>
-  }
-</section>
-
-<section class="section">
-  <h3>Catálogo</h3>
-  @if (catalog$ | async; as catalog) {
+        }
+
+      </ul>
+
+      <div class="pager">
+
+        <span>Pgina {{ suggested.page }} de {{ totalPages(suggested.total, suggested.page_size) }}  Total {{ suggested.total }}</span>
+
+        <div class="pager-actions">
+
+          <button type="button" class="pager-btn" (click)="prevSuggested()" [disabled]="suggested.page <= 1">Anterior</button>
+
+          <button
+
+            type="button"
+
+            class="pager-btn"
+
+            (click)="nextSuggested(suggested.total)"
+
+            [disabled]="suggested.page >= totalPages(suggested.total, suggested.page_size)"
+
+          >
+
+            Siguiente
+
+          </button>
+
+        </div>
+
+      </div>
+
+    }
+
+  } @else {
+
+    <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
+
+  }
+
+</section>
+
+
+
+<section class="section">
+
+  <h3>Catálogo</h3>
+
+  @if (catalog$ | async; as catalog) {
+
     <ul class="material-list">
       @for (m of catalog.items; track m.id) {
         <li class="material-card">
@@ -84,22 +132,54 @@
         </li>
       }
     </ul>
-    <div class="pager">
-      <span>Página {{ catalog.page }} de {{ totalPages(catalog.total, catalog.page_size) }} · Total {{ catalog.total }}</span>
-      <div class="pager-actions">
-        <button type="button" class="pager-btn" (click)="prevCatalog()" [disabled]="catalog.page <= 1">Anterior</button>
-        <button
-          type="button"
-          class="pager-btn"
-          (click)="nextCatalog(catalog.total)"
-          [disabled]="catalog.page >= totalPages(catalog.total, catalog.page_size)"
-        >
-          Siguiente
-        </button>
-      </div>
-    </div>
-  } @else {
-    <p>Cargando...</p>
-  }
-</section>
-
+    <div class="pager">
+
+      <span>Pgina {{ catalog.page }} de {{ totalPages(catalog.total, catalog.page_size) }}  Total {{ catalog.total }}</span>
+
+      <div class="pager-actions">
+
+        <button type="button" class="pager-btn" (click)="prevCatalog()" [disabled]="catalog.page <= 1">Anterior</button>
+
+        <button
+
+          type="button"
+
+          class="pager-btn"
+
+          (click)="nextCatalog(catalog.total)"
+
+          [disabled]="catalog.page >= totalPages(catalog.total, catalog.page_size)"
+
+        >
+
+          Siguiente
+
+        </button>
+
+      </div>
+
+    </div>
+
+  } @else {
+
+    <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
+
+  }
+
+</section>
+
+
+

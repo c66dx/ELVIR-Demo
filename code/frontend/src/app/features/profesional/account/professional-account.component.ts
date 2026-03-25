@@ -1,8 +1,13 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import type { Professional } from '../../../core/models/professional.model';
+import { FormActionsComponent } from '../../../shared/form/form-actions/form-actions.component';
+import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
+import { FormGridComponent } from '../../../shared/form/form-grid/form-grid.component';
+import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component';
 
 interface MeInfo {
   user_id: string;
@@ -15,20 +20,36 @@ interface MeInfo {
 @Component({
   selector: 'app-professional-account',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    FormGridComponent,
+    FormFieldComponent,
+    FormActionsComponent,
+    TextInputComponent,
+  ],
   templateUrl: './professional-account.component.html',
   styleUrl: './professional-account.component.scss',
 })
 export class ProfessionalAccountComponent implements OnInit {
   private api = inject(ApiService);
+  private fb = inject(FormBuilder);
 
   me = signal<MeInfo | null>(null);
   professional = signal<Professional | null>(null);
   loading = signal(true);
-
   photoUrl = signal<string | null>(null);
   photoError = signal<string | null>(null);
   photoLoading = signal(false);
+  emailMessage = signal<string | null>(null);
+  emailError = signal<string | null>(null);
+  activationUrl = signal<string | null>(null);
+
+  emailForm = this.fb.group({
+    new_email: ['', [Validators.required, Validators.email]],
+    current_password: ['', [Validators.required]],
+  });
 
   initials = computed(() => {
     const name = this.professional()?.display_name || this.me()?.email || 'U';
@@ -63,5 +84,25 @@ export class ProfessionalAccountComponent implements OnInit {
       this.photoUrl.set(res.url);
     });
     input.value = '';
+  }
+
+  onChangeEmail(): void {
+    if (this.emailForm.invalid) return;
+    this.emailError.set(null);
+    this.emailMessage.set(null);
+    this.activationUrl.set(null);
+    const { new_email, current_password } = this.emailForm.value;
+    if (!new_email || !current_password) return;
+    this.api.requestEmailChange(new_email, current_password).subscribe((res) => {
+      if ('error' in res) {
+        this.emailError.set(res.error);
+        return;
+      }
+      this.emailMessage.set('Se generó un enlace de confirmación para cambiar tu correo.');
+      if (res.activation_url) {
+        this.activationUrl.set(res.activation_url);
+      }
+      this.emailForm.reset();
+    });
   }
 }

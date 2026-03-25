@@ -1,74 +1,103 @@
-<div class="form-page">
-  <div class="page-header">
-    <h2>{{ isAdmin ? 'Crear material general' : 'Crear material propio' }}</h2>
-    <a [routerLink]="backRoute" class="btn-link">← Volver</a>
-  </div>
+<app-form-container
+  [title]="isAdmin ? 'Crear material general' : 'Crear material propio'"
+  subtitle="Define el contenido y a quién aplica este material."
+>
+  <a form-header-actions [routerLink]="backRoute" class="btn-link">← Volver</a>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="field">
-      <label for="title">Título *</label>
-      <input id="title" type="text" formControlName="title" placeholder="Ej. Técnicas de comunicación" />
-    </div>
-    <div class="field">
-      <label for="description">Descripción</label>
-      <textarea id="description" formControlName="description" rows="2" placeholder="Descripción opcional"></textarea>
-    </div>
-    <div class="field">
-      <label for="type">Tipo *</label>
-      <select id="type" formControlName="type">
-        @for (t of types; track t.value) {
-          <option [value]="t.value">{{ t.label }}</option>
+  <form class="form-layout" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <app-form-section
+      title="Detalle del material"
+      description="Completa la información principal del recurso."
+    >
+      <app-form-grid columns="2">
+        <app-form-field label="Título" [required]="true" forId="title">
+          <app-text-input id="title" formControlName="title" placeholder="Ej. Técnicas de comunicación"></app-text-input>
+        </app-form-field>
+
+        <app-form-field label="Tipo" [required]="true" forId="type">
+          <app-select-input id="type" formControlName="type">
+            @for (t of types; track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </app-select-input>
+        </app-form-field>
+
+        <app-form-field label="Descripción" forId="description" span="full">
+          <app-textarea-input
+            id="description"
+            formControlName="description"
+            [rows]="3"
+            placeholder="Descripción opcional"
+          ></app-textarea-input>
+        </app-form-field>
+
+        <app-form-field label="URL" forId="url" span="full" hint="Puedes usar un enlace o subir un archivo.">
+          <app-text-input
+            id="url"
+            type="url"
+            formControlName="url"
+            placeholder="https://..."
+            [readonly]="!!selectedFile"
+          ></app-text-input>
+        </app-form-field>
+
+        @if (canUploadFile) {
+          <app-form-field label="Archivo" span="full" hint="PDF o video (mp4, webm, mov, avi, mkv). Máx. 50 MB.">
+            <div class="form-file-upload">
+              <input
+                type="file"
+                #fileInput
+                (change)="onFileSelected($event)"
+                accept=".pdf,.mp4,.webm,.mov,.avi,.mkv"
+                class="form-file-input-hidden"
+              />
+              @if (selectedFile) {
+                <span class="form-file-name">{{ selectedFile.name }}</span>
+                <button type="button" class="btn-link btn-sm" (click)="clearFile(); fileInput.value=''">Quitar</button>
+              } @else {
+                <button type="button" class="btn-secondary" (click)="fileInput.click()">Seleccionar archivo</button>
+              }
+            </div>
+          </app-form-field>
         }
-      </select>
-    </div>
-    <div class="field">
-      <label for="url">URL</label>
-      <input id="url" type="url" formControlName="url" placeholder="https://... (o sube un archivo)" [readOnly]="!!selectedFile" />
-    </div>
-    @if (canUploadFile) {
-      <div class="field">
-        <label>O subir archivo desde el PC</label>
-        <div class="file-upload">
-          <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf,.mp4,.webm,.mov,.avi,.mkv" class="file-input-hidden" />
-          @if (selectedFile) {
-            <span class="file-name">{{ selectedFile.name }}</span>
-            <button type="button" class="btn-link btn-sm" (click)="clearFile(); fileInput.value=''">Quitar</button>
-          } @else {
-            <button type="button" class="btn-secondary" (click)="fileInput.click()">Seleccionar archivo</button>
-          }
-        </div>
-        <span class="field-hint">PDF o video (mp4, webm, mov, avi, mkv). Máx. 50 MB</span>
-      </div>
-    }
-    <div class="field">
-      <label for="job_role_id">Cargo (opcional)</label>
-      <select id="job_role_id" formControlName="job_role_id">
-        <option value="">- Ninguno -</option>
-        @if (jobRoles$ | async; as roles) {
-          @for (r of roles; track r.id) {
-            <option [value]="r.id">{{ r.name }}</option>
-          }
-        }
-      </select>
-    </div>
-    <div class="field">
-      <label for="case_id">Caso (opcional)</label>
-      <select id="case_id" formControlName="case_id">
-        <option value="">- Ninguno -</option>
-        @if (cases$ | async; as cases) {
-          @for (c of cases; track c.id) {
-            <option [value]="c.id">{{ c.name }}</option>
-          }
-        }
-      </select>
-    </div>
+      </app-form-grid>
+    </app-form-section>
+
+    <app-form-section
+      title="Asociación (opcional)"
+      description="Vincula el material a un cargo o caso específico."
+    >
+      <app-form-grid columns="2">
+        <app-form-field label="Cargo" forId="job_role_id">
+          <app-select-input id="job_role_id" formControlName="job_role_id" placeholder="- Ninguno -">
+            @if (jobRoles$ | async; as roles) {
+              @for (r of roles; track r.id) {
+                <option [value]="r.id">{{ r.name }}</option>
+              }
+            }
+          </app-select-input>
+        </app-form-field>
+        <app-form-field label="Caso" forId="case_id">
+          <app-select-input id="case_id" formControlName="case_id" placeholder="- Ninguno -">
+            @if (cases$ | async; as cases) {
+              @for (c of cases; track c.id) {
+                <option [value]="c.id">{{ c.name }}</option>
+              }
+            }
+          </app-select-input>
+        </app-form-field>
+      </app-form-grid>
+    </app-form-section>
+
     @if (errorMessage) {
-      <p class="error">{{ errorMessage }}</p>
+      <p class="form-error-banner">{{ errorMessage }}</p>
     }
-    <div class="form-actions actions">
-      <button type="submit" [disabled]="submitting || !form.get('title')?.value?.trim()" class="btn-primary">Crear material</button>
-      <a [routerLink]="backRoute" class="btn-link">Cancelar</a>
-    </div>
-  </form>
-</div>
 
+    <app-form-actions>
+      <button type="submit" [disabled]="submitting || !form.get('title')?.value?.trim()" class="btn-primary">
+        Crear material
+      </button>
+      <a [routerLink]="backRoute" class="btn-secondary">Cancelar</a>
+    </app-form-actions>
+  </form>
+</app-form-container>

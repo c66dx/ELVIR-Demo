@@ -38,7 +38,7 @@
             <a [routerLink]="['/joven/simulacion', s.id]" class="recent-item">
               <span class="recent-date">{{ formatDate(s.started_at) }}</span>
               <app-status-badge [status]="s.status" />
-              <span class="recent-meta">{{ s.mode }} · {{ formatDuration(s.duration_seconds) }}</span>
+              <span class="recent-meta">{{ s.mode }}  {{ formatDuration(s.duration_seconds) }}</span>
             </a>
           }
         </div>
@@ -51,7 +51,20 @@
       </section>
     }
   } @else {
-    <p class="loading">Cargando...</p>
+    <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
   }
 </div>
 

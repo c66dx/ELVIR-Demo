@@ -1,6 +1,5 @@
 """Modelo ASSIGNMENTS."""
 from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, func
-from sqlalchemy.orm import relationship
 
 from app.database import Base
 
