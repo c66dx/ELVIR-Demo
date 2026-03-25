@@ -94,7 +94,7 @@ export class MyAccountComponent implements OnInit {
  this.emailError.set(res.error); 
  return; 
  } 
- this.emailMessage.set('Se gener un enlace de confirmacin para cambiar tu email.'); 
+ this.emailMessage.set('Se generó un enlace de confirmación para cambiar tu correo.'); 
  if (res.activation_url) { 
  this.activationUrl.set(res.activation_url); 
  } 

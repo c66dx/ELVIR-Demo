@@ -149,7 +149,7 @@ class ProfessionalCreate(BaseModel):
     @classmethod
     def email_format(cls, v: str) -> str:
         if "@" not in v or "." not in v.split("@")[-1]:
-            raise ValueError("Formato de email inválido")
+            raise ValueError("Formato de correo inválido")
         return v.lower()
 
     display_name: str
@@ -166,7 +166,7 @@ def create_professional(
     """Crea un nuevo profesional. Solo Admin."""
     existing = db.query(User).filter(User.email.ilike(data.email)).first()
     if existing:
-        raise HTTPException(status_code=400, detail="El email ya est? registrado")
+        raise HTTPException(status_code=400, detail="El correo ya está registrado")
 
     temp_password = uuid.uuid4().hex
     user = User(

@@ -1,4 +1,4 @@
-﻿"""Router de jóvenes."""
+"""Router de jóvenes."""
 import json
 import uuid
 import re
@@ -438,10 +438,10 @@ def create_youth(
     if data.login_enabled and data.email:
         email = data.email.lower().strip()
         if not email:
-            raise HTTPException(status_code=400, detail="Email inválido")
+            raise HTTPException(status_code=400, detail="Correo inválido")
         existing = db.query(User).filter(User.email.ilike(email)).first()
         if existing:
-            raise HTTPException(status_code=409, detail="El email ya está registrado")
+            raise HTTPException(status_code=409, detail="El correo ya está registrado")
     normalized_rut = None
     if data.rut:
         normalized_rut = _normalize_rut(data.rut)
@@ -692,10 +692,10 @@ def update_youth(
     if youth.login_enabled and not youth.user_id and email:
         email = email.lower().strip()
         if not email:
-            raise HTTPException(status_code=400, detail="Email inválido")
+            raise HTTPException(status_code=400, detail="Correo inválido")
         existing = db.query(User).filter(User.email.ilike(email)).first()
         if existing:
-            raise HTTPException(status_code=409, detail="El email ya está registrado")
+            raise HTTPException(status_code=409, detail="El correo ya está registrado")
         token = str(uuid.uuid4())
         expires = datetime.now(timezone.utc) + timedelta(days=7)
         db.add(YouthInvitation(youth_id=youth.id, email=email, token=token, expires_at=expires))
@@ -755,10 +755,10 @@ def change_youth_email(
         raise HTTPException(status_code=400, detail="El joven no tiene login habilitado")
     new_email = data.new_email.lower().strip()
     if not new_email:
-        raise HTTPException(status_code=400, detail="Email inválido")
+        raise HTTPException(status_code=400, detail="Correo inválido")
     existing = db.query(User).filter(User.email.ilike(new_email)).first()
     if existing and (not youth.user_id or existing.id != youth.user_id):
-        raise HTTPException(status_code=400, detail="El email ya está registrado")
+        raise HTTPException(status_code=400, detail="El correo ya está registrado")
     now = datetime.now(timezone.utc)
     (
         db.query(YouthInvitation)

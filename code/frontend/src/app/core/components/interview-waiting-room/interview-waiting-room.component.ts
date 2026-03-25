@@ -24,7 +24,7 @@ export class InterviewWaitingRoomComponent implements OnInit, OnDestroy {
  caseName = signal(''); 
  interviewMode = signal('Videollamada en línea'); 
  interviewerName = signal('Javiera (IA)'); 
- contextSummary = signal('Ests a punto de iniciar una entrevista simulada enfocada en habilidades laborales reales.'); 
+ contextSummary = signal('Estás a punto de iniciar una entrevista simulada enfocada en habilidades laborales reales.'); 
  motivationMessage = signal('Respira profundo: tienes las herramientas para dar una gran entrevista.'); 
  waitMs = signal(7000); 
  secondsLeft = signal(7); 

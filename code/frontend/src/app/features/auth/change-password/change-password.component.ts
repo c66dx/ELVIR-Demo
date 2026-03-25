@@ -112,7 +112,7 @@ export class ChangePasswordComponent {
           this.errorMessage = result.error;
           return;
         }
-        this.notification.success("Contrase?a actualizada correctamente");
+        this.notification.success('Contraseña actualizada correctamente');
         this.router.navigate(["/"]);
       },
       error: () => {

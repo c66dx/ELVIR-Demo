@@ -28,7 +28,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  youthId = signal<string | null>(null); 
  embedUrl = signal<SafeResourceUrl | null>(null); 
  useLiveKit = signal(false); 
- turnIndicator = signal('La entrevistadora est ingresando a la sala...'); 
+ turnIndicator = signal('La entrevistadora está ingresando a la sala...'); 
  sessionMode = signal<string | null>(null); 
  sessionContext = signal<{ jobRoleName: string; caseName: string } | null>(null); 
  loading = signal(true); 
@@ -41,7 +41,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  private room: Room | null = null; 
  private avatarIsSpeaking = false; 
  /** Verdadero si el navegador bloque el audio (politica de autoplay) y el usuario debe hacer clic. */   audioBlocked = signal(false); 
- /** Muestra una gua inicial para activar audio (solo al inicio). */   audioHintVisible = signal(false); 
+ /** Muestra una guía inicial para activar audio (solo al inicio). */   audioHintVisible = signal(false); 
  audioReady = signal(false); 
  volume = signal(0.8); 
  muted = signal(false); 
@@ -173,7 +173,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  audioEl.srcObject = stream; 
  this.audioReady.set(true); 
  this.applyAudioVolume(); 
- // Intentar autoplay; si el navegador lo bloquea, mostramos el botn de activación.   this.audioBlocked.set(true); 
+ // Intentar autoplay; si el navegador lo bloquea, mostramos el botón de activación.   this.audioBlocked.set(true); 
  audioEl.play().then(() => { 
  this.audioBlocked.set(false); 
  this.audioHintVisible.set(false); 
@@ -203,7 +203,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  this.turnIndicator.set('Organizando tu respuesta...'); 
  } else if (eventType === 'avatar.speak_started') { 
  this.avatarIsSpeaking = true; 
- this.turnIndicator.set('Javiera est respondiendo'); 
+ this.turnIndicator.set('Javiera está respondiendo'); 
  this.room?.localParticipant.setMicrophoneEnabled(false); 
  } else if (eventType === 'avatar.speak_ended') { 
  this.avatarIsSpeaking = false; 
@@ -345,7 +345,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  } 
  canDeactivate(): boolean { 
  if (this.allowDeactivate || !this.isSessionActive()) return true; 
- const confirmExit = confirm('Si sales ahora se cancelará la entrevista. ¿Quieres salir?'); 
+    const confirmExit = confirm('Si sales ahora, se cancelará la entrevista. ¿Quieres salir?');
  if (confirmExit) { 
  this.closeSession('CANCELADA', 'ABANDONO', { skipConfirm: true }); 
  } 
@@ -432,10 +432,10 @@ onPageHide(): void {
  return this.isProfessionalView()   ? 'Revisa el detalle de la entrevista o vuelve a la ficha del joven.'   : 'Revisa el detalle de la entrevista y la retroalimentación del tutor cuando esté disponible.'; 
  } 
  summaryTitle(): string { 
- return this.isProfessionalView() ? 'Resumen del tutor' : 'Feedback del tutor'; 
+ return this.isProfessionalView() ? 'Resumen del tutor' : 'Retroalimentación del tutor'; 
  } 
  summaryEmptyText(): string { 
- return this.isProfessionalView()   ? 'Aún no se registra feedback para esta entrevista.'   : 'Tu tutor aún no deja feedback para esta entrevista.'; 
+ return this.isProfessionalView()   ? 'Aún no hay retroalimentación registrada para esta entrevista.'   : 'Tu tutor aún no deja retroalimentación para esta entrevista.'; 
  } 
  closeSession(   status: 'COMPLETADA' | 'CANCELADA',   motivo?: string,   options?: { skipConfirm?: boolean } 
  ): void { 
@@ -491,7 +491,7 @@ onPageHide(): void {
  this.audioRecordingError.set(null); 
  } catch { 
  this.audioRecording.set('error'); 
- this.audioRecordingError.set('No se pudo iniciar la grabacin de audio.'); 
+ this.audioRecordingError.set('No se pudo iniciar la grabación de audio.'); 
  this.cleanupAudioRecorder(); 
  } 
  } 

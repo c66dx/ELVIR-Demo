@@ -8,7 +8,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
 import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component'; 
  export type LoginRole = 'joven' | 'profesional' | 'admin' | null; 
- /**   * Login con seleccin previa de rol (joven/profesional). Usa ApiService para autenticar contra el backend.   * y AuthService.setSession para guardar token y rol. Credenciales de prueba en el HTML.   */
+ /** Login con selección previa de rol (joven/profesional). Usa ApiService y AuthService.setSession. Credenciales de prueba en el HTML. */
 @Component({ 
  selector: 'app-login',   standalone: true,   imports: [CommonModule, ReactiveFormsModule, FormFieldComponent, TextInputComponent],   templateUrl: './login.component.html',   styleUrl: './login.component.scss',
 })

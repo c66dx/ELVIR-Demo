@@ -4,6 +4,8 @@ from typing import Any
 
 from fastapi import Request
 
+_EMAIL_FIELDS = frozenset({"email", "new_email"})
+
 
 class ErrorCode(str, Enum):
     HTTP_ERROR = "HTTP_ERROR"
@@ -32,3 +34,27 @@ def build_error_payload(
 
 def get_request_id(request: Request) -> str | None:
     return getattr(request.state, "request_id", None)
+
+
+def localize_email_validation_errors(errors: list[Any]) -> list[Any]:
+    """Pone en español mensajes 422 de Pydantic para campos de correo (suelen venir en inglés)."""
+    out: list[Any] = []
+    for err in errors:
+        if not isinstance(err, dict):
+            out.append(err)
+            continue
+        e = dict(err)
+        loc = e.get("loc")
+        field = loc[-1] if isinstance(loc, (list, tuple)) and loc else None
+        if field not in _EMAIL_FIELDS:
+            out.append(e)
+            continue
+        msg = str(e.get("msg", ""))
+        lower = msg.lower()
+        err_type = e.get("type")
+        if err_type == "missing" or "field required" in lower:
+            e["msg"] = "El correo es obligatorio."
+        elif any(s in lower for s in ("not a valid email", "email address", "invalid email", "value is not a valid")):
+            e["msg"] = "Introduce un correo electrónico válido."
+        out.append(e)
+    return out

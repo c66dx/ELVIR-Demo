@@ -186,7 +186,7 @@ export class NuevaSimulacionComponent implements OnInit {
  return this.api.getSimulationTemplates({ job_role_id, case_id }).pipe(   switchMap((templates) => { 
  const template = templates[0]; 
  if (!template) { 
- this.errorMessage = 'No se encontr? plantilla para esta combinación'; 
+      this.errorMessage = 'No se encontró plantilla para esta combinación';
  return EMPTY; 
  } 
  return this.api.createSession({ 

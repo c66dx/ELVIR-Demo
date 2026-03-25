@@ -36,7 +36,7 @@ import type { SessionWithTemplateLabel, PlatformSessionItem } from '../../../cor
  id: 'empatia',   title: 'Empata',   description: 'Capacidad de conectar con el entrevistador en contextos sensibles.',   unit: '%',   x: ['Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'],   series: [{ name: 'Puntaje', data: [38, 46, 52, 58, 63, 68] }],   },   { 
  id: 'autogestion',   title: 'Autogestión',   description: 'Manejo emocional y organización durante la entrevista.',   unit: '%',   x: ['Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'],   series: [   { name: 'Autogestionada', data: [42, 50, 57, 60, 66, 71] },   { name: 'Supervisada', data: [35, 44, 49, 55, 59, 64] },   ],   },
 ]; 
- /**   * Perfil del joven: datos, historial de sesiones, resmenes, sugerir material.   * El profesional puede registrar resmenes cualitativos e iniciar simulación supervisada.   */
+ /** Perfil del joven: datos, historial de sesiones, resúmenes, sugerir material. El profesional puede registrar resúmenes cualitativos e iniciar simulación supervisada. */
 @Component({ 
  selector: 'app-perfil-joven',   standalone: true,   imports: [   ReactiveFormsModule,   RouterLink,   StatusBadgeComponent,   FormGridComponent,   FormFieldComponent,   FormActionsComponent,   SelectInputComponent,   TextInputComponent,   TextareaInputComponent,   ],   templateUrl: './perfil-joven.component.html',   styleUrl: './perfil-joven.component.scss',
 })

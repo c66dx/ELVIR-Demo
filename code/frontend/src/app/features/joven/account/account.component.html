@@ -2,7 +2,7 @@
   <header class="account-header">
     <div>
       <h2>Mi Cuenta</h2>
-      <p>Administra tu perfil, email y contraseña.</p>
+      <p>Administra tu perfil, correo y contraseña.</p>
     </div>
   </header>
 
@@ -95,7 +95,7 @@
         }
         @if (activationUrl()) {
           <div class="activation-url">
-            <span>Enlace de confirmacin:</span>
+            <span>Enlace de confirmación:</span>
             <a [href]="activationUrl()!" target="_blank" rel="noopener">{{ activationUrl() }}</a>
           </div>
         }

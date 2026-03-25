@@ -16,7 +16,7 @@ import { formatDate, formatDuration, formatStatusLabel } from '../../../shared/u
  recentSessions: Session[]; 
  materialSuggestionsCount: number;
 } 
- /** Dashboard del joven: resumen de sesiones, última simulación, material sugerido, accesos rpidos. */
+ /** Dashboard del joven: resumen de sesiones, última simulación, material sugerido, accesos rápidos. */
 @Component({ 
  selector: 'app-dashboard-joven',   standalone: true,   imports: [AsyncPipe, RouterLink, StatusBadgeComponent],   templateUrl: './dashboard-joven.component.html',   styleUrl: './dashboard-joven.component.scss',
 })

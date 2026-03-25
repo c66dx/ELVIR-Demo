@@ -88,7 +88,7 @@ export class UsuariosLogsComponent implements OnInit {
  this.interviewsPage = 1; 
  } 
  onDeleteYouth(youth: AdminYouthLogRow): void { 
- if (!confirm(`Desactivar a ${youth.display_name}? Esta acción desactiva la cuenta y libera el email.`)) return; 
+ if (!confirm(`¿Desactivar a ${youth.display_name}? Esta acción desactiva la cuenta y libera el correo.`)) return; 
  this.api.deleteYouthAsAdmin(youth.id).subscribe({ 
  next: (res) => { 
  if ('error' in res) return; 
@@ -96,7 +96,7 @@ export class UsuariosLogsComponent implements OnInit {
  },   }); 
  } 
  onHardDeleteYouth(youth: AdminYouthLogRow): void { 
- const confirmText = prompt(   `Eliminar definitivamente a ${youth.display_name}.` +   `\\nSe borrará toda su data (entrevistas, logs, invitaciones) y no se puede deshacer.` +   `\\nEscribe ELIMINAR para confirmar.`   ); 
+ const confirmText = prompt(   `Eliminar definitivamente a ${youth.display_name}.` +   `\\nSe borrarán todos sus datos (entrevistas, registros, invitaciones) y no se puede deshacer.` +   `\\nEscribe ELIMINAR para confirmar.`   ); 
  if (confirmText !== 'ELIMINAR') return; 
  this.api.deleteYouthHardAsAdmin(youth.id).subscribe({ 
  next: (res) => { 

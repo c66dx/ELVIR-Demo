@@ -99,7 +99,7 @@ export class AuditLogsComponent implements OnInit {
  case 'youth':   return 'Joven'; 
  case 'professional':   return 'Tutor'; 
  case 'session':   return 'Entrevista'; 
- case 'assignment':   return 'Asignacin'; 
+ case 'assignment':   return 'Asignación'; 
  case 'material':   return 'Material'; 
  case 'summary':   return 'Resumen'; 
  case 'auth':   return 'Auth'; 

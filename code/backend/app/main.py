@@ -1,4 +1,4 @@
-﻿"""Aplicación FastAPI ELVIR."""
+"""Aplicación FastAPI ELVIR."""
 from contextlib import asynccontextmanager
 import logging
 from pathlib import Path
@@ -21,7 +21,7 @@ from app.core.middleware import (
     get_request_metrics_snapshot,
     audit_log_middleware,
 )
-from app.core.errors import ErrorCode, build_error_payload, get_request_id
+from app.core.errors import ErrorCode, build_error_payload, get_request_id, localize_email_validation_errors
 from app.schemas.common import ErrorResponse
 from app.models import (  # noqa: F401 - asegurar tablas creadas
     SessionTranscript,
@@ -165,7 +165,8 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    payload = build_error_payload(exc.errors(), code=ErrorCode.VALIDATION_ERROR, request_id=get_request_id(request))
+    detail = localize_email_validation_errors(exc.errors())
+    payload = build_error_payload(detail, code=ErrorCode.VALIDATION_ERROR, request_id=get_request_id(request))
     response = JSONResponse(status_code=422, content=payload)
     return _attach_request_id(request, response)
 

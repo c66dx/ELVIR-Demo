@@ -1,4 +1,4 @@
-﻿"""Esquemas de jóvenes."""
+"""Esquemas de jóvenes."""
 import json
 from datetime import datetime
 from typing import Optional
@@ -24,7 +24,7 @@ class YouthCreate(YouthBase):
     @model_validator(mode="after")
     def email_required_if_login(self):
         if self.login_enabled and not self.email:
-            raise ValueError("email es obligatorio cuando login_enabled es true")
+            raise ValueError("El correo es obligatorio cuando el inicio de sesión está habilitado")
         return self
 
 

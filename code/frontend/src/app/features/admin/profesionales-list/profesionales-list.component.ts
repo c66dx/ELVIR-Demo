@@ -43,7 +43,7 @@ export class ProfesionalesListComponent implements OnInit {
  } 
  } 
  onDeactivate(professional: { id: string; display_name: string; specialty?: string; institution?: string }): void { 
- if (!confirm(`Desactivar a ${professional.display_name}?`)) return; 
+ if (!confirm(`¿Desactivar a ${professional.display_name}?`)) return; 
  this.api   .updateProfessional(professional.id, { 
  display_name: professional.display_name,   specialty: professional.specialty,   institution: professional.institution,   is_active: false,   })   .subscribe({ 
  next: (res) => { 
@@ -56,7 +56,7 @@ export class ProfesionalesListComponent implements OnInit {
  },   error: () => this.notification.error('No se pudo desactivar el tutor'),   }); 
  } 
  onActivate(professional: { id: string; display_name: string; specialty?: string; institution?: string }): void { 
- if (!confirm(`Reactivar a ${professional.display_name}?`)) return; 
+ if (!confirm(`¿Reactivar a ${professional.display_name}?`)) return; 
  this.api   .updateProfessional(professional.id, { 
  display_name: professional.display_name,   specialty: professional.specialty,   institution: professional.institution,   is_active: true,   })   .subscribe({ 
  next: (res) => { 
@@ -69,7 +69,7 @@ export class ProfesionalesListComponent implements OnInit {
  },   error: () => this.notification.error('No se pudo reactivar el tutor'),   }); 
  } 
  onDelete(professional: { id: string; display_name: string }): void { 
- if (!confirm(`Eliminar a ${professional.display_name}? Esta acción no se puede deshacer.`)) return; 
+ if (!confirm(`¿Eliminar a ${professional.display_name}? Esta acción no se puede deshacer.`)) return; 
  this.api.deleteProfessionalAsAdmin(professional.id).subscribe({ 
  next: (res) => { 
  if ('error' in res) { 

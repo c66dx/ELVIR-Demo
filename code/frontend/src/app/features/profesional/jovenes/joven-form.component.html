@@ -114,24 +114,24 @@
 
           @if (form.get('login_enabled')?.value) {
             @if (hasUserAccount) {
-              <app-form-field label="Email" span="full">
+              <app-form-field label="Correo electrónico" span="full">
                 <div class="form-readonly-row">
                   <div class="form-readonly">{{ currentYouth?.email || '-' }}</div>
                   <button type="button" class="btn-secondary btn-sm" (click)="openChangeEmailModal()">
-                    Cambiar email
+                    Cambiar correo
                   </button>
                 </div>
               </app-form-field>
             } @else {
               <app-form-field
-                label="Email"
+                label="Correo electrónico"
                 [required]="true"
                 forId="email"
                 [error]="
-                  form.get('email')?.errors?.['server'] ||   (form.get('email')?.invalid && (form.get('email')?.dirty || form.get('email')?.touched)   ? 'Email inválido. Verifica el formato.'   : null)
+                  form.get('email')?.errors?.['server'] ||   (form.get('email')?.invalid && (form.get('email')?.dirty || form.get('email')?.touched)   ? 'Correo inválido. Verifica el formato.'   : null)
                 "
                 [hint]="
-                  needsInvitation   ?  'Si ya enviaste un enlace, ingresa el mismo u otro email para generar uno nuevo.'   : 'El joven recibirá un enlace para definir su contraseña. Entrégalo en persona o por WhatsApp.'
+                  needsInvitation   ?  'Si ya enviaste un enlace, ingresa el mismo u otro correo para generar uno nuevo.'   : 'El joven recibirá un enlace para definir su contraseña. Entrégalo en persona o por WhatsApp.'
                 "
               >
                 <app-text-input id="email" type="email" formControlName="email" placeholder="ejemplo@correo.cl"></app-text-input>
@@ -190,11 +190,11 @@
   @if (showChangeEmailModal) {
     <div class="modal-overlay" (click)="closeChangeEmailModal()">
       <div class="modal-content" (click)="$event.stopPropagation()">
-        <h3>Cambiar email</h3>
+        <h3>Cambiar correo</h3>
         <p class="modal-hint">
-          Se generará un nuevo enlace de activación. El joven deberá usarlo para actualizar su email y contraseña.
+          Se generará un nuevo enlace de activación. El joven deberá usarlo para actualizar su correo y contraseña.
         </p>
-        <app-form-field label="Nuevo email" forId="change_email">
+        <app-form-field label="Nuevo correo" forId="change_email">
           <app-text-input id="change_email" type="email" [(ngModel)]="newEmailForChange"></app-text-input>
         </app-form-field>
         @if (changeEmailError) {

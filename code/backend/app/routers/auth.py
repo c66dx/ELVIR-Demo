@@ -1,4 +1,4 @@
-﻿"""Router de autenticación."""
+"""Router de autenticación."""
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import uuid
@@ -216,7 +216,7 @@ def activate_account(data: ActivateRequest, db: Session = Depends(get_db)):
                     user.is_active = True
                 inv.used_at = now
                 db.commit()
-                return ActivateResponse(success=True, message="Email actualizado. Ya puedes iniciar sesión.")
+                return ActivateResponse(success=True, message="Correo actualizado. Ya puedes iniciar sesión.")
         if not data.password or not data.password.strip():
             return ActivateResponse(success=False, error="PASSWORD_REQUIRED")
         existing = db.query(User).filter(User.email.ilike(inv.email)).first()
@@ -263,7 +263,7 @@ def activate_account(data: ActivateRequest, db: Session = Depends(get_db)):
             user.password_hash = get_password_hash(data.password)
         prof_inv.used_at = now
         db.commit()
-        return ActivateResponse(success=True, message="Email actualizado. Ya puedes iniciar sesión.")
+        return ActivateResponse(success=True, message="Correo actualizado. Ya puedes iniciar sesión.")
 
     if not data.password or not data.password.strip():
         return ActivateResponse(success=False, error="PASSWORD_REQUIRED")
@@ -322,12 +322,12 @@ def change_email(
 
     new_email = data.new_email.lower().strip()
     if not new_email:
-        raise HTTPException(status_code=400, detail="Email inválido")
+        raise HTTPException(status_code=400, detail="Correo inválido")
     if user.email.lower() == new_email:
-        raise HTTPException(status_code=400, detail="El email ya es el actual")
+        raise HTTPException(status_code=400, detail="El correo ya es el actual")
     existing = db.query(User).filter(User.email.ilike(new_email)).first()
     if existing and existing.id != user.id:
-        raise HTTPException(status_code=409, detail="El email ya está registrado")
+        raise HTTPException(status_code=409, detail="El correo ya está registrado")
 
     now = datetime.now(timezone.utc)
     token = str(uuid.uuid4())
@@ -358,7 +358,7 @@ def change_email(
     db.commit()
     return ChangeEmailResponse(
         success=True,
-        message="Se generó un enlace de confirmación para cambiar el email.",
+        message="Se generó un enlace de confirmación para cambiar el correo.",
         activation_url=activation_url,
     )
 

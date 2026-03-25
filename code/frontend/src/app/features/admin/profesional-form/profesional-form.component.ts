@@ -93,7 +93,7 @@ export class ProfesionalFormComponent implements OnInit {
     if (!this.professionalId || !this.professional) return;
     const nextActive = !this.professional.is_active;
     const label = nextActive ? 'Reactivar' : 'Desactivar';
-    if (!confirm(`${label} a ${this.professional.display_name}?`)) return;
+    if (!confirm(`¿${label} a ${this.professional.display_name}?`)) return;
     const v = this.form.getRawValue();
     this.api
       .updateProfessional(this.professionalId, {
@@ -117,7 +117,7 @@ export class ProfesionalFormComponent implements OnInit {
 
   deleteProfessional(): void {
     if (!this.professionalId || !this.professional) return;
-    if (!confirm(`Eliminar a ${this.professional.display_name}? Esta acción no se puede deshacer.`)) return;
+    if (!confirm(`¿Eliminar a ${this.professional.display_name}? Esta acción no se puede deshacer.`)) return;
     this.api.deleteProfessionalAsAdmin(this.professionalId).subscribe({
       next: (res) => {
         if ('error' in res) {

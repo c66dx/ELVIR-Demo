@@ -85,7 +85,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
  return `Notificaciones, ${this.notificationsUnread} sin leer`; 
  } 
  onLogout(): void { 
- const confirmed = window.confirm('Seguro que quieres cerrar sesión?'); 
+    const confirmed = window.confirm('¿Seguro que quieres cerrar sesión?');
  if (!confirmed) return; 
  this.api.logout().subscribe({ 
  complete: () => { 

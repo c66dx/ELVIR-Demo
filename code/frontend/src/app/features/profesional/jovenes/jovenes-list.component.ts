@@ -102,12 +102,12 @@ export class JovenesListComponent implements OnInit {
  } 
  } 
  onDeactivate(youth: YouthWithLastSession): void { 
- if (!confirm(`Desactivar a ${youth.display_name}?`)) return; 
+ if (!confirm(`¿Desactivar a ${youth.display_name}?`)) return; 
  this.api.deactivateYouth(youth.id).subscribe({ 
  next: () => this.loadYouths(),   }); 
  } 
  onActivate(youth: YouthWithLastSession): void { 
- if (!confirm(`Reactivar a ${youth.display_name}?`)) return; 
+ if (!confirm(`¿Reactivar a ${youth.display_name}?`)) return; 
  this.api.activateYouth(youth.id).subscribe({ 
  next: () => this.loadYouths(),   }); 
  } 

@@ -239,7 +239,7 @@ export class ApiService {
         map((r) => ({ success: true as const, activation_url: r.activation_url })),
         catchError((err) => {
           const d = err.error?.detail;
-          const msg = typeof d === 'string' ? d : 'Error al solicitar cambio de email';
+          const msg = typeof d === 'string' ? d : 'Error al solicitar cambio de correo';
           return of({ error: withRequestId(msg, err) });
         })
       );

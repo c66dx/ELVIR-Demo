@@ -289,7 +289,7 @@ export class JovenFormComponent implements OnInit {
  if (!detail) return; 
  if (typeof detail === 'string') { 
  const msg = detail.toLowerCase(); 
- if (msg.includes('email')) { 
+ if (msg.includes('email') || msg.includes('correo')) { 
  this.setEmailServerError(detail); 
  } 
  return; 
@@ -345,7 +345,7 @@ export class JovenFormComponent implements OnInit {
  if (!email || !this.youthId) return; 
  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
  if (!emailRegex.test(email)) { 
- this.changeEmailError = 'Ingresa un email válido'; 
+ this.changeEmailError = 'Ingresa un correo válido'; 
  this.notification.error(this.changeEmailError); 
  return; 
  } 
@@ -354,7 +354,7 @@ export class JovenFormComponent implements OnInit {
  next: (res) => { 
  this.changingEmail = false; 
  if (res === null) { 
- this.changeEmailError = 'Error al cambiar el email'; 
+ this.changeEmailError = 'Error al cambiar el correo'; 
  this.notification.error(this.changeEmailError); 
  return; 
  } 
@@ -362,14 +362,14 @@ export class JovenFormComponent implements OnInit {
  this.closeChangeEmailModal(); 
  if (res.activation_url) { 
  this.activationUrl = res.activation_url; 
- this.notification.success('Email actualizado. Entrega el nuevo enlace al joven.'); 
+ this.notification.success('Correo actualizado. Entrega el nuevo enlace al joven.'); 
  } else { 
- this.notification.success('Email actualizado correctamente'); 
+ this.notification.success('Correo actualizado correctamente'); 
  } 
  },   error: (err) => { 
  this.changingEmail = false; 
- const msg = err.error?.detail  ?? 'Error al cambiar el email'; 
- this.changeEmailError = typeof msg === 'string' ? msg : 'Error al cambiar el email'; 
+ const msg = err.error?.detail  ?? 'Error al cambiar el correo'; 
+ this.changeEmailError = typeof msg === 'string' ? msg : 'Error al cambiar el correo'; 
  this.notification.error(this.changeEmailError); 
  },   }); 
  }

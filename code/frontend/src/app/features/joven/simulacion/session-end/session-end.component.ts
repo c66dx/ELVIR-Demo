@@ -53,7 +53,7 @@ export class SessionEndComponent implements OnInit {
  } 
  get heroTitle(): string { 
  switch (this.status) { 
- case 'COMPLETADA':   return 'Entrevista completada!'; 
+ case 'COMPLETADA':   return '¡Entrevista completada!'; 
  case 'CANCELADA':   return 'Entrevista pausada'; 
  case 'ERROR':   return 'Tuvimos un problema técnico'; 
  default:   return 'Entrevista finalizada'; 
@@ -62,14 +62,14 @@ export class SessionEndComponent implements OnInit {
  get heroSubtitle(): string { 
  switch (this.status) { 
  case 'COMPLETADA':   return 'Buen trabajo. Tu esfuerzo queda registrado y es parte de tu progreso.'; 
- case 'CANCELADA':   return 'No pasa nada. Puedes retomarla cuando ests listo/a.'; 
- case 'ERROR':   return 'Tu avance qued guardado. Te recomendamos reintentar cuando ests listo/a.'; 
+ case 'CANCELADA':   return 'No pasa nada. Puedes retomarla cuando estés listo/a.'; 
+ case 'ERROR':   return 'Tu avance quedó guardado. Te recomendamos reintentar cuando estés listo/a.'; 
  default:   return 'Gracias por participar en la simulación.'; 
  } 
  } 
  get feedbackMessage(): string { 
  if (this.status === 'COMPLETADA' && this.isJoven) { 
- return 'Recibirs retroalimentación de tu tutor. Mientras tanto, revisa material sugerido para seguir mejorando.'; 
+ return 'Recibirás retroalimentación de tu tutor. Mientras tanto, revisa material sugerido para seguir mejorando.'; 
  } 
  if (this.status === 'COMPLETADA' && this.isProfesional) { 
  return 'Puedes registrar un resumen y dejar retroalimentación para el joven.'; 
