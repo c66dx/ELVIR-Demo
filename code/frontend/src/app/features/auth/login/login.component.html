@@ -237,17 +237,16 @@
           <summary>Credenciales de prueba</summary>
 
           <div class="demo-content">
-
-            <p><strong>Joven:</strong> joven1&#64;test.cl</p>
-
-            <p><strong>Tutor:</strong> prof&#64;test.cl</p>
-
-            <p><strong>Admin:</strong> admin&#64;test.cl</p>
-
-            <p><strong>Clave:</strong> test123</p>
-
-            <p class="demo-note">joven2&#64;test.cl tiene login deshabilitado.</p>
-
+            <p><strong>Joven:</strong> {{ demoCredentials.joven }}</p>
+            <p><strong>Tutor:</strong> {{ demoCredentials.tutor }}</p>
+            <p><strong>Admin:</strong> {{ demoCredentials.admin }}</p>
+            <p><strong>Clave:</strong> {{ demoCredentials.password }}</p>
+            @if (demoCredentials.note) {
+              <p class="demo-note">{{ demoCredentials.note }}</p>
+            }
+            @if (demoCredentials.more) {
+              <p class="demo-note">{{ demoCredentials.more }}</p>
+            }
           </div>
 
         </details>

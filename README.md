@@ -1,4 +1,4 @@
-﻿# ELVIR — Entrenador Laboral Virtual con IA
+# ELVIR — Entrenador Laboral Virtual con IA
 
 Plataforma web para simulaciones de entrevistas laborales asistidas por IA, que apoya a jóvenes de Teletón con discapacidad. Incluye documentación, frontend Angular y backend FastAPI, con integración al servicio externo LiveAvatar para el avatar conversacional.
 
@@ -139,8 +139,9 @@ Abre el navegador en **http://localhost:4200** e inicia sesión con:
 
 | Email | Contraseña | Rol |
 |-------|------------|-----|
-| joven1@test.cl | test123 | JOVEN |
-| joven2@test.cl | test123 | JOVEN |
+| elvir.demo+joven1@gmail.com | test123 | JOVEN |
+| elvir.demo+joven2@gmail.com | test123 | JOVEN (cuenta con login deshabilitado en el perfil de prueba) |
+| elvir.demo+joven3@gmail.com … joven6 | test123 | JOVEN |
 | prof@test.cl | test123 | PROFESIONAL |
 | admin@test.cl | test123 | ADMIN |
 

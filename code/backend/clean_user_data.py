@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Limpia datos creados por usuarios para pruebas locales.
 Mantiene datos base (usuarios de prueba, jovenes, cargos, casos, plantillas, competencias).
@@ -10,7 +10,7 @@ Elimina:
 - Material de apoyo (luego recrea los 4 por defecto salvo --skip-reseed)
 - Invitaciones de jovenes
 - Logs de auditoria
-- Jovenes, profesionales y usuarios no base (preserva emails base y JOV-001..JOV-004)
+- Jovenes, profesionales y usuarios no base (preserva emails base y JOV-001..JOV-008)
 
 Opcional:
 - --delete-uploads elimina archivos bajo backend/uploads
@@ -46,12 +46,25 @@ from app.models.youth_invitation import YouthInvitation
 
 UPLOADS_DIR = Path(__file__).resolve().parent / "uploads"
 SEED_USER_EMAILS = {
-    "joven1@test.cl",
-    "joven2@test.cl",
+    "elvir.demo+joven1@gmail.com",
+    "elvir.demo+joven2@gmail.com",
+    "elvir.demo+joven3@gmail.com",
+    "elvir.demo+joven4@gmail.com",
+    "elvir.demo+joven5@gmail.com",
+    "elvir.demo+joven6@gmail.com",
     "prof@test.cl",
     "admin@test.cl",
 }
-SEED_YOUTH_IDENTIFIERS = {"JOV-001", "JOV-002", "JOV-003", "JOV-004"}
+SEED_YOUTH_IDENTIFIERS = {
+    "JOV-001",
+    "JOV-002",
+    "JOV-003",
+    "JOV-004",
+    "JOV-005",
+    "JOV-006",
+    "JOV-007",
+    "JOV-008",
+}
 
 
 def _delete_upload_files() -> int:

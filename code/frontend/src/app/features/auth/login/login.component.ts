@@ -6,9 +6,12 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ApiService } from '../../../core/services/api.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
-import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component'; 
- export type LoginRole = 'joven' | 'profesional' | 'admin' | null; 
- /** Login con selección previa de rol (joven/profesional). Usa ApiService y AuthService.setSession. Credenciales de prueba en el HTML. */
+import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component';
+import { environment } from '../../../../environments/environment';
+
+export type LoginRole = 'joven' | 'profesional' | 'admin' | null;
+
+/** Login con selección previa de rol. Credenciales de prueba: `environment.demoCredentials`. */
 @Component({ 
  selector: 'app-login',   standalone: true,   imports: [CommonModule, ReactiveFormsModule, FormFieldComponent, TextInputComponent],   templateUrl: './login.component.html',   styleUrl: './login.component.scss',
 })
@@ -18,7 +21,8 @@ export class LoginComponent {
  private api = inject(ApiService); 
  private router = inject(Router); 
  private themeService = inject(ThemeService); 
- theme = this.themeService.theme; 
+ theme = this.themeService.theme;
+ readonly demoCredentials = environment.demoCredentials;
  form: FormGroup = this.fb.nonNullable.group({ 
  email: ['', [Validators.required, Validators.email]],   password: ['', Validators.required],   }); 
  selectedRole: LoginRole = null; 

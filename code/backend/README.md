@@ -1,4 +1,4 @@
-﻿# ELVIR Backend
+# ELVIR Backend
 
 API REST del backend de la plataforma ELVIR, construida con FastAPI y SQLAlchemy.
 
@@ -42,8 +42,9 @@ La API estará disponible en `http://localhost:8000`.
 
 | Email | Contraseña | Rol |
 |-------|------------|-----|
-| joven1@test.cl | test123 | JOVEN |
-| joven2@test.cl | test123 | JOVEN |
+| elvir.demo+joven1@gmail.com | test123 | JOVEN |
+| elvir.demo+joven2@gmail.com | test123 | JOVEN |
+| elvir.demo+joven3@gmail.com … joven6 | test123 | JOVEN |
 | prof@test.cl | test123 | PROFESIONAL |
 | admin@test.cl | test123 | ADMIN |
 
