@@ -167,7 +167,7 @@ export class PerfilJovenComponent implements OnInit {
  youth_id: this.youthId,   material_id: value.material_id,   reason: value.reason || undefined,   session_id: value.session_id || undefined,   })   .subscribe({ 
  next: () => { 
  this.submittingSuggest.set(false); 
- this.notification.success('Material sugerido correctamente. El joven lo ver en "Sugerido para ti".'); 
+ this.notification.success('Material sugerido correctamente. El joven lo verá en "Sugerido para ti".'); 
  this.cancelSuggestMaterial(); 
  },   error: () => this.submittingSuggest.set(false),   }); 
  } 
