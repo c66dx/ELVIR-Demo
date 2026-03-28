@@ -1,6 +1,13 @@
-# PostgreSQL para ELVIR (desarrollo y producción local)
-# Uso: docker compose up -d
-# Luego en .env: DATABASE_URL=postgresql://elvir:elvir@localhost:5432/elvir
+# Stack local ELVIR: PostgreSQL + API FastAPI
+#
+# Solo Postgres (como antes):
+#   docker compose up -d postgres
+#
+# API + Postgres (misma red; la app usa el hostname `postgres`):
+#   docker compose up -d --build
+#   API: http://localhost:8000  |  docs: http://localhost:8000/docs
+#
+# Variables: copia code/backend/.env o exporta DATABASE_URL si corres la API fuera de Docker.
 
 services:
   postgres:
@@ -21,5 +28,38 @@ services:
       timeout: 5s
       retries: 5
 
+  api:
+    build:
+      context: ./code/backend
+      dockerfile: Dockerfile
+    container_name: elvir-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://elvir:elvir@postgres:5432/elvir
+      ENV: dev
+      SECRET_KEY: elvir-dev-secret-change-in-production
+      CORS_ORIGINS: http://localhost:4200,http://127.0.0.1:4200,http://localhost:8000
+      APP_BASE_URL: http://localhost:4200
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - elvir_uploads:/app/uploads
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
 volumes:
   elvir_postgres_data:
+  elvir_uploads:

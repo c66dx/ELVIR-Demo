@@ -16,7 +16,8 @@ from app.models.job_role import JobRole
 from app.models.case import Case
 from app.models.simulation_template import SimulationTemplate
 from app.models.session import Session as SessionModel
-from app.routers.sessions import create_session_event, SessionEventCreate
+from app.routers.sessions import create_session_event
+from app.schemas.session import SessionEventCreate
 
 
 def _build_request(request_id: str = "req-test"):

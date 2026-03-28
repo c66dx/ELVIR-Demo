@@ -8,9 +8,12 @@ from unittest.mock import patch
 from fastapi import HTTPException, UploadFile
 
 from app.routers import upload
+from app.services import upload_files
 
 TEST_TMP_BASE = Path(__file__).resolve().parent / "_tmp"
 TEST_TMP_BASE.mkdir(parents=True, exist_ok=True)
+
+_DUMMY_REQUEST = SimpleNamespace(url=SimpleNamespace(scheme="http", netloc="api.local"))
 
 
 def _tempdir():
@@ -24,7 +27,7 @@ class UploadStreamTestCase(unittest.TestCase):
         with _tempdir() as tmpdir:
             dest = Path(tmpdir) / "out.pdf"
             file = UploadFile(filename="test.pdf", file=BytesIO(b"hola" * 100))
-            upload._save_upload_stream(file, dest)
+            upload_files._save_upload_stream(file, dest)
             self.assertTrue(dest.exists())
             self.assertGreater(dest.stat().st_size, 0)
 
@@ -35,11 +38,11 @@ class UploadStreamTestCase(unittest.TestCase):
 
         file = UploadFile(filename="archivo.exe", file=BytesIO(b"x"))
         with self.assertRaises(HTTPException) as ctx:
-            upload.upload_file(request=None, file=file, user=DummyUser())
+            upload.upload_file(request=_DUMMY_REQUEST, file=file, user=DummyUser())
 
         self.assertEqual(ctx.exception.status_code, 400)
         self.assertIn("Extensión no permitida", ctx.exception.detail)
-        expected = ", ".join(sorted(upload.ALLOWED_EXTENSIONS))
+        expected = ", ".join(sorted(upload_files.ALLOWED_EXTENSIONS))
         self.assertIn(expected, ctx.exception.detail)
         self.assertTrue(file.file.closed)
 
@@ -50,7 +53,7 @@ class UploadStreamTestCase(unittest.TestCase):
 
         file = UploadFile(filename="archivo.pdf", file=BytesIO(b"x"))
         with self.assertRaises(HTTPException) as ctx:
-            upload.upload_file(request=None, file=file, user=DummyUser())
+            upload.upload_file(request=_DUMMY_REQUEST, file=file, user=DummyUser())
 
         self.assertEqual(ctx.exception.status_code, 403)
         self.assertEqual(ctx.exception.detail, "Acceso denegado")
@@ -63,7 +66,7 @@ class UploadStreamTestCase(unittest.TestCase):
 
         file = UploadFile(filename="", file=BytesIO(b"x"))
         with self.assertRaises(HTTPException) as ctx:
-            upload.upload_file(request=None, file=file, user=DummyUser())
+            upload.upload_file(request=_DUMMY_REQUEST, file=file, user=DummyUser())
 
         self.assertEqual(ctx.exception.status_code, 400)
         self.assertEqual(ctx.exception.detail, "Nombre de archivo vacío")
@@ -73,18 +76,18 @@ class UploadStreamTestCase(unittest.TestCase):
     def test_save_upload_stream_accepts_exact_size_limit(self):
         with _tempdir() as tmpdir:
             dest = Path(tmpdir) / "out.webm"
-            file = UploadFile(filename="test.webm", file=BytesIO(b"x" * upload.MAX_SIZE_BYTES))
-            upload._save_upload_stream(file, dest)
+            file = UploadFile(filename="test.webm", file=BytesIO(b"x" * upload_files.MAX_SIZE_BYTES))
+            upload_files._save_upload_stream(file, dest)
             self.assertTrue(dest.exists())
-            self.assertEqual(dest.stat().st_size, upload.MAX_SIZE_BYTES)
+            self.assertEqual(dest.stat().st_size, upload_files.MAX_SIZE_BYTES)
 
 
     def test_save_upload_stream_size_limit(self):
         with _tempdir() as tmpdir:
             dest = Path(tmpdir) / "out.mp4"
-            file = UploadFile(filename="test.mp4", file=BytesIO(b"x" * (upload.MAX_SIZE_BYTES + 1)))
+            file = UploadFile(filename="test.mp4", file=BytesIO(b"x" * (upload_files.MAX_SIZE_BYTES + 1)))
             with self.assertRaises(HTTPException):
-                upload._save_upload_stream(file, dest)
+                upload_files._save_upload_stream(file, dest)
 
 
     def test_upload_maps_ensure_dir_oserror_and_closes_file(self):
@@ -92,9 +95,9 @@ class UploadStreamTestCase(unittest.TestCase):
             role = "ADMIN"
 
         file = UploadFile(filename="archivo.pdf", file=BytesIO(b"x"))
-        with patch.object(upload, "_ensure_uploads_dir", side_effect=OSError("mkdir fail")):
+        with patch.object(upload_files, "_ensure_uploads_dir", side_effect=OSError("mkdir fail")):
             with self.assertRaises(HTTPException) as ctx:
-                upload.upload_file(request=None, file=file, user=DummyUser())
+                upload.upload_file(request=_DUMMY_REQUEST, file=file, user=DummyUser())
 
         self.assertEqual(ctx.exception.status_code, 500)
         self.assertIn("Error al guardar archivo", ctx.exception.detail)
@@ -117,12 +120,12 @@ class UploadStreamTestCase(unittest.TestCase):
 
             file = UploadFile(filename="archivo.pdf", file=BytesIO(b"x"))
             with (
-                patch.object(upload, "UPLOADS_DIR", uploads_dir),
-                patch.object(upload, "_save_upload_stream", side_effect=fake_save),
-                patch("app.routers.upload.uuid.uuid4", return_value=DummyUUID()),
+                patch.object(upload_files, "UPLOADS_DIR", uploads_dir),
+                patch.object(upload_files, "_save_upload_stream", side_effect=fake_save),
+                patch("app.services.upload_files.uuid.uuid4", return_value=DummyUUID()),
             ):
                 with self.assertRaises(HTTPException) as ctx:
-                    upload.upload_file(request=None, file=file, user=DummyUser())
+                    upload.upload_file(request=_DUMMY_REQUEST, file=file, user=DummyUser())
 
             self.assertEqual(ctx.exception.status_code, 500)
             self.assertIn("Error al guardar archivo", ctx.exception.detail)
@@ -144,8 +147,8 @@ class UploadStreamTestCase(unittest.TestCase):
             file = UploadFile(filename="archivo.pdf", file=BytesIO(b"contenido"))
 
             with (
-                patch.object(upload, "UPLOADS_DIR", uploads_dir),
-                patch("app.routers.upload.uuid.uuid4", return_value=DummyUUID()),
+                patch.object(upload_files, "UPLOADS_DIR", uploads_dir),
+                patch("app.services.upload_files.uuid.uuid4", return_value=DummyUUID()),
             ):
                 result = upload.upload_file(request=request, file=file, user=DummyUser())
 
@@ -169,8 +172,8 @@ class UploadStreamTestCase(unittest.TestCase):
             file = UploadFile(filename="MATERIAL.PDF", file=BytesIO(b"contenido"))
 
             with (
-                patch.object(upload, "UPLOADS_DIR", uploads_dir),
-                patch("app.routers.upload.uuid.uuid4", return_value=DummyUUID()),
+                patch.object(upload_files, "UPLOADS_DIR", uploads_dir),
+                patch("app.services.upload_files.uuid.uuid4", return_value=DummyUUID()),
             ):
                 result = upload.upload_file(request=request, file=file, user=DummyUser())
 
@@ -191,15 +194,15 @@ class UploadStreamTestCase(unittest.TestCase):
             uploads_dir = Path(tmpdir)
             file = UploadFile(
                 filename="archivo.mp4",
-                file=BytesIO(b"x" * (upload.MAX_SIZE_BYTES + 1)),
+                file=BytesIO(b"x" * (upload_files.MAX_SIZE_BYTES + 1)),
             )
 
             with (
-                patch.object(upload, "UPLOADS_DIR", uploads_dir),
-                patch("app.routers.upload.uuid.uuid4", return_value=DummyUUID()),
+                patch.object(upload_files, "UPLOADS_DIR", uploads_dir),
+                patch("app.services.upload_files.uuid.uuid4", return_value=DummyUUID()),
             ):
                 with self.assertRaises(HTTPException) as ctx:
-                    upload.upload_file(request=None, file=file, user=DummyUser())
+                    upload.upload_file(request=_DUMMY_REQUEST, file=file, user=DummyUser())
 
             self.assertEqual(ctx.exception.status_code, 400)
             self.assertIn("Archivo demasiado grande", ctx.exception.detail)
@@ -223,12 +226,12 @@ class UploadStreamTestCase(unittest.TestCase):
 
             file = UploadFile(filename="archivo.pdf", file=BytesIO(b"x"))
             with (
-                patch.object(upload, "UPLOADS_DIR", uploads_dir),
-                patch.object(upload, "_save_upload_stream", side_effect=fake_save),
-                patch("app.routers.upload.uuid.uuid4", return_value=DummyUUID()),
+                patch.object(upload_files, "UPLOADS_DIR", uploads_dir),
+                patch.object(upload_files, "_save_upload_stream", side_effect=fake_save),
+                patch("app.services.upload_files.uuid.uuid4", return_value=DummyUUID()),
             ):
                 with self.assertRaises(HTTPException) as ctx:
-                    upload.upload_file(request=None, file=file, user=DummyUser())
+                    upload.upload_file(request=_DUMMY_REQUEST, file=file, user=DummyUser())
 
             self.assertEqual(ctx.exception.status_code, 400)
             self.assertEqual(ctx.exception.detail, "Archivo demasiado grande")

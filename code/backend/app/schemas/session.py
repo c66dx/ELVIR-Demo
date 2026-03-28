@@ -65,3 +65,39 @@ class TranscriptResponse(BaseModel):
     transcript_data: list[TranscriptEntry]
     session_active: Optional[bool] = None
     fetched_at: Optional[datetime] = None
+
+
+class SessionMonthlyStat(BaseModel):
+    month: str
+    count: int
+
+
+class SessionStatsResponse(BaseModel):
+    total: int
+    completed: int
+    cancelled: int
+    error: int
+    in_progress: int
+    monthly: list[SessionMonthlyStat]
+
+
+class SessionEvaluationRequest(BaseModel):
+    session_id: int | None = None
+    liveavatar_session_id: str | None = None
+    evaluation: Any
+    source: str | None = None
+
+
+class SessionCompetencyItem(BaseModel):
+    competency_slug: str
+    level_slug: str
+    comment: str | None = None
+
+
+class SessionCompetenciesRequest(BaseModel):
+    items: list[SessionCompetencyItem]
+
+
+class SessionEventCreate(BaseModel):
+    event_type: str
+    payload: dict | None = None

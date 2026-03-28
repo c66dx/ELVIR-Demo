@@ -15,13 +15,9 @@ from app.models.session import Session as SessionModel
 from app.models.user import User
 from app.models.youth import Youth
 from app.models.youth_invitation import YouthInvitation
-from app.routers.youths import (
-    _create_youth_with_unique_identifier,
-    _get_last_session_map,
-    _generate_identifier,
-    change_youth_email,
-    list_youths,
-)
+from app.routers.youths import change_youth_email, list_youths
+from app.services.youth_identifiers import create_youth_with_unique_identifier, generate_identifier
+from app.services.youth_queries import get_last_session_map
 from app.schemas.youth import YouthChangeEmailRequest
 
 
@@ -60,13 +56,13 @@ class YouthsRouterTestCase(unittest.TestCase):
 
 
     def test_generate_identifier_uses_latest_jov_pattern(self):
-        self.assertEqual(_generate_identifier(self.db), "JOV-002")
+        self.assertEqual(generate_identifier(self.db), "JOV-002")
 
         extra = Youth(user_id=None, display_name="Otro2", identifier="JOV-099", login_enabled=False, is_active=True)
         self.db.add(extra)
         self.db.commit()
 
-        self.assertEqual(_generate_identifier(self.db), "JOV-100")
+        self.assertEqual(generate_identifier(self.db), "JOV-100")
 
     def test_generate_identifier_skips_malformed_latest(self):
         malformed = Youth(user_id=None, display_name="Malformed", identifier="JOV-XYZ", login_enabled=False, is_active=True)
@@ -74,7 +70,7 @@ class YouthsRouterTestCase(unittest.TestCase):
         self.db.add_all([malformed, valid])
         self.db.commit()
 
-        self.assertEqual(_generate_identifier(self.db), "JOV-011")
+        self.assertEqual(generate_identifier(self.db), "JOV-011")
 
     def test_generate_identifier_uses_numeric_max_not_lexicographic(self):
         self.db.add_all([
@@ -83,7 +79,7 @@ class YouthsRouterTestCase(unittest.TestCase):
         ])
         self.db.commit()
 
-        self.assertEqual(_generate_identifier(self.db), "JOV-101")
+        self.assertEqual(generate_identifier(self.db), "JOV-101")
 
     def test_get_last_session_map_returns_latest_session(self):
         now = datetime.now(timezone.utc)
@@ -106,7 +102,7 @@ class YouthsRouterTestCase(unittest.TestCase):
         self.db.add_all([older, latest])
         self.db.commit()
 
-        last_map = _get_last_session_map(self.db, [self.youth.id])
+        last_map = get_last_session_map(self.db, [self.youth.id])
         self.assertIn(self.youth.id, last_map)
         self.assertEqual(last_map[self.youth.id].id, latest.id)
 
@@ -132,7 +128,7 @@ class YouthsRouterTestCase(unittest.TestCase):
         self.db.add_all([first, second])
         self.db.commit()
 
-        last_map = _get_last_session_map(self.db, [self.youth.id])
+        last_map = get_last_session_map(self.db, [self.youth.id])
         self.assertEqual(last_map[self.youth.id].id, max(first.id, second.id))
 
     def test_change_email_creates_invitation_without_updating_user_email(self):
@@ -189,8 +185,8 @@ class YouthsRouterTestCase(unittest.TestCase):
         self.db.add(Youth(user_id=None, display_name="Dup", identifier="JOV-002", login_enabled=False, is_active=True))
         self.db.commit()
 
-        with patch("app.routers.youths._generate_identifier", side_effect=["JOV-002", "JOV-003"]):
-            youth = _create_youth_with_unique_identifier(
+        with patch("app.services.youth_identifiers.generate_identifier", side_effect=["JOV-002", "JOV-003"]):
+            youth = create_youth_with_unique_identifier(
                 self.db,
                 display_name="Nuevo",
                 phone=None,
@@ -206,9 +202,9 @@ class YouthsRouterTestCase(unittest.TestCase):
         self.db.add(Youth(user_id=None, display_name="Dup", identifier="JOV-002", login_enabled=False, is_active=True))
         self.db.commit()
 
-        with patch("app.routers.youths._generate_identifier", return_value="JOV-002"):
+        with patch("app.services.youth_identifiers.generate_identifier", return_value="JOV-002"):
             with self.assertRaisesRegex(HTTPException, "No fue posible generar un identificador único"):
-                _create_youth_with_unique_identifier(
+                create_youth_with_unique_identifier(
                     self.db,
                     display_name="Nuevo",
                     phone=None,
