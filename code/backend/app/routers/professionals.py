@@ -1,7 +1,6 @@
 """Router de profesionales (gestión por Admin)."""
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
 from app.config import settings
 from app.database import get_db
