@@ -38,15 +38,16 @@ La API estará disponible en `http://localhost:8000`.
 - Métricas operativas: `http://localhost:8000/health/metrics`
 - Header de trazabilidad: respuestas incluyen `X-Request-ID` (si no viene en request, se genera).
 
-## Usuarios de prueba (tras ejecutar seed)
+## Usuarios de prueba (tras ejecutar seed, rama **main**)
 
 | Email | Contraseña | Rol |
 |-------|------------|-----|
-| elvir.demo+joven1@gmail.com | test123 | JOVEN |
-| elvir.demo+joven2@gmail.com | test123 | JOVEN |
-| elvir.demo+joven3@gmail.com … joven6 | test123 | JOVEN |
+| joven1@test.cl | test123 | JOVEN |
+| joven2@test.cl | test123 | JOVEN (login deshabilitado en perfil de prueba) |
 | prof@test.cl | test123 | PROFESIONAL |
 | admin@test.cl | test123 | ADMIN |
+
+Otra rama (p. ej. preview) puede definir más cuentas (Gmail, etc.): usar una BD acorde a ese `seed.py`.
 
 ## Configuración
 

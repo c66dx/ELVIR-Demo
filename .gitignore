@@ -49,6 +49,8 @@ npm-debug.log*
 # Archivos subidos (backend)
 code/backend/uploads/
 
+docs/liveavatar/deep-research-report.md
+docs/liveavatar/ENTREGA-investigacion-voz.md
 docs/reunion
 docs/material
 referencia-catalina/

@@ -99,16 +99,15 @@ def _ensure_assignment(db: Session, youth: Youth | None, prof: Professional | No
 
 
 def seed(db: Session):
-    """Ejecuta la carga inicial."""
-    # Usuarios (misma convención que preview: Gmail para jóvenes, @test.cl tutor/admin)
+    """Ejecuta la carga inicial.
+
+    Rama **main**: solo dos jóvenes demo (`joven1@test.cl` con login, `joven2@test.cl` sin login).
+    Otra rama (p. ej. preview/Teletón) puede usar el seed extendido con Gmail; no mezclar en la misma BD.
+    """
     if db.query(User).count() == 0:
         users = [
-            User(email="elvir.demo+joven1@gmail.com", password_hash=get_password_hash("test123"), role="JOVEN", is_active=True),
-            User(email="elvir.demo+joven2@gmail.com", password_hash=get_password_hash("test123"), role="JOVEN", is_active=True),
-            User(email="elvir.demo+joven3@gmail.com", password_hash=get_password_hash("test123"), role="JOVEN", is_active=True),
-            User(email="elvir.demo+joven4@gmail.com", password_hash=get_password_hash("test123"), role="JOVEN", is_active=True),
-            User(email="elvir.demo+joven5@gmail.com", password_hash=get_password_hash("test123"), role="JOVEN", is_active=True),
-            User(email="elvir.demo+joven6@gmail.com", password_hash=get_password_hash("test123"), role="JOVEN", is_active=True),
+            User(email="joven1@test.cl", password_hash=get_password_hash("test123"), role="JOVEN", is_active=True),
+            User(email="joven2@test.cl", password_hash=get_password_hash("test123"), role="JOVEN", is_active=True),
             User(email="prof@test.cl", password_hash=get_password_hash("test123"), role="PROFESIONAL", is_active=True),
             User(email="admin@test.cl", password_hash=get_password_hash("test123"), role="ADMIN", is_active=True),
         ]
@@ -133,17 +132,15 @@ def seed(db: Session):
     elif prof_user:
         prof = db.query(Professional).filter(Professional.user_id == prof_user.id).first()
 
-    # Jóvenes
+    # Jóvenes (solo dos cuentas con usuario en main)
     if db.query(Youth).count() == 0:
-        u1 = db.query(User).filter(User.email == "elvir.demo+joven1@gmail.com").first()
-        u2 = db.query(User).filter(User.email == "elvir.demo+joven2@gmail.com").first()
+        u1 = db.query(User).filter(User.email == "joven1@test.cl").first()
+        u2 = db.query(User).filter(User.email == "joven2@test.cl").first()
         youths = [
             Youth(user_id=u1.id, login_enabled=True, display_name="María González", identifier="JOV-001",
                   phone="+56912345678", is_active=True, general_notes="Notas generales"),
             Youth(user_id=u2.id, login_enabled=False, display_name="Juan Rodríguez", identifier="JOV-002",
                   is_active=True),
-            Youth(login_enabled=True, display_name="Carolina Flores", identifier="JOV-003", is_active=True),
-            Youth(login_enabled=True, display_name="Roberto Díaz", identifier="JOV-004", is_active=True),
         ]
         for y in youths:
             db.add(y)
@@ -153,12 +150,8 @@ def seed(db: Session):
                 db.add(Assignment(youth_id=y.id, professional_id=prof.id, status="ACTIVO"))
 
     # Asegurar seeds y asignaciones aunque la BD ya tenga datos
-    seed_joven1 = _get_or_create_user(db, "elvir.demo+joven1@gmail.com", "JOVEN", is_active=True)
-    seed_joven2 = _get_or_create_user(db, "elvir.demo+joven2@gmail.com", "JOVEN", is_active=True)
-    seed_joven3 = _get_or_create_user(db, "elvir.demo+joven3@gmail.com", "JOVEN", is_active=True)
-    seed_joven4 = _get_or_create_user(db, "elvir.demo+joven4@gmail.com", "JOVEN", is_active=True)
-    seed_joven5 = _get_or_create_user(db, "elvir.demo+joven5@gmail.com", "JOVEN", is_active=True)
-    seed_joven6 = _get_or_create_user(db, "elvir.demo+joven6@gmail.com", "JOVEN", is_active=True)
+    seed_joven1 = _get_or_create_user(db, "joven1@test.cl", "JOVEN", is_active=True)
+    seed_joven2 = _get_or_create_user(db, "joven2@test.cl", "JOVEN", is_active=True)
     seed_prof_user = _get_or_create_user(db, "prof@test.cl", "PROFESIONAL", is_active=True)
     _get_or_create_user(db, "admin@test.cl", "ADMIN", is_active=True)
 
@@ -179,57 +172,7 @@ def seed(db: Session):
         display_name="Juan Rodríguez",
         login_enabled=False,
     )
-    y3 = _get_or_create_youth(
-        db,
-        user=None,
-        identifier="JOV-003",
-        display_name="Carolina Flores",
-        login_enabled=True,
-    )
-    y4 = _get_or_create_youth(
-        db,
-        user=None,
-        identifier="JOV-004",
-        display_name="Roberto Díaz",
-        login_enabled=True,
-    )
-    y5 = _get_or_create_youth(
-        db,
-        user=seed_joven3,
-        identifier="JOV-005",
-        display_name="Valentina Rojas",
-        login_enabled=True,
-        phone="+56955550101",
-        general_notes="Se recomienda retroalimentación concreta y breve.",
-    )
-    y6 = _get_or_create_youth(
-        db,
-        user=seed_joven4,
-        identifier="JOV-006",
-        display_name="Camilo Pérez",
-        login_enabled=True,
-        phone="+56955550102",
-        general_notes="Prefiere preguntas directas y ejemplos prácticos.",
-    )
-    y7 = _get_or_create_youth(
-        db,
-        user=seed_joven5,
-        identifier="JOV-007",
-        display_name="Francisca Soto",
-        login_enabled=True,
-        phone="+56955550103",
-        general_notes="Mejora con apoyo visual y lenguaje sencillo.",
-    )
-    y8 = _get_or_create_youth(
-        db,
-        user=seed_joven6,
-        identifier="JOV-008",
-        display_name="Diego Muñoz",
-        login_enabled=True,
-        phone="+56955550104",
-        general_notes="Necesita contraste alto y textos grandes.",
-    )
-    for y in (y1, y2, y3, y4, y5, y6, y7, y8):
+    for y in (y1, y2):
         _ensure_assignment(db, y, seed_prof)
 # Cargos (contenido de Catalina - cargos.json + Context Dinamico roles-data)
     if db.query(JobRole).count() == 0:

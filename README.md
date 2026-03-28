@@ -133,15 +133,16 @@ npm start
 
 Espera a que compile (~30 segundos). La app queda en `http://localhost:4200`.
 
+En la rama **main**, el login y el `seed.py` usan **solo dos jóvenes** `@test.cl` (uno con login y otro deshabilitado). Otra rama (p. ej. preview / despliegue Teletón) puede llevar **otro seed** (Gmail, más jóvenes): no mezcles la misma base de datos entre esos esquemas; borra el SQLite o vuelve a crear la BD al cambiar de rama.
+
 ### 5. Abrir la aplicación
 
 Abre el navegador en **http://localhost:4200** e inicia sesión con:
 
 | Email | Contraseña | Rol |
 |-------|------------|-----|
-| elvir.demo+joven1@gmail.com | test123 | JOVEN |
-| elvir.demo+joven2@gmail.com | test123 | JOVEN (cuenta con login deshabilitado en el perfil de prueba) |
-| elvir.demo+joven3@gmail.com … joven6 | test123 | JOVEN |
+| joven1@test.cl | test123 | JOVEN |
+| joven2@test.cl | test123 | JOVEN (login deshabilitado en el perfil de prueba) |
 | prof@test.cl | test123 | PROFESIONAL |
 | admin@test.cl | test123 | ADMIN |
 

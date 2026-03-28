@@ -75,6 +75,8 @@ Configurar en `code/backend/.env`:
 
 Si no están configuradas, el endpoint `/sessions/{id}/start` devuelve un placeholder.
 
+**Idioma y acento:** El backend envía `avatar_persona.language: "es"` al crear el token. El acento depende del **Voice ID** en LiveAvatar, no de un locale regional en la API. Resumen para equipo e investigación: [ENTREGA-investigacion-voz.md](./ENTREGA-investigacion-voz.md).
+
 ---
 
 ## 3. Obtención del prompt (contenido de Catalina)
