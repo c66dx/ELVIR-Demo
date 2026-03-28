@@ -21,6 +21,10 @@ exclude = '''
 )/
 '''
 
+[tool.pytest.ini_options]
+# Evita el aviso de pytest-asyncio sobre el scope del event loop por defecto.
+asyncio_default_fixture_loop_scope = "function"
+
 [tool.mypy]
 python_version = "3.11"
 ignore_missing_imports = true
