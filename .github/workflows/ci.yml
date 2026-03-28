@@ -37,6 +37,16 @@ jobs:
       - name: Run backend unit tests (pytest)
         run: PYTHONPATH=. python -m pytest -q
 
+  backend-docker:
+    name: Backend Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build API Docker image
+        run: docker build -t elvir-api:ci ./code/backend
+
   frontend-build:
     name: Frontend build
     runs-on: ubuntu-latest
