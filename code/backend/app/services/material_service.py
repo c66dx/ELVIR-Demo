@@ -1,7 +1,6 @@
 """Consultas y persistencia de material de apoyo."""
-from __future__ import annotations
 
-from typing import Optional
+from __future__ import annotations
 
 from fastapi import HTTPException
 from sqlalchemy import or_, select
@@ -56,8 +55,8 @@ def create_support_material_record(
 def fetch_support_material_list(
     db: Session,
     user: User,
-    job_role_id: Optional[int],
-    case_id: Optional[int],
+    job_role_id: int | None,
+    case_id: int | None,
     page: int | None,
     page_size: int | None,
 ) -> tuple[list[SupportMaterial], dict[str, str] | None]:
@@ -69,9 +68,7 @@ def fetch_support_material_list(
     if user.role == "PROFESIONAL":
         prof = db.query(Professional).filter(Professional.user_id == user.id).first()
         if prof:
-            q = q.filter(
-                (SupportMaterial.created_by.is_(None)) | (SupportMaterial.created_by == prof.id)
-            )
+            q = q.filter((SupportMaterial.created_by.is_(None)) | (SupportMaterial.created_by == prof.id))
     elif user.role == "JOVEN":
         youth = db.query(Youth).filter(Youth.user_id == user.id).first()
         if not youth:
@@ -129,11 +126,15 @@ def assert_youth_access_for_material_lists(db: Session, user: User, youth_id: in
         return
     prof = db.query(Professional).filter(Professional.user_id == user.id).first()
     if prof:
-        assign = db.query(Assignment).filter(
-            Assignment.youth_id == youth_id,
-            Assignment.professional_id == prof.id,
-            Assignment.status == "ACTIVO",
-        ).first()
+        assign = (
+            db.query(Assignment)
+            .filter(
+                Assignment.youth_id == youth_id,
+                Assignment.professional_id == prof.id,
+                Assignment.status == "ACTIVO",
+            )
+            .first()
+        )
         if not assign:
             raise HTTPException(status_code=403, detail="Acceso denegado")
 
@@ -151,11 +152,15 @@ def suggest_material_to_youth(
     prof: Professional,
     data: SuggestMaterialRequest,
 ) -> dict:
-    assign = db.query(Assignment).filter(
-        Assignment.youth_id == data.youth_id,
-        Assignment.professional_id == prof.id,
-        Assignment.status == "ACTIVO",
-    ).first()
+    assign = (
+        db.query(Assignment)
+        .filter(
+            Assignment.youth_id == data.youth_id,
+            Assignment.professional_id == prof.id,
+            Assignment.status == "ACTIVO",
+        )
+        .first()
+    )
     if not assign:
         raise HTTPException(status_code=403, detail="Acceso denegado")
     sugg = MaterialSuggestion(

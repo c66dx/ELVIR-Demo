@@ -1,4 +1,5 @@
 """Overview de jóvenes y profesionales (panel admin)."""
+
 from __future__ import annotations
 
 from typing import Literal

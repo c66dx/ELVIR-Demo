@@ -1,4 +1,5 @@
 """Comprobación de acceso a recursos de profesionales."""
+
 from __future__ import annotations
 
 from fastapi import HTTPException

@@ -1,9 +1,8 @@
 import unittest
-
-from fastapi import HTTPException
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
+from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -16,9 +15,9 @@ from app.models.user import User
 from app.models.youth import Youth
 from app.models.youth_invitation import YouthInvitation
 from app.routers.youths import change_youth_email, list_youths
+from app.schemas.youth import YouthChangeEmailRequest
 from app.services.youth_identifiers import create_youth_with_unique_identifier, generate_identifier
 from app.services.youth_queries import get_last_session_map
-from app.schemas.youth import YouthChangeEmailRequest
 
 
 class YouthsRouterTestCase(unittest.TestCase):
@@ -82,7 +81,7 @@ class YouthsRouterTestCase(unittest.TestCase):
         self.assertEqual(generate_identifier(self.db), "JOV-101")
 
     def test_get_last_session_map_returns_latest_session(self):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         older = SessionModel(
             youth_id=self.youth.id,
             professional_id=self.prof.id,
@@ -108,7 +107,7 @@ class YouthsRouterTestCase(unittest.TestCase):
 
 
     def test_get_last_session_map_resolves_tie_with_highest_id(self):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         first = SessionModel(
             youth_id=self.youth.id,
             professional_id=self.prof.id,
@@ -156,7 +155,7 @@ class YouthsRouterTestCase(unittest.TestCase):
             youth_id=self.youth.id,
             email="old-pending@test.cl",
             token="old-token",
-            expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+            expires_at=datetime.now(UTC) + timedelta(days=7),
         )
         self.db.add(old_inv)
         self.db.commit()

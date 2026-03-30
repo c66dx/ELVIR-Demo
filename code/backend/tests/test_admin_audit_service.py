@@ -1,6 +1,6 @@
 """Tests de admin_audit_service (listado de audit logs)."""
 import unittest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -27,7 +27,7 @@ class AdminAuditServiceTestCase(unittest.TestCase):
         self.db.add(self.actor)
         self.db.flush()
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         self.db.add_all(
             [
                 AuditLog(

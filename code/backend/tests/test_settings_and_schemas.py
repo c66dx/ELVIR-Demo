@@ -3,7 +3,10 @@ import unittest
 from pydantic import ValidationError
 
 from app.config import Settings
-from app.schemas.session import SessionCreate, SessionCloseRequest
+from app.schemas.session import SessionCloseRequest, SessionCreate
+
+
+_PROD_SECRET = "a" * 32  # cumple longitud mínima en producción (distinta del default dev)
 
 
 class SettingsAndSchemasTestCase(unittest.TestCase):
@@ -18,7 +21,7 @@ class SettingsAndSchemasTestCase(unittest.TestCase):
     def test_production_alias_is_accepted_when_safe(self):
         s = Settings(
             ENV="production",
-            SECRET_KEY="safe-secret",
+            SECRET_KEY=_PROD_SECRET,
             AUTO_CREATE_TABLES=False,
             CORS_ORIGINS="http://localhost:4200",
         )
@@ -27,14 +30,14 @@ class SettingsAndSchemasTestCase(unittest.TestCase):
     def test_env_is_trimmed_before_validation(self):
         s = Settings(
             ENV="  prod  ",
-            SECRET_KEY="safe-secret",
+            SECRET_KEY=_PROD_SECRET,
             AUTO_CREATE_TABLES=False,
             CORS_ORIGINS="http://localhost:4200",
         )
         self.assertEqual(s.ENV, "prod")
 
     def test_is_production_flag(self):
-        s_prod = Settings(ENV="production", SECRET_KEY="safe-secret", AUTO_CREATE_TABLES=False, CORS_ORIGINS="http://localhost:4200")
+        s_prod = Settings(ENV="production", SECRET_KEY=_PROD_SECRET, AUTO_CREATE_TABLES=False, CORS_ORIGINS="http://localhost:4200")
         s_dev = Settings(ENV="dev", CORS_ORIGINS="http://localhost:4200")
         self.assertTrue(s_prod.is_production)
         self.assertFalse(s_dev.is_production)
@@ -45,8 +48,32 @@ class SettingsAndSchemasTestCase(unittest.TestCase):
 
     def test_production_rejects_auto_create_tables(self):
         with self.assertRaises(ValidationError):
-            Settings(ENV="prod", SECRET_KEY="super-secret", AUTO_CREATE_TABLES=True)
+            Settings(ENV="prod", SECRET_KEY=_PROD_SECRET, AUTO_CREATE_TABLES=True)
 
+    def test_production_rejects_short_secret(self):
+        with self.assertRaises(ValidationError):
+            Settings(
+                ENV="prod",
+                SECRET_KEY="x" * 31,
+                AUTO_CREATE_TABLES=False,
+                CORS_ORIGINS="http://localhost:4200",
+            )
+
+    def test_storage_s3_requires_bucket_and_public_url(self):
+        with self.assertRaises(ValidationError):
+            Settings(
+                CORS_ORIGINS="http://localhost:4200",
+                STORAGE_BACKEND="s3",
+                S3_BUCKET="",
+                S3_PUBLIC_BASE_URL="https://cdn.example.com",
+            )
+        with self.assertRaises(ValidationError):
+            Settings(
+                CORS_ORIGINS="http://localhost:4200",
+                STORAGE_BACKEND="s3",
+                S3_BUCKET="mi-bucket",
+                S3_PUBLIC_BASE_URL="",
+            )
 
     def test_auto_create_tables_allowed_only_in_dev(self):
         Settings(ENV="dev", AUTO_CREATE_TABLES=True, CORS_ORIGINS="http://localhost:4200")

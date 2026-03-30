@@ -29,7 +29,19 @@ for arg in "$@"; do
   esac
 done
 
-echo "[1/3] Validando migraciones Alembic..."
+echo "=== [backend] ruff ==="
+(
+  cd "$BACKEND_DIR"
+  PYTHONPATH=. python -m ruff check .
+)
+
+echo "=== [backend] mypy ==="
+(
+  cd "$BACKEND_DIR"
+  PYTHONPATH=. python -m mypy --config-file ../../pyproject.toml
+)
+
+echo "=== [backend] migraciones Alembic ==="
 (
   cd "$BACKEND_DIR"
   rm -f "$MIGRATION_DB"
@@ -44,31 +56,31 @@ echo "[1/3] Validando migraciones Alembic..."
   fi
 )
 
-echo "[2/3] Ejecutando tests backend..."
+echo "=== [backend] pytest + cobertura (mín. 70%, ver pyproject.toml) ==="
 (
   cd "$BACKEND_DIR"
-  PYTHONPATH=. python -m unittest discover -s tests -v
+  PYTHONPATH=. python -m pytest -q --cov=app --cov-fail-under=70
 )
 
 if [[ "$SKIP_FRONTEND" == "false" ]]; then
-  echo "[pre] Verificando alineación package-lock frontend..."
+  echo "=== [pre] package-lock frontend ==="
   python "$ROOT_DIR/scripts/check_frontend_lock_sync.py"
 
-  echo "[3/3] Compilando frontend (smoke build)..."
+  echo "=== [frontend] build (smoke) ==="
   (
     cd "$FRONTEND_DIR"
     npm run build -- --configuration development
   )
 else
-  echo "[3/3] Frontend omitido por bandera --skip-frontend"
+  echo "=== [frontend] omitido (--skip-frontend) ==="
 fi
 
 if [[ "$RUN_FRONTEND_UNIT_TESTS" == "true" ]]; then
-  echo "[extra] Ejecutando tests unitarios frontend con cobertura mínima..."
+  echo "=== [frontend] unit tests (npm run test:ci) ==="
   (
     cd "$FRONTEND_DIR"
     npm run test:ci
   )
 fi
 
-echo "✅ Quality gate completado"
+echo "✅ Quality gate completado (alineado con CI: ruff, mypy, alembic, pytest --cov)"

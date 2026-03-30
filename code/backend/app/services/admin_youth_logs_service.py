@@ -1,4 +1,5 @@
 """Logs de plataforma y entrevistas de un joven (panel admin)."""
+
 from __future__ import annotations
 
 from fastapi import HTTPException
@@ -47,10 +48,7 @@ def build_youth_logs_response(
             total = platform_q.order_by(None).count()
             offset = (platform_page - 1) * platform_page_size
             platform_rows = (
-                platform_q.order_by(PlatformSession.started_at.desc())
-                .offset(offset)
-                .limit(platform_page_size)
-                .all()
+                platform_q.order_by(PlatformSession.started_at.desc()).offset(offset).limit(platform_page_size).all()
             )
             platform_meta = AdminListMeta(total=total, page=platform_page, page_size=platform_page_size)
         else:
@@ -64,12 +62,7 @@ def build_youth_logs_response(
     if interviews_use_pagination:
         total = sessions_q.order_by(None).count()
         offset = (interviews_page - 1) * interviews_page_size
-        sessions = (
-            sessions_q.order_by(SessionModel.started_at.desc())
-            .offset(offset)
-            .limit(interviews_page_size)
-            .all()
-        )
+        sessions = sessions_q.order_by(SessionModel.started_at.desc()).offset(offset).limit(interviews_page_size).all()
         interviews_meta = AdminListMeta(total=total, page=interviews_page, page_size=interviews_page_size)
     else:
         sessions = sessions_q.order_by(SessionModel.started_at.desc()).all()

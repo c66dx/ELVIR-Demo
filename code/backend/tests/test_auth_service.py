@@ -1,6 +1,6 @@
 """Tests unitarios de auth_service (login, me, platform session, validación de token)."""
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
 from sqlalchemy import create_engine
@@ -150,7 +150,7 @@ class AuthServiceTestCase(unittest.TestCase):
             youth_id=y.id,
             email="inv@test.cl",
             token="tok-youth-1",
-            expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+            expires_at=datetime.now(UTC) + timedelta(days=1),
         )
         self.db.add(inv)
         self.db.commit()
@@ -176,7 +176,7 @@ class AuthServiceTestCase(unittest.TestCase):
             professional_id=p.id,
             email="profinv@test.cl",
             token="tok-prof-1",
-            expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+            expires_at=datetime.now(UTC) + timedelta(days=1),
         )
         self.db.add(inv)
         self.db.commit()
@@ -217,7 +217,7 @@ class ActivateAccountTestCase(unittest.TestCase):
             youth_id=y.id,
             email="nuevo@test.cl",
             token="tok-act-y",
-            expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+            expires_at=datetime.now(UTC) + timedelta(days=1),
         )
         self.db.add(inv)
         self.db.commit()
@@ -246,8 +246,8 @@ class ActivateAccountTestCase(unittest.TestCase):
             youth_id=y.id,
             email="u@test.cl",
             token="tok-used",
-            expires_at=datetime.now(timezone.utc) + timedelta(days=1),
-            used_at=datetime.now(timezone.utc),
+            expires_at=datetime.now(UTC) + timedelta(days=1),
+            used_at=datetime.now(UTC),
         )
         self.db.add(inv)
         self.db.commit()
@@ -272,7 +272,7 @@ class ActivateAccountTestCase(unittest.TestCase):
             professional_id=p.id,
             email="pend@test.cl",
             token="tok-act-p",
-            expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+            expires_at=datetime.now(UTC) + timedelta(days=1),
         )
         self.db.add(inv)
         self.db.commit()

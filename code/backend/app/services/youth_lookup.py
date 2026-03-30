@@ -1,4 +1,5 @@
 """Lookup de jóvenes por ID con filtrado por rol."""
+
 from __future__ import annotations
 
 from sqlalchemy.orm import Session as DBSession
@@ -11,13 +12,7 @@ from app.services.youth_queries import get_user_profile_photo_map
 
 def parse_lookup_ids(raw_ids: list) -> list[int]:
     """Normaliza lista de ids (int o string numérico) a enteros positivos únicos."""
-    parsed = list(
-        {
-            int(i)
-            for i in raw_ids
-            if isinstance(i, int) or (isinstance(i, str) and str(i).isdigit())
-        }
-    )
+    parsed = list({int(i) for i in raw_ids if isinstance(i, int) or (isinstance(i, str) and str(i).isdigit())})
     return [i for i in parsed if i > 0]
 
 
@@ -34,6 +29,7 @@ def lookup_youth_profiles(db: DBSession, user: User, ids: list[int]) -> list[dic
         q = q.filter(Youth.id == youth.id)
     elif user.role == "PROFESIONAL":
         from app.models.professional import Professional
+
         prof = db.query(Professional).filter(Professional.user_id == user.id).first()
         if not prof:
             return []

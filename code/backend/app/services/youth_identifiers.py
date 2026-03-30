@@ -1,4 +1,5 @@
 """Generación de identificadores JOV-NNN y creación de jóvenes con reintentos ante colisiones."""
+
 from __future__ import annotations
 
 from fastapi import HTTPException, status

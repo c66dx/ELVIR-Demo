@@ -1,4 +1,5 @@
 """Lectura de transcripciones de sesión."""
+
 from __future__ import annotations
 
 from sqlalchemy.orm import Session as OrmSession

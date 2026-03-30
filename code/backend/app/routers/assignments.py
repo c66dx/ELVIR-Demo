@@ -1,10 +1,13 @@
 """Router de asignaciones (joven-profesional)."""
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Path
 from sqlalchemy.orm import Session
 
-from app.database import get_db
 from app.core.dependencies import get_current_user
+from app.database import get_db
+from app.schemas.assignment import AssignmentCreate
 from app.services.assignment_service import (
     assert_user_can_create_assignment,
     assert_user_can_end_assignment,
@@ -16,11 +19,6 @@ from app.services.assignment_service import (
 )
 
 router = APIRouter(prefix="/assignments", tags=["assignments"])
-
-
-class AssignmentCreate(BaseModel):
-    youth_id: int
-    professional_id: int
 
 
 @router.post("")
@@ -37,7 +35,7 @@ def create_assignment(
 
 @router.patch("/{assignment_id}/end")
 def end_assignment(
-    assignment_id: int,
+    assignment_id: Annotated[int, Path(ge=1)],
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):

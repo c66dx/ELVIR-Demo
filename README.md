@@ -121,6 +121,10 @@ Deja esta terminal abierta. El backend queda en `http://localhost:8000`.
 - Linux/Mac: `cp .env.example .env`  
 La URL de PostgreSQL por defecto es `postgresql://elvir:elvir@localhost:5432/elvir` (compatible con `docker compose`).
 
+#### Rate limiting (backend)
+
+El API aplica límites por IP con **slowapi** (`LOGIN_RATE_LIMIT`, `DEFAULT_API_RATE_LIMIT`, etc.). La lista de variables está en `code/backend/.env.example`. En producción detrás de un proxy inverso (nginx, ingress), puedes activar `RATE_LIMIT_TRUST_X_FORWARDED_FOR=true` para que la clave sea el cliente real de `X-Forwarded-For` (solo si el proxy es de confianza y no expones el API directamente a Internet sin esa cabecera).
+
 ### 4. Configurar y ejecutar el frontend
 
 Abre **otra terminal** (la del backend sigue corriendo):
@@ -254,7 +258,7 @@ python code/backend/clean_user_data.py --skip-reseed
 
 ## Quality gate (recomendado antes de push/PR)
 
-Para validar en un solo comando lo que más impacta la nota final (migraciones + tests backend + build frontend):
+Para validar en un solo comando lo mismo que el job de backend en CI (**ruff**, **mypy**, migraciones Alembic, **pytest con cobertura ≥70%**) y, salvo `--skip-frontend`, build frontend:
 
 ```bash
 ./scripts/quality_gate.sh
@@ -278,7 +282,7 @@ Si además quieres correr unit tests frontend (cuando las dependencias de test e
 ./scripts/quality_gate.sh --frontend-unit-tests
 ```
 
-Este gate replica los checks críticos de CI y facilita una evidencia reproducible de calidad.
+El gate replica los checks críticos del backend en CI; el build frontend sigue siendo smoke local adicional.
 
 Verificación rápida de reproducibilidad frontend (package/lock):
 
@@ -295,4 +299,12 @@ Para validar desde fuera del backend el estado operativo y alertas simples (`/he
 python scripts/check_health_metrics.py --url http://localhost:8000/health/metrics --fail-on-alert
 ```
 
-Esto sirve para integrarlo en un cron o monitor externo liviano y fallar cuando exista una alerta activa.---
+Esto sirve para integrarlo en un cron o monitor externo liviano y fallar cuando exista una alerta activa.
+
+Readiness (conexión a base de datos, útil antes de marcar el despliegue como sano):
+
+```bash
+python scripts/check_health_ready.py --url http://localhost:8000/health/ready
+```
+
+---

@@ -1,4 +1,5 @@
 """Helpers para respuestas de error consistentes."""
+
 from enum import Enum
 from typing import Any
 
@@ -12,6 +13,7 @@ class ErrorCode(str, Enum):
     VALIDATION_ERROR = "VALIDATION_ERROR"
     INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR"
     CSRF_FORBIDDEN = "CSRF_FORBIDDEN"
+    RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED"
 
 
 def build_error_payload(
@@ -45,7 +47,7 @@ def localize_email_validation_errors(errors: list[Any]) -> list[Any]:
             continue
         e = dict(err)
         loc = e.get("loc")
-        field = loc[-1] if isinstance(loc, (list, tuple)) and loc else None
+        field = loc[-1] if isinstance(loc, list | tuple) and loc else None
         if field not in _EMAIL_FIELDS:
             out.append(e)
             continue

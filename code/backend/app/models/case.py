@@ -1,5 +1,6 @@
 """Modelo CASES."""
-from sqlalchemy import Column, Integer, String, Boolean, Text
+
+from sqlalchemy import Boolean, Column, Integer, String, Text
 
 from app.database import Base
 

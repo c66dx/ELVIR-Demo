@@ -1,4 +1,5 @@
 """Listado paginado de sesiones de plataforma (login/logout) por usuario."""
+
 from __future__ import annotations
 
 from sqlalchemy import desc

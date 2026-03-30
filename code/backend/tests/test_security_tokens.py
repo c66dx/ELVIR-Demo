@@ -18,6 +18,7 @@ class SecurityTokensTestCase(unittest.TestCase):
         assert payload is not None
         self.assertEqual(payload.get("sub"), "42")
         self.assertEqual(payload.get("role"), "ADMIN")
+        self.assertIsNotNone(payload.get("iat"))
 
     def test_csrf_token_roundtrip(self):
         token = create_csrf_token(subject="42")

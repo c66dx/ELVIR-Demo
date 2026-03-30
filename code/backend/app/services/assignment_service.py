@@ -1,7 +1,8 @@
 """Creación y cierre de asignaciones joven–profesional."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -31,11 +32,15 @@ def create_active_assignment(
     prof = db.query(Professional).filter(Professional.id == professional_id).first()
     if not prof:
         raise HTTPException(status_code=404, detail="Profesional no encontrado")
-    existing = db.query(Assignment).filter(
-        Assignment.youth_id == youth_id,
-        Assignment.professional_id == professional_id,
-        Assignment.status == "ACTIVO",
-    ).first()
+    existing = (
+        db.query(Assignment)
+        .filter(
+            Assignment.youth_id == youth_id,
+            Assignment.professional_id == professional_id,
+            Assignment.status == "ACTIVO",
+        )
+        .first()
+    )
     if existing:
         raise HTTPException(status_code=400, detail="Ya existe una asignación activa")
     assignment = Assignment(
@@ -62,7 +67,7 @@ def assignment_created_payload(assignment: Assignment) -> dict:
 
 def finalize_assignment(db: Session, assignment: Assignment) -> Assignment:
     assignment.status = "INACTIVO"
-    assignment.ended_at = datetime.now(timezone.utc)
+    assignment.ended_at = datetime.now(UTC)
     db.commit()
     db.refresh(assignment)
     return assignment

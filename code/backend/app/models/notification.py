@@ -1,14 +1,13 @@
 """Modelo YOUTH_NOTIFICATIONS."""
-from sqlalchemy import Column, DateTime, Integer, String, Text, ForeignKey, func, UniqueConstraint
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 
 from app.database import Base
 
 
 class YouthNotification(Base):
     __tablename__ = "youth_notifications"
-    __table_args__ = (
-        UniqueConstraint("youth_id", "entity_type", "entity_id", name="uq_youth_notifications_entity"),
-    )
+    __table_args__ = (UniqueConstraint("youth_id", "entity_type", "entity_id", name="uq_youth_notifications_entity"),)
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     youth_id = Column(Integer, ForeignKey("youths.id"), nullable=False, index=True)

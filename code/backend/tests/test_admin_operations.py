@@ -1,6 +1,6 @@
 """Tests de admin_operations (borrados admin, delete_upload_file)."""
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from fastapi import HTTPException
@@ -14,6 +14,7 @@ from app.models.professional import Professional
 from app.models.professional_invitation import ProfessionalInvitation
 from app.models.user import User
 from app.models.youth import Youth
+from app.core.storage import LocalStorageBackend
 from app.services.admin_operations import (
     apply_admin_soft_delete_professional,
     apply_admin_soft_delete_youth,
@@ -24,22 +25,26 @@ from app.services.admin_operations import (
 
 class DeleteUploadFileTestCase(unittest.TestCase):
     def test_none_url(self):
-        self.assertFalse(delete_upload_file(None, "/uploads/youths/", Path(".")))
+        self.assertFalse(delete_upload_file(None))
 
     def test_wrong_prefix(self):
-        self.assertFalse(
-            delete_upload_file("http://x/uploads/other/f.jpg", "/uploads/youths/", Path("."))
-        )
+        self.assertFalse(delete_upload_file("http://x/uploads/other/f.jpg"))
 
     def test_deletes_existing_file(self):
         import tempfile
+        from unittest.mock import patch
 
         with tempfile.TemporaryDirectory() as tmp:
-            base = Path(tmp)
-            (base / "photo.jpg").write_bytes(b"x")
+            root = Path(tmp)
+            (root / "youths").mkdir(parents=True)
+            (root / "youths" / "photo.jpg").write_bytes(b"x")
             url = "http://localhost:8000/uploads/youths/photo.jpg"
-            self.assertTrue(delete_upload_file(url, "/uploads/youths/", base))
-            self.assertFalse((base / "photo.jpg").exists())
+            with patch(
+                "app.services.admin_operations.get_storage",
+                return_value=LocalStorageBackend(root=root),
+            ):
+                self.assertTrue(delete_upload_file(url))
+            self.assertFalse((root / "youths" / "photo.jpg").exists())
 
 
 class AdminSoftDeleteTestCase(unittest.TestCase):
@@ -80,7 +85,7 @@ class AdminSoftDeleteTestCase(unittest.TestCase):
                 professional_id=self.prof.id,
                 email="inv@test.cl",
                 token="tok-inv",
-                expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+                expires_at=datetime.now(UTC) + timedelta(days=1),
             )
         )
         self.db.commit()

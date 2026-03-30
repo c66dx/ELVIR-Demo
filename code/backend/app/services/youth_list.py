@@ -1,4 +1,5 @@
 """Listado de jóvenes con última sesión y cabeceras de paginación."""
+
 from __future__ import annotations
 
 import re
@@ -38,6 +39,7 @@ def list_youths_with_last_session(
 
     if user.role == "PROFESIONAL":
         from app.models.professional import Professional
+
         prof = db.query(Professional).filter(Professional.user_id == user.id).first()
         if not prof:
             return YouthListResult(items=[])

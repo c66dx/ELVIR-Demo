@@ -1,17 +1,18 @@
 """Listado, alta y actualización de profesionales (Admin) y asignaciones paginadas."""
+
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
 import uuid
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.security import get_password_hash
 from app.models.assignment import Assignment
 from app.models.professional import Professional
 from app.models.professional_invitation import ProfessionalInvitation
 from app.models.user import User
-from app.core.security import get_password_hash
 
 
 def fetch_professional_assignments(
@@ -139,7 +140,7 @@ def create_professional_with_invitation(
     db.add(prof)
     db.flush()
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     token = str(uuid.uuid4())
     expires = now + timedelta(days=7)
     db.add(

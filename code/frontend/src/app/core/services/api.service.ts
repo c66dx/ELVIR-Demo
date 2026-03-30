@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of, forkJoin } from 'rxjs';
-import { map, catchError, switchMap } from 'rxjs/operators';
+import { HttpClient, HttpParams, HttpEvent, HttpEventType } from '@angular/common/http';
+import { Observable, of, forkJoin, EMPTY } from 'rxjs';
+import { map, catchError, switchMap, mergeMap } from 'rxjs/operators';
 import type { Role, SessionStatus, SessionMode, MaterialType, Difficulty } from '../models/types.model';
 import type { Youth } from '../models/youth.model';
 import type { Session } from '../models/session.model';
@@ -1326,13 +1326,30 @@ export class ApiService {
       );
   }
 
-  uploadFile(file: File): Observable<{ url: string } | { error: string }> {
+  /**
+   * Subida de material (staff). Emite `{ progress: 0–100 }` durante el envío y luego `{ url }` o `{ error }`.
+   */
+  uploadFile(file: File): Observable<{ url: string } | { error: string } | { progress: number }> {
     const formData = new FormData();
     formData.append('file', file);
     return this.http
-      .post<{ url: string }>(`${API_BASE}/upload`, formData)
+      .post<{ url: string }>(`${API_BASE}/upload`, formData, {
+        reportProgress: true,
+        observe: 'events',
+      })
       .pipe(
-        map((r) => ({ url: r.url })),
+        mergeMap((event: HttpEvent<{ url: string }>) => {
+          if (event.type === HttpEventType.UploadProgress) {
+            const total = event.total;
+            const pct =
+              total != null && total > 0 ? Math.round((100 * event.loaded) / total) : event.loaded > 0 ? -1 : 0;
+            return of({ progress: pct });
+          }
+          if (event.type === HttpEventType.Response && event.body) {
+            return of({ url: event.body.url });
+          }
+          return EMPTY;
+        }),
         catchError((err) => {
           const d = err.error?.detail;
           const msg = typeof d === 'string' ? d : 'Error al subir archivo';

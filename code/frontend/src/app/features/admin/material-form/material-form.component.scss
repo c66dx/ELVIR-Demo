@@ -1,3 +1,30 @@
-﻿:host {
+:host {
   display: block;
+}
+
+.material-upload-progress {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
+}
+
+.material-upload-progress-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--progress-track, rgba(0, 0, 0, 0.08));
+  overflow: hidden;
+  margin-bottom: 0.35rem;
+}
+
+.material-upload-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--progress-fill, #2563eb);
+  transition: width 0.15s ease-out;
+  min-width: 0;
+}
+
+.material-upload-progress-label {
+  font-size: 0.875rem;
+  color: var(--text-muted, #64748b);
 }

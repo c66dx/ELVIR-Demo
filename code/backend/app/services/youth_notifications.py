@@ -1,7 +1,8 @@
 """Consultas y actualizaciones de notificaciones de jóvenes."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session as DBSession
 
@@ -50,7 +51,7 @@ def mark_youth_notifications_read(db: DBSession, youth_id: int, notification_ids
     """Marca como leídas las notificaciones indicadas. Retorna filas actualizadas."""
     if not notification_ids:
         return 0
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     updated = (
         db.query(YouthNotification)
         .filter(YouthNotification.youth_id == youth_id, YouthNotification.id.in_(notification_ids))
@@ -61,7 +62,7 @@ def mark_youth_notifications_read(db: DBSession, youth_id: int, notification_ids
 
 
 def mark_all_youth_notifications_read(db: DBSession, youth_id: int) -> int:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     updated = (
         db.query(YouthNotification)
         .filter(YouthNotification.youth_id == youth_id, YouthNotification.read_at.is_(None))

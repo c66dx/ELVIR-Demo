@@ -1,16 +1,15 @@
-﻿"""Dependencias de FastAPI: auth, current user."""
-from typing import Optional
+"""Dependencias de FastAPI: auth, current user."""
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.models.user import User
-from app.models.professional import Professional
-from app.models.youth import Youth
-from app.core.security import decode_token
 from app.config import settings
+from app.core.security import decode_token
+from app.database import get_db
+from app.models.professional import Professional
+from app.models.user import User
+from app.models.youth import Youth
 
 security = HTTPBearer(auto_error=False)
 MAX_TOKEN_LENGTH = 4096
@@ -24,7 +23,7 @@ def _is_valid_token_candidate(value: str) -> bool:
     return bool(value) and len(value) <= MAX_TOKEN_LENGTH and not _has_inner_whitespace(value)
 
 
-def _resolve_access_token(request: Request, credentials: Optional[HTTPAuthorizationCredentials]) -> Optional[str]:
+def _resolve_access_token(request: Request, credentials: HTTPAuthorizationCredentials | None) -> str | None:
     """Resuelve token desde Bearer header o cookie HttpOnly de sesión."""
     if credentials:
         scheme = str(getattr(credentials, "scheme", "") or "").strip().lower()
@@ -42,9 +41,9 @@ def _resolve_access_token(request: Request, credentials: Optional[HTTPAuthorizat
 
 def get_current_user_id(
     request: Request,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
     db: Session = Depends(get_db),
-) -> Optional[int]:
+) -> int | None:
     """Obtiene el user_id del token JWT. Retorna None si no hay token."""
     token = _resolve_access_token(request, credentials)
     if not token:
@@ -62,7 +61,7 @@ def get_current_user_id(
 
 def get_current_user(
     request: Request,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
     db: Session = Depends(get_db),
 ) -> User:
     """Obtiene el usuario actual. 401 si no autenticado."""
@@ -107,7 +106,9 @@ def get_current_professional(
     """Obtiene el profesional actual. 403 si no es profesional."""
     prof = db.query(Professional).filter(Professional.user_id == user.id, Professional.is_active == True).first()
     if not prof:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acceso denegado: se requiere rol profesional")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Acceso denegado: se requiere rol profesional"
+        )
     return prof
 
 
@@ -129,4 +130,3 @@ def get_current_admin(
     if user.role != "ADMIN":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acceso denegado: se requiere rol Admin")
     return user
-

@@ -1,6 +1,6 @@
 """Tests de build_users_overview (panel admin)."""
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -88,7 +88,7 @@ class AdminOverviewServiceTestCase(unittest.TestCase):
                 youth_id=self.y_pending.id,
                 email="pend@inv.cl",
                 token="tok-pend-ov",
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+                expires_at=datetime.now(UTC) + timedelta(days=7),
             )
         )
         self.db.commit()

@@ -1,15 +1,16 @@
 """Router de catálogos: job-roles, cases, simulation-templates."""
-from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.schemas.common import JobRoleResponse, CaseResponse, SimulationTemplateResponse
 from app.core.dependencies import get_current_user
+from app.database import get_db
+from app.schemas.common import CaseResponse, JobRoleResponse, SimulationTemplateResponse
 from app.services.catalogs import (
-    competency_levels_catalog_payload,
     competencies_catalog_payload,
+    competency_levels_catalog_payload,
     get_simulation_template_by_id,
     list_cases_for_catalog,
     list_job_roles_for_catalog,
@@ -40,8 +41,8 @@ def list_cases(
 
 @router.get("/simulation-templates", response_model=list[SimulationTemplateResponse])
 def list_simulation_templates(
-    job_role_id: Optional[int] = Query(None),
-    case_id: Optional[int] = Query(None),
+    job_role_id: Annotated[int | None, Query(ge=1)] = None,
+    case_id: Annotated[int | None, Query(ge=1)] = None,
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -49,9 +50,9 @@ def list_simulation_templates(
     return list_simulation_templates_for_catalog(db, job_role_id, case_id)
 
 
-@router.get("/simulation-templates/resolve", response_model=Optional[SimulationTemplateResponse])
+@router.get("/simulation-templates/resolve", response_model=SimulationTemplateResponse | None)
 def resolve_simulation_template(
-    job_role_id: int = Query(...),
+    job_role_id: Annotated[int, Query(ge=1)],
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -77,9 +78,9 @@ def list_competency_levels(
     return competency_levels_catalog_payload(db)
 
 
-@router.get("/simulation-templates/{template_id}", response_model=Optional[SimulationTemplateResponse])
+@router.get("/simulation-templates/{template_id}", response_model=SimulationTemplateResponse | None)
 def get_simulation_template(
-    template_id: int,
+    template_id: Annotated[int, Path(ge=1)],
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):

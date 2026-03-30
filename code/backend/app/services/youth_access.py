@@ -1,4 +1,5 @@
 """Carga de jóvenes y comprobación de acceso (lectura) para routers."""
+
 from __future__ import annotations
 
 from fastapi import HTTPException
@@ -24,11 +25,15 @@ def require_youth_assigned_to_professional(
 ) -> Youth:
     """Carga el joven y exige asignación ACTIVO entre el joven y el profesional autenticado."""
     youth = load_youth_or_404(db, youth_id)
-    assign = db.query(Assignment).filter(
-        Assignment.youth_id == youth_id,
-        Assignment.professional_id == prof.id,
-        Assignment.status == "ACTIVO",
-    ).first()
+    assign = (
+        db.query(Assignment)
+        .filter(
+            Assignment.youth_id == youth_id,
+            Assignment.professional_id == prof.id,
+            Assignment.status == "ACTIVO",
+        )
+        .first()
+    )
     if not assign:
         raise HTTPException(status_code=403, detail="Acceso denegado")
     return youth
@@ -45,11 +50,15 @@ def ensure_youth_read_access(db: Session, user: User, youth: Youth) -> None:
     if user.role == "PROFESIONAL":
         prof = db.query(Professional).filter(Professional.user_id == user.id).first()
         if prof:
-            assign = db.query(Assignment).filter(
-                Assignment.youth_id == youth.id,
-                Assignment.professional_id == prof.id,
-                Assignment.status == "ACTIVO",
-            ).first()
+            assign = (
+                db.query(Assignment)
+                .filter(
+                    Assignment.youth_id == youth.id,
+                    Assignment.professional_id == prof.id,
+                    Assignment.status == "ACTIVO",
+                )
+                .first()
+            )
             if not assign:
                 raise HTTPException(status_code=403, detail="Acceso denegado")
         return
@@ -68,11 +77,15 @@ def ensure_youth_photo_upload_access(db: Session, user: User, youth: Youth) -> N
         prof = db.query(Professional).filter(Professional.user_id == user.id).first()
         if not prof:
             raise HTTPException(status_code=403, detail="Acceso denegado")
-        assign = db.query(Assignment).filter(
-            Assignment.youth_id == youth.id,
-            Assignment.professional_id == prof.id,
-            Assignment.status == "ACTIVO",
-        ).first()
+        assign = (
+            db.query(Assignment)
+            .filter(
+                Assignment.youth_id == youth.id,
+                Assignment.professional_id == prof.id,
+                Assignment.status == "ACTIVO",
+            )
+            .first()
+        )
         if not assign:
             raise HTTPException(status_code=403, detail="Acceso denegado")
         return

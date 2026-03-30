@@ -1,5 +1,6 @@
 """Modelo USERS."""
-from sqlalchemy import Column, DateTime, Integer, String, Boolean, func
+
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, func
 
 from app.database import Base
 

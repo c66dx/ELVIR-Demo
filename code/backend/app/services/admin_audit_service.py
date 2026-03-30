@@ -1,4 +1,5 @@
 """Consulta paginada de audit logs (panel admin)."""
+
 from __future__ import annotations
 
 from sqlalchemy import or_
@@ -46,10 +47,7 @@ def fetch_audit_log_rows(
 
     total = q.order_by(None).count()
     rows = (
-        q.order_by(AuditLog.created_at.desc(), AuditLog.id.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-        .all()
+        q.order_by(AuditLog.created_at.desc(), AuditLog.id.desc()).offset((page - 1) * page_size).limit(page_size).all()
     )
     return rows, total
 

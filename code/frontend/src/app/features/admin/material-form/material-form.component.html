@@ -93,6 +93,19 @@
       <p class="form-error-banner">{{ errorMessage }}</p>
     }
 
+    @if (uploadProgress !== null && submitting && selectedFile) {
+      <div class="material-upload-progress" role="status" aria-live="polite">
+        @if (uploadProgress >= 0) {
+          <div class="material-upload-progress-track">
+            <div class="material-upload-progress-fill" [style.width.%]="uploadProgress"></div>
+          </div>
+          <span class="material-upload-progress-label">Subiendo… {{ uploadProgress }}%</span>
+        } @else {
+          <span class="material-upload-progress-label">Subiendo archivo…</span>
+        }
+      </div>
+    }
+
     <app-form-actions>
       <button type="submit" [disabled]="submitting || !form.get('title')?.value?.trim()" class="btn-primary">
         Crear material

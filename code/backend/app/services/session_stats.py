@@ -1,7 +1,8 @@
 """Agregados y series mensuales de sesiones."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import case, func
 from sqlalchemy.orm import Session as OrmSession
@@ -24,7 +25,7 @@ def compute_session_stats(
 ) -> SessionStatsResponse:
     """Resumen de sesiones (conteos por estado y curva mensual de completadas)."""
     sessions_q = build_sessions_query(db, user, youth_id)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     month_keys: list[str] = []
     for i in range(months - 1, -1, -1):
@@ -33,7 +34,7 @@ def compute_session_stats(
         m = (m - 1) % 12 + 1
         month_keys.append(_month_key(y, m))
     first_year, first_month = month_keys[0].split("-")
-    range_start = datetime(int(first_year), int(first_month), 1, tzinfo=timezone.utc)
+    range_start = datetime(int(first_year), int(first_month), 1, tzinfo=UTC)
 
     if sessions_q is None:
         return SessionStatsResponse(

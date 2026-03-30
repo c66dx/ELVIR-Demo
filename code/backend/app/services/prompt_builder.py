@@ -1,10 +1,10 @@
 ﻿"""Ensambla el prompt para LiveAvatar (Opción B: catálogo en BD)."""
+
 import json
 from pathlib import Path
 
-from app.models.job_role import JobRole
 from app.models.case import Case
-
+from app.models.job_role import JobRole
 
 PROMPT_BASE_PATH = Path(__file__).parent.parent / "prompts" / "prompt_base.txt"
 
@@ -56,5 +56,6 @@ def build_prompt(job_role: JobRole, case: Case) -> str:
     base = load_prompt_base()
     role_ctx = build_role_context(job_role)
     case_ctx = build_case_context(case)
-    return f"{base}\n\n====================================\n{role_ctx}\n====================================\n{case_ctx}"
-
+    return (
+        f"{base}\n\n====================================\n{role_ctx}\n====================================\n{case_ctx}"
+    )

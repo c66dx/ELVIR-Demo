@@ -1,4 +1,5 @@
 """Consultas auxiliares para el panel de administración (overview de usuarios)."""
+
 from __future__ import annotations
 
 from datetime import datetime

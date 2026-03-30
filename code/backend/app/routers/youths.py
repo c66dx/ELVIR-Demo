@@ -1,51 +1,57 @@
 """Router de jóvenes."""
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, Request, UploadFile, File
-from pydantic import BaseModel
+
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, File, HTTPException, Path, Query, Request, Response, UploadFile
 from sqlalchemy.orm import Session as DBSession
+
+from app.core.dependencies import get_current_professional, get_current_user
 from app.database import get_db
 from app.models.user import User
-from app.schemas.youth import YouthCreate, YouthUpdate, YouthResponse, YouthWithLastSession, YouthChangeEmailRequest
+from app.schemas.notification import NotificationReadRequest, YouthNotificationResponse
 from app.schemas.platform_session import PlatformSessionResponse
-from app.schemas.notification import YouthNotificationResponse, NotificationReadRequest
-from app.core.dependencies import get_current_user, get_current_professional
+from app.schemas.youth import (
+    YouthChangeEmailRequest,
+    YouthCreate,
+    YouthLookupRequest,
+    YouthResponse,
+    YouthUpdate,
+    YouthWithLastSession,
+)
 from app.services.session_access import check_youth_access
-from app.services.youth_photo import persist_youth_photo_upload
+from app.services.youth_access import (
+    ensure_youth_photo_upload_access,
+    ensure_youth_read_access,
+    load_youth_or_404,
+)
 from app.services.youth_create_service import create_youth_for_professional
+from app.services.youth_list import list_youths_with_last_session
+from app.services.youth_lookup import lookup_youth_profiles, parse_lookup_ids
+from app.services.youth_notifications import (
+    fetch_youth_notifications,
+    mark_all_youth_notifications_read,
+    mark_youth_notifications_read,
+)
+from app.services.youth_photo import persist_youth_photo_upload
+from app.services.youth_platform_sessions import fetch_youth_platform_sessions
+from app.services.youth_response import youth_to_response, youth_to_response_with_contact
 from app.services.youth_update_service import (
     activate_youth_for_professional,
     change_youth_email_for_professional,
     deactivate_youth_for_professional,
     update_youth_profile,
 )
-from app.services.youth_list import list_youths_with_last_session
-from app.services.youth_lookup import lookup_youth_profiles, parse_lookup_ids
-from app.services.youth_response import youth_to_response, youth_to_response_with_contact
-from app.services.youth_platform_sessions import fetch_youth_platform_sessions
-from app.services.youth_notifications import (
-    fetch_youth_notifications,
-    mark_all_youth_notifications_read,
-    mark_youth_notifications_read,
-)
-from app.services.youth_access import (
-    ensure_youth_photo_upload_access,
-    ensure_youth_read_access,
-    load_youth_or_404,
-)
 
 router = APIRouter(prefix="/youths", tags=["youths"])
 
 
-class YouthLookupRequest(BaseModel):
-    ids: list[int]
-
-
 @router.get("", response_model=list[YouthWithLastSession])
 def list_youths(
-    search: str | None = None,
-    is_active: bool | None = None,
-    login_enabled: bool | None = None,
-    page: int | None = Query(None, ge=1),
-    page_size: int | None = Query(None, ge=1, le=200),
+    search: Annotated[str | None, Query(max_length=200)] = None,
+    is_active: Annotated[bool | None, Query()] = None,
+    login_enabled: Annotated[bool | None, Query()] = None,
+    page: Annotated[int | None, Query(ge=1)] = None,
+    page_size: Annotated[int | None, Query(ge=1, le=200)] = None,
     user: User = Depends(get_current_user),
     db: DBSession = Depends(get_db),
     response: Response = None,
@@ -91,7 +97,7 @@ def create_youth(
 
 @router.get("/{youth_id}", response_model=YouthResponse)
 def get_youth(
-    youth_id: int,
+    youth_id: Annotated[int, Path(ge=1)],
     user: User = Depends(get_current_user),
     db: DBSession = Depends(get_db),
 ):
@@ -103,7 +109,7 @@ def get_youth(
 
 @router.post("/{youth_id}/photo", response_model=YouthResponse)
 def upload_youth_photo(
-    youth_id: int,
+    youth_id: Annotated[int, Path(ge=1)],
     request: Request,
     file: UploadFile = File(...),
     user: User = Depends(get_current_user),
@@ -119,9 +125,9 @@ def upload_youth_photo(
 
 @router.get("/{youth_id}/platform-sessions", response_model=list[PlatformSessionResponse])
 def list_youth_platform_sessions(
-    youth_id: int,
-    page: int | None = Query(None, ge=1),
-    page_size: int | None = Query(None, ge=1, le=200),
+    youth_id: Annotated[int, Path(ge=1)],
+    page: Annotated[int | None, Query(ge=1)] = None,
+    page_size: Annotated[int | None, Query(ge=1, le=200)] = None,
     user: User = Depends(get_current_user),
     db: DBSession = Depends(get_db),
     response: Response = None,
@@ -131,9 +137,7 @@ def list_youth_platform_sessions(
     ensure_youth_read_access(db, user, youth)
     if not youth.user_id:
         return []
-    sessions, pagination_headers = fetch_youth_platform_sessions(
-        db, youth.user_id, page, page_size
-    )
+    sessions, pagination_headers = fetch_youth_platform_sessions(db, youth.user_id, page, page_size)
     if pagination_headers and response:
         for key, value in pagination_headers.items():
             response.headers[key] = value
@@ -142,7 +146,7 @@ def list_youth_platform_sessions(
 
 @router.put("/{youth_id}", response_model=YouthResponse)
 def update_youth(
-    youth_id: int,
+    youth_id: Annotated[int, Path(ge=1)],
     data: YouthUpdate,
     prof=Depends(get_current_professional),
     db: DBSession = Depends(get_db),
@@ -154,7 +158,7 @@ def update_youth(
 
 @router.patch("/{youth_id}/deactivate", response_model=YouthResponse)
 def deactivate_youth(
-    youth_id: int,
+    youth_id: Annotated[int, Path(ge=1)],
     prof=Depends(get_current_professional),
     db: DBSession = Depends(get_db),
 ):
@@ -165,7 +169,7 @@ def deactivate_youth(
 
 @router.post("/{youth_id}/change-email", response_model=YouthResponse)
 def change_youth_email(
-    youth_id: int,
+    youth_id: Annotated[int, Path(ge=1)],
     data: YouthChangeEmailRequest,
     prof=Depends(get_current_professional),
     db: DBSession = Depends(get_db),
@@ -177,7 +181,7 @@ def change_youth_email(
 
 @router.patch("/{youth_id}/activate", response_model=YouthResponse)
 def activate_youth(
-    youth_id: int,
+    youth_id: Annotated[int, Path(ge=1)],
     prof=Depends(get_current_professional),
     db: DBSession = Depends(get_db),
 ):
@@ -188,10 +192,10 @@ def activate_youth(
 
 @router.get("/{youth_id}/notifications", response_model=list[YouthNotificationResponse])
 def list_youth_notifications(
-    youth_id: int,
-    page: int | None = Query(None, ge=1),
-    page_size: int | None = Query(None, ge=1, le=200),
-    unread_only: bool | None = Query(None),
+    youth_id: Annotated[int, Path(ge=1)],
+    page: Annotated[int | None, Query(ge=1)] = None,
+    page_size: Annotated[int | None, Query(ge=1, le=200)] = None,
+    unread_only: Annotated[bool | None, Query()] = None,
     user: User = Depends(get_current_user),
     db: DBSession = Depends(get_db),
     response: Response = None,
@@ -200,9 +204,7 @@ def list_youth_notifications(
     if not check_youth_access(db, user, youth_id, allow_admin=True):
         raise HTTPException(status_code=403, detail="Acceso denegado")
 
-    items, notification_headers = fetch_youth_notifications(
-        db, youth_id, page, page_size, unread_only
-    )
+    items, notification_headers = fetch_youth_notifications(db, youth_id, page, page_size, unread_only)
     if response:
         for key, value in notification_headers.items():
             response.headers[key] = value
@@ -211,7 +213,7 @@ def list_youth_notifications(
 
 @router.patch("/{youth_id}/notifications/read")
 def mark_notifications_read(
-    youth_id: int,
+    youth_id: Annotated[int, Path(ge=1)],
     data: NotificationReadRequest,
     user: User = Depends(get_current_user),
     db: DBSession = Depends(get_db),
@@ -227,7 +229,7 @@ def mark_notifications_read(
 
 @router.patch("/{youth_id}/notifications/read-all")
 def mark_all_notifications_read(
-    youth_id: int,
+    youth_id: Annotated[int, Path(ge=1)],
     user: User = Depends(get_current_user),
     db: DBSession = Depends(get_db),
 ):
@@ -236,5 +238,3 @@ def mark_all_notifications_read(
         raise HTTPException(status_code=403, detail="Acceso denegado")
     updated = mark_all_youth_notifications_read(db, youth_id)
     return {"updated": updated}
-
-

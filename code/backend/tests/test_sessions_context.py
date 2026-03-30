@@ -6,12 +6,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.database import Base
+from app.models.case import Case
+from app.models.job_role import JobRole
+from app.models.session import Session as SessionModel
+from app.models.simulation_template import SimulationTemplate
 from app.models.user import User
 from app.models.youth import Youth
-from app.models.job_role import JobRole
-from app.models.case import Case
-from app.models.simulation_template import SimulationTemplate
-from app.models.session import Session as SessionModel
 from app.routers.sessions import get_session_context
 
 

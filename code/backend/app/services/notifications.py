@@ -1,5 +1,6 @@
 """Helpers para crear notificaciones de joven."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
@@ -18,7 +19,7 @@ def upsert_youth_notification(
     entity_id: int | None = None,
 ) -> YouthNotification:
     """Crea o actualiza una notificación única por entidad."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     existing = None
     if entity_type and entity_id is not None:
         existing = (

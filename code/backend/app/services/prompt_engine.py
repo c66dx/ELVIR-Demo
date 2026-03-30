@@ -4,16 +4,18 @@ Contrato esperado (minimo):
 - POST /prompt/generate -> { "prompt": "...", "opening_text": "...", "name": "...", "version": "..." }
 - POST /prompt/evaluate -> { "snapshot": { ... }, "version": "..." }
 """
+
 from __future__ import annotations
 
-import httpx
 import json
 import os
 import shlex
 import subprocess
 
+import httpx
+
 from app.config import settings
-from app.schemas.prompt import PromptInput, PromptResult, EvaluationInput, EvaluationResult
+from app.schemas.prompt import EvaluationInput, EvaluationResult, PromptInput, PromptResult
 from app.services.prompt_builder import build_prompt
 
 

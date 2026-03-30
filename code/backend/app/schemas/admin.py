@@ -1,4 +1,5 @@
 """Esquemas Pydantic del panel de administración."""
+
 from datetime import datetime
 
 from pydantic import BaseModel

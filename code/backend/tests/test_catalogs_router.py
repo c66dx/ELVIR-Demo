@@ -5,12 +5,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.database import Base
-from app.models.user import User
-from app.models.job_role import JobRole
 from app.models.case import Case
+from app.models.job_role import JobRole
 from app.models.simulation_template import SimulationTemplate
-from app.routers.catalogs import list_simulation_templates
-from app.routers.catalogs import resolve_simulation_template, get_simulation_template
+from app.models.user import User
+from app.routers.catalogs import get_simulation_template, list_simulation_templates, resolve_simulation_template
 
 
 class CatalogsRouterTestCase(unittest.TestCase):

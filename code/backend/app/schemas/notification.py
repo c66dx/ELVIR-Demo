@@ -1,6 +1,8 @@
 """Esquemas para notificaciones."""
+
 from datetime import datetime
-from pydantic import BaseModel
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class YouthNotificationResponse(BaseModel):
@@ -15,9 +17,17 @@ class YouthNotificationResponse(BaseModel):
     created_at: datetime
     read_at: datetime | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class NotificationReadRequest(BaseModel):
-    ids: list[int] = []
+    """Marcar notificaciones como leídas. Lista vacía no actualiza filas."""
+
+    ids: list[int] = Field(default_factory=list, max_length=500)
+
+    @field_validator("ids")
+    @classmethod
+    def ids_non_negative(cls, v: list[int]) -> list[int]:
+        if any(i < 1 for i in v):
+            raise ValueError("Los IDs deben ser positivos")
+        return v

@@ -1,10 +1,11 @@
-﻿"""Esquemas de autenticación."""
-from pydantic import BaseModel, EmailStr
+"""Esquemas de autenticación."""
+
+from pydantic import BaseModel, EmailStr, Field
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=1, max_length=2000)
 
 
 class LoginResponse(BaseModel):
@@ -31,9 +32,12 @@ class ActivateValidateResponse(BaseModel):
 
 
 class ActivateRequest(BaseModel):
-    token: str
-    password: str | None = None  # Nueva contraseña (obligatoria en primera activación, opcional en cambio de correo)
-    current_password: str | None = None  # Contraseña actual (obligatoria solo en cambio de correo)
+    token: str = Field(..., min_length=1, max_length=500)
+    password: str | None = Field(
+        None,
+        max_length=2000,
+    )  # Nueva contraseña (obligatoria en primera activación, opcional en cambio de correo)
+    current_password: str | None = Field(None, max_length=2000)  # Contraseña actual (cambio de correo)
 
 
 class ActivateResponse(BaseModel):
@@ -43,17 +47,16 @@ class ActivateResponse(BaseModel):
 
 
 class ChangePasswordRequest(BaseModel):
-    current_password: str
-    new_password: str
+    current_password: str = Field(..., min_length=1, max_length=2000)
+    new_password: str = Field(..., min_length=1, max_length=2000)
 
 
 class ChangeEmailRequest(BaseModel):
     new_email: EmailStr
-    current_password: str
+    current_password: str = Field(..., min_length=1, max_length=2000)
 
 
 class ChangeEmailResponse(BaseModel):
     success: bool
     message: str | None = None
     activation_url: str | None = None
-

@@ -1,4 +1,5 @@
 """Eventos de trazabilidad manuales en sesiones."""
+
 from __future__ import annotations
 
 from fastapi import HTTPException
@@ -35,9 +36,4 @@ def persist_manual_session_event(
 
 def list_session_events_ordered(db: OrmSession, session_id: int) -> list[SessionEvent]:
     """Eventos de una sesión ordenados por occurred_at. El caller debe haber validado acceso."""
-    return (
-        db.query(SessionEvent)
-        .filter(SessionEvent.session_id == session_id)
-        .order_by(SessionEvent.occurred_at)
-        .all()
-    )
+    return db.query(SessionEvent).filter(SessionEvent.session_id == session_id).order_by(SessionEvent.occurred_at).all()

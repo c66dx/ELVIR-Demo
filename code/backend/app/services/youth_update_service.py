@@ -1,9 +1,10 @@
 """Actualización de perfil de jóvenes por profesional asignado."""
+
 from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session as DBSession
@@ -57,7 +58,7 @@ def update_youth_profile(
         if existing:
             raise HTTPException(status_code=409, detail="El correo ya está registrado")
         token = str(uuid.uuid4())
-        expires = datetime.now(timezone.utc) + timedelta(days=7)
+        expires = datetime.now(UTC) + timedelta(days=7)
         db.add(YouthInvitation(youth_id=youth.id, email=email, token=token, expires_at=expires))
         activation_url = f"{settings.APP_BASE_URL}/activar?token={token}"
     db.commit()
@@ -81,7 +82,7 @@ def change_youth_email_for_professional(
     existing = db.query(User).filter(User.email.ilike(new_email)).first()
     if existing and (not youth.user_id or existing.id != youth.user_id):
         raise HTTPException(status_code=400, detail="El correo ya está registrado")
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     (
         db.query(YouthInvitation)
         .filter(YouthInvitation.youth_id == youth.id, YouthInvitation.used_at.is_(None))

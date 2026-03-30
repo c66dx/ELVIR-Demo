@@ -1,9 +1,10 @@
 """Creación de jóvenes por profesional (perfil + asignación + invitación opcional)."""
+
 from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session as DBSession
@@ -56,7 +57,7 @@ def create_youth_for_professional(
     activation_url = None
     if data.login_enabled and email:
         token = str(uuid.uuid4())
-        expires = datetime.now(timezone.utc) + timedelta(days=7)
+        expires = datetime.now(UTC) + timedelta(days=7)
         db.add(YouthInvitation(youth_id=youth.id, email=email, token=token, expires_at=expires))
         activation_url = f"{settings.APP_BASE_URL}/activar?token={token}"
     db.commit()

@@ -52,7 +52,9 @@ class RequestIdMiddlewareTestCase(unittest.TestCase):
 
         self.assertEqual(req.state.request_id, "req-fail")
         joined = "\n".join(logs.output)
-        self.assertIn("request_id=req-fail", joined)
+        # assertLogs usa formato estándar (sin ElvirTextFormatter); el cuerpo del log de acceso incluye método, ruta y 500.
+        self.assertIn("method=GET", joined)
+        self.assertIn("path=/health", joined)
         self.assertIn("status=500", joined)
 
     def test_generates_request_id_when_missing(self):

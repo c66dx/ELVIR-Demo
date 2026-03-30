@@ -1,8 +1,9 @@
 """Lógica de login, sesión de plataforma, activación y cambio de credenciales."""
+
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, Response, status
 from sqlalchemy import desc
@@ -37,8 +38,8 @@ from app.schemas.auth import (
 def _expires_at_utc(dt: datetime) -> datetime:
     """SQLite puede devolver datetimes naive; normaliza a UTC para comparar con now."""
     if dt.tzinfo is None:
-        return dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
+        return dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
 
 
 def set_session_cookies(response: Response, token: str, csrf_token: str) -> None:
@@ -99,7 +100,7 @@ def end_active_platform_session(db: Session, user: User) -> None:
         .first()
     )
     if active:
-        active.ended_at = datetime.now(timezone.utc)
+        active.ended_at = datetime.now(UTC)
         db.commit()
 
 
@@ -125,7 +126,7 @@ def build_me_response(db: Session, user: User) -> MeResponse:
 
 
 def validate_activation_token(db: Session, token: str) -> ActivateValidateResponse:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     inv = db.query(YouthInvitation).filter(YouthInvitation.token == token).first()
     if inv:
         if inv.used_at:
@@ -167,7 +168,7 @@ def validate_activation_token(db: Session, token: str) -> ActivateValidateRespon
 
 
 def activate_account(db: Session, data: ActivateRequest) -> ActivateResponse:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     inv = db.query(YouthInvitation).filter(YouthInvitation.token == data.token).first()
     if inv:
         if inv.used_at:
@@ -301,7 +302,7 @@ def request_email_change(db: Session, user: User, data: ChangeEmailRequest) -> C
     if existing and existing.id != user.id:
         raise HTTPException(status_code=409, detail="El correo ya está registrado")
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     token = str(uuid.uuid4())
     expires = now + timedelta(days=7)
     if user.role == "JOVEN":

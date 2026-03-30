@@ -1,7 +1,8 @@
 """Acceso a datos de jóvenes/sesiones y expiración de sesiones inactivas (compartido entre routers)."""
+
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
 from sqlalchemy import and_, or_, select
@@ -19,8 +20,8 @@ from app.models.youth import Youth
 def _dt_utc(dt: datetime) -> datetime:
     """SQLite puede devolver datetimes naive; normaliza a UTC para aritmética con now."""
     if dt.tzinfo is None:
-        return dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
+        return dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
 
 
 def check_youth_access(
@@ -40,11 +41,15 @@ def check_youth_access(
         prof = db.query(Professional).filter(Professional.user_id == user.id).first()
         if not prof:
             return False
-        assign = db.query(Assignment).filter(
-            Assignment.youth_id == youth_id,
-            Assignment.professional_id == prof.id,
-            Assignment.status == "ACTIVO",
-        ).first()
+        assign = (
+            db.query(Assignment)
+            .filter(
+                Assignment.youth_id == youth_id,
+                Assignment.professional_id == prof.id,
+                Assignment.status == "ACTIVO",
+            )
+            .first()
+        )
         return assign is not None
     return False
 
@@ -54,7 +59,7 @@ def expire_stale_sessions(db: Session) -> int:
     timeout_minutes = getattr(settings, "SESSION_IDLE_TIMEOUT_MINUTES", 0) or 0
     if timeout_minutes <= 0:
         return 0
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     cutoff = now - timedelta(minutes=timeout_minutes)
     stale_q = db.query(SessionModel).filter(
         SessionModel.status == "EN_CURSO",
@@ -143,6 +148,6 @@ def touch_session_heartbeat(db: Session, session_id: int, user: User) -> dict:
     session = require_session_access(db, session_id, user)
     if session.status != "EN_CURSO":
         return {"ok": False, "status": session.status}
-    session.last_heartbeat_at = datetime.now(timezone.utc)
+    session.last_heartbeat_at = datetime.now(UTC)
     db.commit()
     return {"ok": True}

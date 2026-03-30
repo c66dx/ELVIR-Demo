@@ -1,5 +1,6 @@
 """Modelo YOUTH."""
-from sqlalchemy import Column, DateTime, Integer, String, Boolean, Text, ForeignKey, func
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, func
 
 from app.database import Base
 

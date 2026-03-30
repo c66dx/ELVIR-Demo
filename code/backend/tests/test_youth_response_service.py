@@ -1,6 +1,6 @@
 """Tests de youth_to_response_with_contact."""
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -55,7 +55,7 @@ class YouthResponseServiceTestCase(unittest.TestCase):
             youth_id=self.youth_pending.id,
             email="pending@test.cl",
             token="tok-pend",
-            expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+            expires_at=datetime.now(UTC) + timedelta(days=7),
         )
         self.db.add(self.inv)
         self.db.commit()

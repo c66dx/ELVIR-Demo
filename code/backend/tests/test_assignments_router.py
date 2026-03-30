@@ -10,7 +10,8 @@ from app.models.assignment import Assignment
 from app.models.professional import Professional
 from app.models.user import User
 from app.models.youth import Youth
-from app.routers.assignments import create_assignment, end_assignment, AssignmentCreate
+from app.routers.assignments import create_assignment, end_assignment
+from app.schemas.assignment import AssignmentCreate
 
 
 class AssignmentsRouterTestCase(unittest.TestCase):

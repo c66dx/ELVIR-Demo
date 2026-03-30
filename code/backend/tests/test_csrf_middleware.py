@@ -83,7 +83,7 @@ class CsrfMiddlewareTestCase(unittest.TestCase):
     def test_blank_auth_cookie_does_not_trigger_csrf_checks(self):
         req = self._build_request(
             "POST",
-            headers=[(b"cookie", f"{settings.AUTH_COOKIE_NAME}=   ".encode("utf-8"))],
+            headers=[(b"cookie", f"{settings.AUTH_COOKIE_NAME}=   ".encode())],
         )
 
         async def call_next(_request):
@@ -101,7 +101,7 @@ class CsrfMiddlewareTestCase(unittest.TestCase):
             headers=[
                 (b"cookie", cookie.encode("utf-8")),
                 (b"origin", allowed_origin),
-                (settings.CSRF_HEADER_NAME.lower().encode("utf-8"), f"  {csrf}  ".encode("utf-8")),
+                (settings.CSRF_HEADER_NAME.lower().encode("utf-8"), f"  {csrf}  ".encode()),
             ],
         )
 

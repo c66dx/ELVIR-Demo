@@ -1,20 +1,19 @@
 import unittest
 
 from fastapi import HTTPException
-from starlette.requests import Request
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from starlette.requests import Request
 
 from app.database import Base
+from app.models.assignment import Assignment
+from app.models.case import Case
+from app.models.job_role import JobRole
+from app.models.professional import Professional
+from app.models.simulation_template import SimulationTemplate
 from app.models.user import User
 from app.models.youth import Youth
-from app.models.professional import Professional
-from app.models.assignment import Assignment
-from app.models.job_role import JobRole
-from app.models.case import Case
-from app.models.simulation_template import SimulationTemplate
 from app.routers.sessions import create_session
 from app.schemas.session import SessionCreate
 

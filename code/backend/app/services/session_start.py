@@ -1,8 +1,9 @@
 """Inicio de sesión LiveAvatar: contexto, token, embed de respaldo."""
+
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from urllib.parse import quote
 
 from fastapi import HTTPException
@@ -119,7 +120,7 @@ def apply_start_session(
             )
         )
 
-    live_id = f"live-{session_id}-{int(datetime.now(timezone.utc).timestamp())}"
+    live_id = f"live-{session_id}-{int(datetime.now(UTC).timestamp())}"
     session.liveavatar_session_id = live_id
     db.add(
         SessionEvent(

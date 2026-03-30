@@ -1,7 +1,8 @@
 """Persistencia de evaluación externa (ej. webhook LiveAvatar)."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session as OrmSession
@@ -24,9 +25,9 @@ def persist_liveavatar_evaluation(
     if data.session_id:
         session = db.query(SessionModel).filter(SessionModel.id == data.session_id).first()
     elif data.liveavatar_session_id:
-        session = db.query(SessionModel).filter(
-            SessionModel.liveavatar_session_id == data.liveavatar_session_id
-        ).first()
+        session = (
+            db.query(SessionModel).filter(SessionModel.liveavatar_session_id == data.liveavatar_session_id).first()
+        )
 
     if not session:
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
@@ -34,7 +35,7 @@ def persist_liveavatar_evaluation(
     metrics = dict(session.metrics) if session.metrics else {}
     metrics["liveavatar_evaluation"] = data.evaluation
     metrics["liveavatar_evaluation_source"] = data.source or "liveavatar"
-    metrics["liveavatar_evaluation_received_at"] = datetime.now(timezone.utc).isoformat()
+    metrics["liveavatar_evaluation_received_at"] = datetime.now(UTC).isoformat()
     session.metrics = metrics
 
     db.add(

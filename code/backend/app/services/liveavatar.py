@@ -1,14 +1,14 @@
 ﻿"""Integración con LiveAvatar (Context Dinámico)."""
+
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from app.config import settings
-from app.models.job_role import JobRole
 from app.models.case import Case
+from app.models.job_role import JobRole
 from app.models.simulation_template import SimulationTemplate
-from app.services.prompt_engine import get_prompt, PromptProviderError
 from app.schemas.prompt import PromptInput
-
+from app.services.prompt_engine import PromptProviderError, get_prompt
 
 DEFAULT_OPENING_TEXT = "Hola, soy Javiera y estaré a cargo de esta entrevista."
 INVALID_LIVEAVATAR_IDS = {"", "default", "avatar-default", "voice-default", "ctx-elvir-dinamico"}
@@ -257,4 +257,3 @@ def get_session_transcript(liveavatar_session_id: str, request_id: str | None = 
             }
     except Exception:
         return None
-

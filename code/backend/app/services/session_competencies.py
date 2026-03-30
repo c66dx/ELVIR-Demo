@@ -1,4 +1,5 @@
 """Evaluación por competencias en sesiones."""
+
 from __future__ import annotations
 
 from fastapi import HTTPException
@@ -23,17 +24,23 @@ def replace_session_competencies(
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
-    assign = db.query(Assignment).filter(
-        Assignment.youth_id == session.youth_id,
-        Assignment.professional_id == professional.id,
-        Assignment.status == "ACTIVO",
-    ).first()
+    assign = (
+        db.query(Assignment)
+        .filter(
+            Assignment.youth_id == session.youth_id,
+            Assignment.professional_id == professional.id,
+            Assignment.status == "ACTIVO",
+        )
+        .first()
+    )
     if not assign:
         raise HTTPException(status_code=403, detail="Acceso denegado")
 
     db.query(SessionCompetency).filter(SessionCompetency.session_id == session_id).delete()
     for item in data.items:
-        comp = db.query(Competency).filter(Competency.slug == item.competency_slug, Competency.is_active == True).first()
+        comp = (
+            db.query(Competency).filter(Competency.slug == item.competency_slug, Competency.is_active == True).first()
+        )
         level = db.query(CompetencyLevel).filter(CompetencyLevel.slug == item.level_slug).first()
         if not comp or not level:
             raise HTTPException(

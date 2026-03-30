@@ -5,11 +5,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.database import Base
-from app.models.user import User
-from app.models.youth import Youth
+from app.models.material_suggestion import MaterialSuggestion
 from app.models.professional import Professional
 from app.models.support_material import SupportMaterial
-from app.models.material_suggestion import MaterialSuggestion
+from app.models.user import User
+from app.models.youth import Youth
 from app.routers.material import list_support_material
 
 

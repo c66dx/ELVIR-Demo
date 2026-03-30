@@ -1,4 +1,5 @@
 """Mapeo Youth ORM → esquemas de API."""
+
 from __future__ import annotations
 
 from sqlalchemy.orm import Session

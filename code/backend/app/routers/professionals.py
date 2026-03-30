@@ -1,8 +1,12 @@
 """Router de profesionales (gestión por Admin)."""
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.core.dependencies import get_current_admin, get_current_user
 from app.database import get_db
 from app.models.user import User
 from app.schemas.professional import (
@@ -11,7 +15,6 @@ from app.schemas.professional import (
     ProfessionalResponse,
     ProfessionalUpdate,
 )
-from app.core.dependencies import get_current_admin, get_current_user
 from app.services.professional_access import assert_can_access_professional
 from app.services.professional_service import (
     create_professional_with_invitation,
@@ -29,9 +32,9 @@ router = APIRouter(prefix="/professionals", tags=["professionals"])
 
 @router.get("/{professional_id}/assignments")
 def list_professional_assignments(
-    professional_id: int,
-    page: int | None = Query(None, ge=1),
-    page_size: int | None = Query(None, ge=1, le=200),
+    professional_id: Annotated[int, Path(ge=1)],
+    page: Annotated[int | None, Query(ge=1)] = None,
+    page_size: Annotated[int | None, Query(ge=1, le=200)] = None,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     response: Response = None,
@@ -47,9 +50,9 @@ def list_professional_assignments(
 
 @router.get("", response_model=list[ProfessionalResponse])
 def list_professionals(
-    page: int | None = Query(None, ge=1),
-    page_size: int | None = Query(None, ge=1, le=200),
-    is_active: bool | None = Query(None),
+    page: Annotated[int | None, Query(ge=1)] = None,
+    page_size: Annotated[int | None, Query(ge=1, le=200)] = None,
+    is_active: Annotated[bool | None, Query()] = None,
     admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
     response: Response = None,
@@ -61,10 +64,7 @@ def list_professionals(
             response.headers[key] = value
     user_ids = [p.user_id for p in profs]
     user_map = user_map_by_ids(db, user_ids)
-    return [
-        ProfessionalResponse(**professional_response_dict(p, user_map.get(p.user_id)))
-        for p in profs
-    ]
+    return [ProfessionalResponse(**professional_response_dict(p, user_map.get(p.user_id))) for p in profs]
 
 
 @router.post("", response_model=ProfessionalCreateResponse)
@@ -90,7 +90,7 @@ def create_professional(
 
 @router.get("/{professional_id}", response_model=ProfessionalResponse)
 def get_professional(
-    professional_id: int,
+    professional_id: Annotated[int, Path(ge=1)],
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -105,7 +105,7 @@ def get_professional(
 
 @router.put("/{professional_id}", response_model=ProfessionalResponse)
 def update_professional(
-    professional_id: int,
+    professional_id: Annotated[int, Path(ge=1)],
     data: ProfessionalUpdate,
     admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),

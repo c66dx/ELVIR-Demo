@@ -1,26 +1,25 @@
 import unittest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import patch
-
-from starlette.requests import Request
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from starlette.requests import Request
 
 from app.config import settings
 from app.database import Base
-from app.models.user import User
-from app.models.youth import Youth
+from app.models.case import Case
+from app.models.job_role import JobRole
 from app.models.session import Session as SessionModel
 from app.models.session_event import SessionEvent
 from app.models.session_transcript import SessionTranscript
-from app.models.job_role import JobRole
-from app.models.case import Case
 from app.models.simulation_template import SimulationTemplate
-from app.routers.sessions import start_session, close_session, get_session_transcript_endpoint
-from app.services.liveavatar import LiveAvatarError
+from app.models.user import User
+from app.models.youth import Youth
+from app.routers.sessions import close_session, get_session_transcript_endpoint, start_session
 from app.schemas.session import SessionCloseRequest
+from app.services.liveavatar import LiveAvatarError
 
 
 def _build_request(request_id: str = "req-test"):
@@ -87,7 +86,7 @@ class SessionsLiveAvatarTestCase(unittest.TestCase):
             simulation_template_id=self.template.id,
             mode="AUTOGESTIONADA",
             status="EN_CURSO",
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
         self.db.add(self.session)
         self.db.commit()

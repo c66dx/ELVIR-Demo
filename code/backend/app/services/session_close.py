@@ -1,8 +1,9 @@
 """Cierre de sesión de simulación: métricas, transcripción LiveAvatar, evaluación de prompt."""
+
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session as OrmSession
 
@@ -40,7 +41,7 @@ def apply_close_session(
     El caller debe haber resuelto la sesión y permisos.
     """
     session.status = data.status
-    session.ended_at = datetime.now(timezone.utc)
+    session.ended_at = datetime.now(UTC)
     metrics = dict(data.metrics) if data.metrics else {}
     if data.motivo:
         metrics["motivo"] = data.motivo
@@ -48,7 +49,7 @@ def apply_close_session(
         session.duration_seconds = metrics["duration_seconds"]
     else:
         if session.started_at:
-            delta = datetime.now(timezone.utc) - session.started_at
+            delta = datetime.now(UTC) - session.started_at
             session.duration_seconds = int(delta.total_seconds())
     session.metrics = metrics if metrics else data.metrics
 
@@ -59,7 +60,7 @@ def apply_close_session(
             if existing:
                 existing.transcript_data = transcript_data.get("transcript_data", [])
                 existing.session_active = transcript_data.get("session_active")
-                existing.fetched_at = datetime.now(timezone.utc)
+                existing.fetched_at = datetime.now(UTC)
             else:
                 db.add(
                     SessionTranscript(

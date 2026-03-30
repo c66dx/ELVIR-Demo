@@ -1,6 +1,6 @@
 """Tests de check_youth_access, expire_stale_sessions, build_sessions_query y 404 en require_session_access."""
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 from fastapi import HTTPException
@@ -161,7 +161,7 @@ class ExpireStaleSessionsTestCase(unittest.TestCase):
         self.db.commit()
         self.db.refresh(self.template)
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         self.stale = SessionModel(
             youth_id=self.youth.id,
             professional_id=self.prof.id,
@@ -199,7 +199,7 @@ class ExpireStaleSessionsTestCase(unittest.TestCase):
         self.assertEqual(ev.event_type, "AUTO_CANCELLED")
 
     def test_no_stale_returns_zero(self):
-        self.stale.last_heartbeat_at = datetime.now(timezone.utc)
+        self.stale.last_heartbeat_at = datetime.now(UTC)
         self.db.commit()
         with patch.object(settings, "SESSION_IDLE_TIMEOUT_MINUTES", 30):
             self.assertEqual(expire_stale_sessions(self.db), 0)

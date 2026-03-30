@@ -1,30 +1,26 @@
 """Router de resúmenes cualitativos."""
-from typing import Optional
 
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Path
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import get_current_professional, get_current_user
 from app.database import get_db
-from app.core.dependencies import get_current_user, get_current_professional
-from app.services.session_access import require_session_access
+from app.schemas.summary import SummaryRequest
 from app.services.interview_summary_service import (
     create_or_update_professional_summary,
     get_summary_for_session_if_access,
     summary_response_dict,
 )
+from app.services.session_access import require_session_access
 
 router = APIRouter(tags=["summaries"])
 
 
-class SummaryRequest(BaseModel):
-    summary_text: str
-    competency_tags: Optional[list[str]] = None
-
-
 @router.post("/sessions/{session_id}/summary")
 def create_or_update_summary(
-    session_id: int,
+    session_id: Annotated[int, Path(ge=1)],
     data: SummaryRequest,
     prof=Depends(get_current_professional),
     db: Session = Depends(get_db),
@@ -41,7 +37,7 @@ def create_or_update_summary(
 
 @router.get("/sessions/{session_id}/summary")
 def get_session_summary(
-    session_id: int,
+    session_id: Annotated[int, Path(ge=1)],
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):

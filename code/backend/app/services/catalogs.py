@@ -1,8 +1,9 @@
 """Consultas y armado de respuestas de catálogos (job-roles, cases, plantillas, competencias)."""
+
 from __future__ import annotations
 
 import json
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy.orm import Session as OrmSession
 
@@ -12,15 +13,15 @@ from app.models.competency_level import CompetencyLevel
 from app.models.job_role import JobRole
 from app.models.simulation_template import SimulationTemplate
 from app.schemas.common import (
-    CaseResponse,
     CaseRef,
+    CaseResponse,
     JobRoleRef,
     JobRoleResponse,
     SimulationTemplateResponse,
 )
 
 
-def parse_competencias(val: Any) -> Optional[list]:
+def parse_competencias(val: Any) -> list | None:
     """Parsea competencias desde JSON string o lista."""
     if val is None:
         return None
@@ -76,8 +77,8 @@ def list_cases_for_catalog(db: OrmSession) -> list[CaseResponse]:
 
 def list_simulation_templates_for_catalog(
     db: OrmSession,
-    job_role_id: Optional[int],
-    case_id: Optional[int],
+    job_role_id: int | None,
+    case_id: int | None,
 ) -> list[SimulationTemplateResponse]:
     q = (
         db.query(SimulationTemplate, JobRole, Case)

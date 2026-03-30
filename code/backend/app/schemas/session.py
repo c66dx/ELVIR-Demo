@@ -1,38 +1,38 @@
 """Esquemas de sesiones."""
-from datetime import datetime
-from typing import Optional, Any, Literal
 
-from pydantic import BaseModel
+from datetime import datetime
+from typing import Any, Literal
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SessionCreate(BaseModel):
-    youth_id: int
-    simulation_template_id: int
+    youth_id: int = Field(..., ge=1)
+    simulation_template_id: int = Field(..., ge=1)
     mode: Literal["AUTOGESTIONADA", "SUPERVISADA"]
-    professional_id: Optional[int] = None
+    professional_id: int | None = Field(None, ge=1)
 
 
 class SessionResponse(BaseModel):
     id: int
     youth_id: int
-    professional_id: Optional[int] = None
+    professional_id: int | None = None
     simulation_template_id: int
     mode: Literal["AUTOGESTIONADA", "SUPERVISADA"]
     status: Literal["EN_CURSO", "COMPLETADA", "CANCELADA", "ERROR"]
     started_at: datetime
-    ended_at: Optional[datetime] = None
-    duration_seconds: Optional[int] = None
-    liveavatar_session_id: Optional[str] = None
-    metrics: Optional[dict[str, Any]] = None
+    ended_at: datetime | None = None
+    duration_seconds: int | None = None
+    liveavatar_session_id: str | None = None
+    metrics: dict[str, Any] | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SessionCloseRequest(BaseModel):
     status: Literal["COMPLETADA", "CANCELADA", "ERROR"]
-    metrics: Optional[dict[str, Any]] = None
-    motivo: Optional[str] = None  # Para ERROR: LIVEAVATAR_CONNECTION, etc.
+    metrics: dict[str, Any] | None = None
+    motivo: str | None = Field(None, max_length=500)  # Para ERROR: LIVEAVATAR_CONNECTION, etc.
 
 
 class SessionStartResponse(BaseModel):
@@ -48,10 +48,9 @@ class SessionEventResponse(BaseModel):
     session_id: int
     event_type: str
     occurred_at: datetime
-    payload: Optional[dict] = None
+    payload: dict | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TranscriptEntry(BaseModel):
@@ -63,8 +62,8 @@ class TranscriptEntry(BaseModel):
 
 class TranscriptResponse(BaseModel):
     transcript_data: list[TranscriptEntry]
-    session_active: Optional[bool] = None
-    fetched_at: Optional[datetime] = None
+    session_active: bool | None = None
+    fetched_at: datetime | None = None
 
 
 class SessionMonthlyStat(BaseModel):
@@ -82,22 +81,22 @@ class SessionStatsResponse(BaseModel):
 
 
 class SessionEvaluationRequest(BaseModel):
-    session_id: int | None = None
-    liveavatar_session_id: str | None = None
+    session_id: int | None = Field(None, ge=1)
+    liveavatar_session_id: str | None = Field(None, max_length=200)
     evaluation: Any
-    source: str | None = None
+    source: str | None = Field(None, max_length=100)
 
 
 class SessionCompetencyItem(BaseModel):
-    competency_slug: str
-    level_slug: str
-    comment: str | None = None
+    competency_slug: str = Field(..., min_length=1, max_length=200)
+    level_slug: str = Field(..., min_length=1, max_length=200)
+    comment: str | None = Field(None, max_length=10_000)
 
 
 class SessionCompetenciesRequest(BaseModel):
-    items: list[SessionCompetencyItem]
+    items: list[SessionCompetencyItem] = Field(..., max_length=200)
 
 
 class SessionEventCreate(BaseModel):
-    event_type: str
+    event_type: str = Field(..., min_length=1, max_length=120)
     payload: dict | None = None

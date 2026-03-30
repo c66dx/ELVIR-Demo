@@ -9,4 +9,3 @@ Uso recomendado:
 """
 
 __all__: list[str] = []
-

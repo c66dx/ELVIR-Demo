@@ -28,10 +28,24 @@ class OpenApiErrorSchemaTestCase(unittest.TestCase):
         for code in ErrorCode:
             self.assertIn(code.value, description)
 
+        for path in ("/health", "/health/metrics", "/health/live", "/health/ready"):
+            op = payload.get("paths", {}).get(path, {}).get("get", {})
+            self.assertIn("health", op.get("tags", []), msg=f"path {path} should be tagged health")
+
+        ready_responses = payload.get("paths", {}).get("/health/ready", {}).get("get", {}).get("responses", {})
+        self.assertIn("503", ready_responses, msg="/health/ready should document 503 readiness failure")
+
         health_get = payload.get("paths", {}).get("/health", {}).get("get", {})
         responses = health_get.get("responses", {})
         self.assertIn("500", responses)
         self.assertEqual(responses["500"].get("$ref"), "#/components/responses/ErrorResponse")
+
+        rl = components["responses"]["RateLimitExceeded"]
+        self.assertEqual(
+            rl["content"]["application/json"]["schema"]["$ref"],
+            "#/components/schemas/ErrorResponse",
+        )
+        self.assertIn("X-Request-ID", rl.get("headers", {}))
 
 
 if __name__ == "__main__":

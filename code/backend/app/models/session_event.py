@@ -1,6 +1,6 @@
 """Modelo SESSION_EVENTS."""
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, func
-from sqlalchemy import JSON
+
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, func
 
 from app.database import Base
 

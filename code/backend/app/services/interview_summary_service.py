@@ -1,15 +1,14 @@
 """Creación y lectura de resúmenes cualitativos de entrevistas."""
-from __future__ import annotations
 
-from typing import Optional
+from __future__ import annotations
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.models.interview_summary import InterviewSummary
-from app.models.session import Session as SessionModel
 from app.models.assignment import Assignment
+from app.models.interview_summary import InterviewSummary
 from app.models.professional import Professional
+from app.models.session import Session as SessionModel
 from app.services.notifications import upsert_youth_notification
 
 
@@ -30,17 +29,21 @@ def create_or_update_professional_summary(
     session_id: int,
     prof: Professional,
     summary_text: str,
-    competency_tags: Optional[list[str]],
+    competency_tags: list[str] | None,
 ) -> dict:
     """Crea o actualiza resumen; notifica al joven. Requiere que el caller haya validado asignación."""
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
-    assign = db.query(Assignment).filter(
-        Assignment.youth_id == session.youth_id,
-        Assignment.professional_id == prof.id,
-        Assignment.status == "ACTIVO",
-    ).first()
+    assign = (
+        db.query(Assignment)
+        .filter(
+            Assignment.youth_id == session.youth_id,
+            Assignment.professional_id == prof.id,
+            Assignment.status == "ACTIVO",
+        )
+        .first()
+    )
     if not assign:
         raise HTTPException(status_code=403, detail="Acceso denegado")
 

@@ -1,8 +1,9 @@
 """Listado y filtrado de sesiones."""
+
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, time, timezone
+from datetime import UTC, date, datetime, time
 
 from fastapi import HTTPException, Response
 from sqlalchemy import func, or_
@@ -75,10 +76,10 @@ def fetch_sessions_list(
         raise HTTPException(status_code=400, detail="Rango de fechas inválido")
 
     if start_date:
-        start_dt = datetime.combine(start_date, time.min, tzinfo=timezone.utc)
+        start_dt = datetime.combine(start_date, time.min, tzinfo=UTC)
         sessions_q = sessions_q.filter(SessionModel.started_at >= start_dt)
     if end_date:
-        end_dt = datetime.combine(end_date, time.max, tzinfo=timezone.utc)
+        end_dt = datetime.combine(end_date, time.max, tzinfo=UTC)
         sessions_q = sessions_q.filter(SessionModel.started_at <= end_dt)
 
     if use_pagination:

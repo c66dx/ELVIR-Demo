@@ -1,6 +1,6 @@
 """Tests de build_youth_logs_response (panel admin)."""
 import unittest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy import create_engine
@@ -220,7 +220,7 @@ class AdminYouthLogsNoUserTestCase(unittest.TestCase):
                 simulation_template_id=self.tpl.id,
                 mode="AUTOGESTIONADA",
                 status="EN_CURSO",
-                started_at=datetime.now(timezone.utc),
+                started_at=datetime.now(UTC),
             )
         )
         self.db.commit()

@@ -1,7 +1,8 @@
 """Creación de sesiones de simulación."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session as OrmSession
@@ -46,7 +47,7 @@ def create_session_record(
         simulation_template_id=data.simulation_template_id,
         mode=data.mode,
         status="EN_CURSO",
-        last_heartbeat_at=datetime.now(timezone.utc),
+        last_heartbeat_at=datetime.now(UTC),
     )
     db.add(session)
     db.flush()

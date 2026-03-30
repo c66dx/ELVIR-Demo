@@ -1,4 +1,5 @@
 """Etiquetas cargo/caso para la UI de simulación."""
+
 from __future__ import annotations
 
 from sqlalchemy.orm import Session as OrmSession

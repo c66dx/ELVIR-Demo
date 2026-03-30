@@ -7,6 +7,7 @@ const STATUS_MESSAGES: Record<number, string> = {
   403: 'No tienes permiso para realizar esta acción',
   404: 'Recurso no encontrado',
   422: 'Datos inválidos',
+  429: 'Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.',
   500: 'Error del servidor. Intenta más tarde.',
 };
 
@@ -37,6 +38,12 @@ export function extractErrorMessage(err: unknown, requestId?: string | null): st
 
   if (typeof detail === 'string' && detail.trim()) {
     message = detail;
+  } else if (err.status === 429) {
+    const nested = (err.error as { error?: { message?: string } })?.error?.message;
+    message =
+      (typeof nested === 'string' && nested.trim() ? nested : '') ||
+      STATUS_MESSAGES[429] ||
+      'Demasiadas solicitudes';
   } else if (Array.isArray(detail) && detail.length > 0) {
     const first = detail[0] as { msg?: unknown; message?: unknown } | undefined;
     const msg =

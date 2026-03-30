@@ -1,7 +1,8 @@
 """Consultas auxiliares y efectos sobre jóvenes (sesiones, usuarios, invitaciones)."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import and_, desc, func
 from sqlalchemy.orm import Session as DBSession
@@ -68,7 +69,7 @@ def disable_youth_login(db: DBSession, youth: Youth) -> None:
         if user:
             user.is_active = False
             user.email = f"disabled+{user.id}@invalid.local"
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     (
         db.query(YouthInvitation)
         .filter(YouthInvitation.youth_id == youth.id, YouthInvitation.used_at.is_(None))

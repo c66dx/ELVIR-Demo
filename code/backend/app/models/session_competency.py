@@ -1,5 +1,7 @@
 """Modelo SESSION_COMPETENCIES."""
-from sqlalchemy import Column, DateTime, Integer, Text, ForeignKey, UniqueConstraint, func
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text, UniqueConstraint, func
+
 from app.database import Base
 
 

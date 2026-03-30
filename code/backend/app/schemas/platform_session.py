@@ -1,6 +1,8 @@
 """Esquemas para sesiones de plataforma (login/logout)."""
+
 from datetime import datetime
-from pydantic import BaseModel
+
+from pydantic import BaseModel, ConfigDict
 
 
 class PlatformSessionResponse(BaseModel):
@@ -11,5 +13,4 @@ class PlatformSessionResponse(BaseModel):
     started_at: datetime
     ended_at: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

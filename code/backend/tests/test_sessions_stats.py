@@ -1,17 +1,17 @@
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.database import Base
+from app.models.case import Case
+from app.models.job_role import JobRole
+from app.models.session import Session as SessionModel
+from app.models.simulation_template import SimulationTemplate
 from app.models.user import User
 from app.models.youth import Youth
-from app.models.job_role import JobRole
-from app.models.case import Case
-from app.models.simulation_template import SimulationTemplate
-from app.models.session import Session as SessionModel
 from app.routers.sessions import get_session_stats
 
 
@@ -69,7 +69,7 @@ class SessionsStatsTestCase(unittest.TestCase):
         self.db.add(template)
         self.db.flush()
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         prev_month_anchor = (now.replace(day=1) - timedelta(days=1)).replace(day=15)
 
         s1 = SessionModel(

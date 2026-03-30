@@ -1,13 +1,13 @@
-﻿"""Middlewares HTTP reutilizables de la API."""
+"""Middlewares HTTP reutilizables de la API."""
 
 from __future__ import annotations
 
-from collections import Counter
-import logging
 import hmac
-from urllib.parse import urlparse
-from time import perf_counter
+import logging
+from collections import Counter
 from threading import Lock
+from time import perf_counter
+from urllib.parse import urlparse
 from uuid import uuid4
 
 from fastapi import Request
@@ -15,7 +15,9 @@ from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.core.errors import ErrorCode, build_error_payload, get_request_id
-from app.core.security import decode_token, decode_csrf_token
+from app.core.logging_config import emit_http_access_log
+from app.core.request_context import current_request_id
+from app.core.security import decode_csrf_token, decode_token
 from app.database import SessionLocal
 from app.models.audit_log import AuditLog
 
@@ -73,9 +75,9 @@ def _should_audit_request(method: str, path: str) -> bool:
 def _infer_entity_from_path(path: str) -> tuple[str | None, str | None]:
     trimmed = path
     if trimmed.startswith("/api/v1/"):
-        trimmed = trimmed[len("/api/v1/"):]
+        trimmed = trimmed[len("/api/v1/") :]
     elif trimmed.startswith("/api/"):
-        trimmed = trimmed[len("/api/"):]
+        trimmed = trimmed[len("/api/") :]
     parts = [p for p in trimmed.split("/") if p]
     if not parts:
         return None, None
@@ -130,7 +132,7 @@ def _extract_client_ip(request: Request) -> str | None:
 def _normalize_origin(origin: str | None) -> str | None:
     if not origin:
         return None
-    origin = origin.strip().rstrip('/')
+    origin = origin.strip().rstrip("/")
     parsed = urlparse(origin)
     if not parsed.scheme or not parsed.netloc:
         return None
@@ -160,11 +162,7 @@ def _is_allowed_origin(origin: str | None) -> bool:
     normalized = _normalize_origin(origin)
     if not normalized:
         return False
-    allowed = {
-        normalized_allowed
-        for o in settings.cors_origins_list
-        if (normalized_allowed := _normalize_origin(o))
-    }
+    allowed = {normalized_allowed for o in settings.cors_origins_list if (normalized_allowed := _normalize_origin(o))}
     return normalized in allowed
 
 
@@ -172,34 +170,43 @@ async def request_id_middleware(request: Request, call_next):
     """Propaga o genera X-Request-ID, y registra una traza básica por request."""
     request_id = request.headers.get("X-Request-ID") or uuid4().hex
     request.state.request_id = request_id
+    ctx_token = current_request_id.set(request_id)
     start = perf_counter()
 
     try:
-        response = await call_next(request)
-    except Exception:
-        elapsed_ms = (perf_counter() - start) * 1000
-        logger.exception(
-            "request_id=%s method=%s path=%s status=500 duration_ms=%.2f",
-            request_id,
-            request.method,
-            request.url.path,
-            elapsed_ms,
-        )
-        _record_request_metric(request.method, request.url.path, 500)
-        raise
+        try:
+            response = await call_next(request)
+        except Exception:
+            elapsed_ms = (perf_counter() - start) * 1000
+            emit_http_access_log(
+                logger,
+                settings,
+                request_id=request_id,
+                method=request.method,
+                path=request.url.path,
+                status_code=500,
+                duration_ms=elapsed_ms,
+                error=True,
+            )
+            _record_request_metric(request.method, request.url.path, 500)
+            raise
 
-    elapsed_ms = (perf_counter() - start) * 1000
-    response.headers["X-Request-ID"] = request_id
-    _record_request_metric(request.method, request.url.path, response.status_code)
-    logger.info(
-        "request_id=%s method=%s path=%s status=%s duration_ms=%.2f",
-        request_id,
-        request.method,
-        request.url.path,
-        response.status_code,
-        elapsed_ms,
-    )
-    return response
+        elapsed_ms = (perf_counter() - start) * 1000
+        response.headers["X-Request-ID"] = request_id
+        _record_request_metric(request.method, request.url.path, response.status_code)
+        emit_http_access_log(
+            logger,
+            settings,
+            request_id=request_id,
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration_ms=elapsed_ms,
+            error=False,
+        )
+        return response
+    finally:
+        current_request_id.reset(ctx_token)
 
 
 async def security_headers_middleware(request: Request, call_next):
@@ -211,13 +218,15 @@ async def security_headers_middleware(request: Request, call_next):
     response.headers.setdefault("Permissions-Policy", "camera=(), geolocation=(), interest-cohort=()")
     path = request.url.path or ""
     if path.startswith("/docs") or path.startswith("/redoc") or path == "/openapi.json":
+        # ReDoc/Swagger cargan desde jsdelivr; ReDoc usa workers blob: (Chrome exige worker-src explícito).
         docs_csp = (
             "default-src 'self' https://cdn.jsdelivr.net; "
             "img-src 'self' data: https://cdn.jsdelivr.net; "
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "worker-src 'self' blob: https://cdn.jsdelivr.net; "
             "font-src 'self' data: https://cdn.jsdelivr.net; "
-            "connect-src 'self'; "
+            "connect-src 'self' https://cdn.jsdelivr.net; "
             "frame-ancestors 'none'; base-uri 'none'"
         )
         response.headers.setdefault("Content-Security-Policy", docs_csp)
@@ -234,6 +243,7 @@ async def csrf_protection_middleware(request: Request, call_next):
 
         auth_cookie = (request.cookies.get(settings.AUTH_COOKIE_NAME) or "").strip()
         if auth_cookie:
+
             def _csrf_forbidden(message: str) -> JSONResponse:
                 request_id = get_request_id(request)
                 if not request_id:
@@ -318,4 +328,3 @@ async def audit_log_middleware(request: Request, call_next):
                     db.close()
             except Exception:
                 pass
-

@@ -1,4 +1,5 @@
 ﻿"""Configuración de base de datos con SQLAlchemy (PostgreSQL)."""
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -34,4 +35,3 @@ def get_db():
         yield db
     finally:
         db.close()
-

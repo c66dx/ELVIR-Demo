@@ -3,13 +3,34 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from starlette.requests import Request
 
 from app.database import Base
 from app.models.assignment import Assignment
 from app.models.professional import Professional
 from app.models.user import User
 from app.models.youth import Youth
-from app.routers.admin import admin_delete_youth, admin_delete_professional
+from app.routers.admin import admin_delete_professional, admin_delete_youth
+
+
+def _admin_router_request() -> Request:
+    """Request ASGI mínimo (slowapi exige starlette.requests.Request)."""
+    return Request(
+        scope={
+            "type": "http",
+            "asgi": {"version": "3.0"},
+            "http_version": "1.1",
+            "method": "DELETE",
+            "scheme": "http",
+            "path": "/api/v1/admin",
+            "raw_path": b"/api/v1/admin",
+            "root_path": "",
+            "query_string": b"",
+            "headers": [(b"host", b"test.local")],
+            "client": ("127.0.0.1", 12345),
+            "server": ("test.local", 80),
+        }
+    )
 
 
 class AdminRouterTestCase(unittest.TestCase):
@@ -53,7 +74,9 @@ class AdminRouterTestCase(unittest.TestCase):
         self.engine.dispose()
 
     def test_admin_delete_youth_disables_login_and_assignments(self):
-        result = admin_delete_youth(self.youth.id, admin=self.admin_user, db=self.db)
+        result = admin_delete_youth(
+            _admin_router_request(), self.youth.id, admin=self.admin_user, db=self.db
+        )
         self.assertTrue(result.get("ok"))
 
         self.db.refresh(self.youth)
@@ -70,7 +93,9 @@ class AdminRouterTestCase(unittest.TestCase):
         self.assertIsNotNone(assignment.ended_at)
 
     def test_admin_delete_professional_disables_user_and_assignments(self):
-        result = admin_delete_professional(self.prof.id, admin=self.admin_user, db=self.db)
+        result = admin_delete_professional(
+            _admin_router_request(), self.prof.id, admin=self.admin_user, db=self.db
+        )
         self.assertTrue(result.get("ok"))
 
         self.db.refresh(self.prof)

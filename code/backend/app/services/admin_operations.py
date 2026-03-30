@@ -1,13 +1,13 @@
 """Operaciones de administración: baja lógica, borrado duro y limpieza de ficheros."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from pathlib import Path
-from urllib.parse import urlparse
+from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session as DBSession
 
+from app.core.storage import get_storage
 from app.models.assignment import Assignment
 from app.models.audit_log import AuditLog
 from app.models.interview_summary import InterviewSummary
@@ -15,6 +15,7 @@ from app.models.material_suggestion import MaterialSuggestion
 from app.models.material_view import MaterialView
 from app.models.platform_session import PlatformSession
 from app.models.professional import Professional
+from app.models.professional_invitation import ProfessionalInvitation
 from app.models.session import Session as SessionModel
 from app.models.session_audio import SessionAudio
 from app.models.session_competency import SessionCompetency
@@ -23,38 +24,19 @@ from app.models.session_transcript import SessionTranscript
 from app.models.user import User
 from app.models.youth import Youth
 from app.models.youth_invitation import YouthInvitation
-from app.models.professional_invitation import ProfessionalInvitation
 from app.services.youth_queries import disable_youth_login
 
-UPLOADS_DIR = Path(__file__).resolve().parent.parent.parent / "uploads"
-YOUTH_UPLOAD_DIR = UPLOADS_DIR / "youths"
-PROFILE_UPLOAD_DIR = UPLOADS_DIR / "profiles"
-AUDIO_UPLOAD_DIR = UPLOADS_DIR / "audio"
 
-
-def delete_upload_file(url: str | None, prefix: str, base_dir: Path) -> bool:
-    if not url:
-        return False
-    try:
-        parsed = urlparse(url)
-        path = parsed.path or ""
-        if not path.startswith(prefix):
-            return False
-        filename = path.replace(prefix, "", 1)
-        file_path = base_dir / filename
-        if file_path.exists():
-            file_path.unlink(missing_ok=True)
-            return True
-    except Exception:
-        return False
-    return False
+def delete_upload_file(url: str | None) -> bool:
+    """Elimina un fichero dada su URL pública (disco local o S3 según configuración)."""
+    return get_storage().delete_public_url(url)
 
 
 def apply_admin_soft_delete_youth(db: DBSession, youth_id: int) -> dict:
     youth = db.query(Youth).filter(Youth.id == youth_id).first()
     if not youth:
         raise HTTPException(status_code=404, detail="Joven no encontrado")
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     youth.is_active = False
     youth.login_enabled = False
     disable_youth_login(db, youth)
@@ -71,7 +53,7 @@ def apply_admin_soft_delete_professional(db: DBSession, professional_id: int) ->
     professional = db.query(Professional).filter(Professional.id == professional_id).first()
     if not professional:
         raise HTTPException(status_code=404, detail="Tutor no encontrado")
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     professional.is_active = False
     if professional.user_id:
         user = db.query(User).filter(User.id == professional.user_id).first()
@@ -118,25 +100,53 @@ def apply_hard_delete_youth(db: DBSession, youth_id: int) -> dict:
     deleted_sessions = 0
 
     if session_ids:
-        audio_urls = [row[0] for row in db.query(SessionAudio.url).filter(SessionAudio.session_id.in_(session_ids)).all()]
-        deleted_session_events = db.query(SessionEvent).filter(SessionEvent.session_id.in_(session_ids)).delete(synchronize_session=False)
-        deleted_session_summaries = db.query(InterviewSummary).filter(InterviewSummary.session_id.in_(session_ids)).delete(synchronize_session=False)
-        deleted_session_transcripts = db.query(SessionTranscript).filter(SessionTranscript.session_id.in_(session_ids)).delete(synchronize_session=False)
-        deleted_session_audio = db.query(SessionAudio).filter(SessionAudio.session_id.in_(session_ids)).delete(synchronize_session=False)
-        deleted_session_competencies = db.query(SessionCompetency).filter(SessionCompetency.session_id.in_(session_ids)).delete(synchronize_session=False)
-        deleted_sessions = db.query(SessionModel).filter(SessionModel.youth_id == youth_id).delete(synchronize_session=False)
+        audio_urls = [
+            row[0] for row in db.query(SessionAudio.url).filter(SessionAudio.session_id.in_(session_ids)).all()
+        ]
+        deleted_session_events = (
+            db.query(SessionEvent).filter(SessionEvent.session_id.in_(session_ids)).delete(synchronize_session=False)
+        )
+        deleted_session_summaries = (
+            db.query(InterviewSummary)
+            .filter(InterviewSummary.session_id.in_(session_ids))
+            .delete(synchronize_session=False)
+        )
+        deleted_session_transcripts = (
+            db.query(SessionTranscript)
+            .filter(SessionTranscript.session_id.in_(session_ids))
+            .delete(synchronize_session=False)
+        )
+        deleted_session_audio = (
+            db.query(SessionAudio).filter(SessionAudio.session_id.in_(session_ids)).delete(synchronize_session=False)
+        )
+        deleted_session_competencies = (
+            db.query(SessionCompetency)
+            .filter(SessionCompetency.session_id.in_(session_ids))
+            .delete(synchronize_session=False)
+        )
+        deleted_sessions = (
+            db.query(SessionModel).filter(SessionModel.youth_id == youth_id).delete(synchronize_session=False)
+        )
 
     deleted_views = db.query(MaterialView).filter(MaterialView.youth_id == youth_id).delete(synchronize_session=False)
-    deleted_suggestions = db.query(MaterialSuggestion).filter(MaterialSuggestion.youth_id == youth_id).delete(synchronize_session=False)
+    deleted_suggestions = (
+        db.query(MaterialSuggestion).filter(MaterialSuggestion.youth_id == youth_id).delete(synchronize_session=False)
+    )
     deleted_assignments = db.query(Assignment).filter(Assignment.youth_id == youth_id).delete(synchronize_session=False)
-    deleted_invitations = db.query(YouthInvitation).filter(YouthInvitation.youth_id == youth_id).delete(synchronize_session=False)
+    deleted_invitations = (
+        db.query(YouthInvitation).filter(YouthInvitation.youth_id == youth_id).delete(synchronize_session=False)
+    )
 
     deleted_platform_sessions = 0
     deleted_audit_logs = 0
     deleted_users = 0
     if user_id:
-        deleted_platform_sessions = db.query(PlatformSession).filter(PlatformSession.user_id == user_id).delete(synchronize_session=False)
-        deleted_audit_logs = db.query(AuditLog).filter(AuditLog.actor_user_id == user_id).delete(synchronize_session=False)
+        deleted_platform_sessions = (
+            db.query(PlatformSession).filter(PlatformSession.user_id == user_id).delete(synchronize_session=False)
+        )
+        deleted_audit_logs = (
+            db.query(AuditLog).filter(AuditLog.actor_user_id == user_id).delete(synchronize_session=False)
+        )
 
     deleted_youths = db.query(Youth).filter(Youth.id == youth_id).delete(synchronize_session=False)
 
@@ -146,12 +156,12 @@ def apply_hard_delete_youth(db: DBSession, youth_id: int) -> dict:
     db.commit()
 
     removed_files = 0
-    if delete_upload_file(youth_photo_url, "/uploads/youths/", YOUTH_UPLOAD_DIR):
+    if delete_upload_file(youth_photo_url):
         removed_files += 1
-    if delete_upload_file(user_photo_url, "/uploads/profiles/", PROFILE_UPLOAD_DIR):
+    if delete_upload_file(user_photo_url):
         removed_files += 1
     for url in audio_urls:
-        if delete_upload_file(url, "/uploads/audio/", AUDIO_UPLOAD_DIR):
+        if delete_upload_file(url):
             removed_files += 1
 
     return {

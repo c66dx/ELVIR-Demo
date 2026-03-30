@@ -1,4 +1,5 @@
 """Persistencia de audio grabado para sesiones completadas."""
+
 from __future__ import annotations
 
 import uuid
@@ -7,40 +8,17 @@ from pathlib import Path
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session as OrmSession
 
+from app.core.storage import get_storage
 from app.models.session_audio import SessionAudio
 from app.models.user import User
 
-SESSION_AUDIO_DIR = Path(__file__).resolve().parent.parent.parent / "uploads" / "audio"
 SESSION_AUDIO_EXTENSIONS = {".webm", ".ogg", ".wav", ".mp3", ".m4a"}
 SESSION_AUDIO_MAX_MB = 30
 SESSION_AUDIO_MAX_BYTES = SESSION_AUDIO_MAX_MB * 1024 * 1024
-SESSION_AUDIO_CHUNK_SIZE = 1024 * 1024
 
 
 def allowed_audio_extensions_message() -> str:
     return ", ".join(sorted(SESSION_AUDIO_EXTENSIONS))
-
-
-def _ensure_session_audio_dir() -> None:
-    SESSION_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
-
-
-def _save_audio_stream(file: UploadFile, destination: Path) -> int:
-    """Guarda audio por chunks y retorna tamaño total escrito."""
-    total_written = 0
-    with destination.open("wb") as out:
-        while True:
-            chunk = file.file.read(SESSION_AUDIO_CHUNK_SIZE)
-            if not chunk:
-                break
-            total_written += len(chunk)
-            if total_written > SESSION_AUDIO_MAX_BYTES:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Audio demasiado grande. Máximo: {SESSION_AUDIO_MAX_MB} MB",
-                )
-            out.write(chunk)
-    return total_written
 
 
 def persist_session_audio_upload(
@@ -51,7 +29,7 @@ def persist_session_audio_upload(
     public_base_url: str,
 ) -> SessionAudio:
     """
-    Guarda el archivo en disco y crea o actualiza SessionAudio.
+    Guarda el archivo y crea o actualiza SessionAudio.
     El caller debe haber validado sesión, permisos y estado COMPLETADA.
     """
     if not file.filename:
@@ -63,41 +41,33 @@ def persist_session_audio_upload(
             detail=f"Extensión no permitida. Permitidas: {allowed_audio_extensions_message()}",
         )
 
-    _ensure_session_audio_dir()
+    content_type = file.content_type
     filename = f"session_{session_id}_{uuid.uuid4().hex}{ext}"
-    file_path = SESSION_AUDIO_DIR / filename
+    relative_key = f"audio/{filename}"
+    storage = get_storage()
+
     try:
-        size = _save_audio_stream(file, file_path)
-    except HTTPException:
-        if file_path.exists():
-            file_path.unlink(missing_ok=True)
-        raise
-    except OSError as e:
-        if file_path.exists():
-            file_path.unlink(missing_ok=True)
-        raise HTTPException(status_code=500, detail=f"Error al guardar audio: {str(e)}") from e
+        url, size = storage.save_upload(
+            file,
+            relative_key=relative_key,
+            max_bytes=SESSION_AUDIO_MAX_BYTES,
+            public_base_url=public_base_url,
+            oversize_detail=f"Audio demasiado grande. Máximo: {SESSION_AUDIO_MAX_MB} MB",
+        )
     finally:
         try:
             file.file.close()
         except Exception:
             pass
 
-    base = public_base_url.rstrip("/")
-    url = f"{base}/uploads/audio/{filename}"
-
     existing = db.query(SessionAudio).filter(SessionAudio.session_id == session_id).first()
     if existing:
         try:
-            old_url = existing.url or ""
-            if "/uploads/audio/" in old_url:
-                old_name = old_url.split("/uploads/audio/")[-1]
-                old_path = SESSION_AUDIO_DIR / old_name
-                if old_path.exists():
-                    old_path.unlink(missing_ok=True)
+            storage.delete_public_url(existing.url or "")
         except Exception:
             pass
         existing.url = url
-        existing.content_type = file.content_type
+        existing.content_type = content_type
         existing.file_size_bytes = size
         existing.duration_seconds = duration_seconds
         db.commit()
@@ -107,7 +77,7 @@ def persist_session_audio_upload(
     audio = SessionAudio(
         session_id=session_id,
         url=url,
-        content_type=file.content_type,
+        content_type=content_type,
         file_size_bytes=size,
         duration_seconds=duration_seconds,
     )
