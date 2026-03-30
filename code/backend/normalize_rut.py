@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import re
-from typing import List, Dict
 
 from app.database import SessionLocal
 from app.models.youth import Youth
@@ -63,7 +62,7 @@ def main() -> int:
 
     db = SessionLocal()
     try:
-        youths: List[Youth] = db.query(Youth).filter(Youth.rut.isnot(None)).all()
+        youths: list[Youth] = db.query(Youth).filter(Youth.rut.isnot(None)).all()
         total = len(youths)
         valid_items = []
         invalid_items = []
@@ -80,7 +79,7 @@ def main() -> int:
                 invalid_items.append((y, "invalid"))
 
         # Detectar duplicados despues de normalizar
-        norm_map: Dict[str, List[Youth]] = {}
+        norm_map: dict[str, list[Youth]] = {}
         for y, norm in valid_items:
             norm_map.setdefault(norm, []).append(y)
 

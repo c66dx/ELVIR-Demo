@@ -8,13 +8,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.core.storage import LocalStorageBackend
 from app.database import Base
 from app.models.assignment import Assignment
 from app.models.professional import Professional
 from app.models.professional_invitation import ProfessionalInvitation
 from app.models.user import User
 from app.models.youth import Youth
-from app.core.storage import LocalStorageBackend
 from app.services.admin_operations import (
     apply_admin_soft_delete_professional,
     apply_admin_soft_delete_youth,
