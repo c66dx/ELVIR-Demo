@@ -5,7 +5,6 @@ from pydantic import ValidationError
 from app.config import Settings
 from app.schemas.session import SessionCloseRequest, SessionCreate
 
-
 _PROD_SECRET = "a" * 32  # cumple longitud mínima en producción (distinta del default dev)
 
 
