@@ -22,13 +22,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from sqlalchemy.orm import Session
 from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
+from app.models.assignment import Assignment
 from app.models.audit_log import AuditLog
 from app.models.interview_summary import InterviewSummary
-from app.models.assignment import Assignment
 from app.models.material_suggestion import MaterialSuggestion
 from app.models.material_view import MaterialView
 from app.models.platform_session import PlatformSession
@@ -42,7 +42,6 @@ from app.models.support_material import SupportMaterial
 from app.models.user import User
 from app.models.youth import Youth
 from app.models.youth_invitation import YouthInvitation
-
 
 UPLOADS_DIR = Path(__file__).resolve().parent / "uploads"
 SEED_USER_EMAILS = {
@@ -139,8 +138,8 @@ def clean(db: Session) -> dict[str, int]:
 
 def reseed_material(db: Session) -> None:
     """Recrea los 4 materiales por defecto de la carga inicial."""
-    from app.models.job_role import JobRole
     from app.models.case import Case
+    from app.models.job_role import JobRole
 
     jr1 = db.query(JobRole).filter(JobRole.slug == "operario").first()
     c1 = db.query(Case).filter(Case.slug == "normal").first()
