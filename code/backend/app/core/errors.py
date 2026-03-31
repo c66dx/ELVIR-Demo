@@ -1,6 +1,6 @@
 """Helpers para respuestas de error consistentes."""
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from fastapi import Request
@@ -8,7 +8,7 @@ from fastapi import Request
 _EMAIL_FIELDS = frozenset({"email", "new_email"})
 
 
-class ErrorCode(str, Enum):
+class ErrorCode(StrEnum):
     HTTP_ERROR = "HTTP_ERROR"
     VALIDATION_ERROR = "VALIDATION_ERROR"
     INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR"
