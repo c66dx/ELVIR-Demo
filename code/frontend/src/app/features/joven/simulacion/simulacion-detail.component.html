@@ -1,0 +1,854 @@
+<div class="simulacion-page">
+
+
+  <div class="simulacion-main">
+
+
+    @if (sessionCompleted()) {
+
+
+      @if (completedSessionData(); as data) {
+
+
+        @let company = companyContext(data.jobRoleName);
+
+
+        <div class="session-report">
+
+
+          <header class="report-header">
+
+
+            <div
+
+
+              class="report-badge"
+
+
+              [class.status-completada]="data.status === 'COMPLETADA'"
+
+
+              [class.status-cancelada]="data.status === 'CANCELADA'"
+
+
+              [class.status-error]="data.status === 'ERROR'"
+
+
+            >
+
+
+              <span class="badge-icon" aria-hidden="true">
+
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+                  <path d="M20 6L9 17l-5-5" />
+
+
+                </svg>
+
+
+              </span>
+
+
+              <span class="badge-text">{{ formatStatusLabel(data.status) }}</span>
+
+
+            </div>
+
+
+            <div class="report-title">
+
+
+              <h3>Informe de entrevista</h3>
+
+
+              <p class="report-subtitle">Registro de tu simulación y próximos pasos sugeridos.</p>
+
+
+            </div>
+
+
+            <div class="report-meta">
+
+
+              <div class="meta-item">
+
+
+                <span class="meta-label">Empresa</span>
+
+
+                <span class="meta-value">{{ company.name }}</span>
+
+
+                <span class="meta-sub">{{ company.sector }}</span>
+
+
+              </div>
+
+
+              <div class="meta-item">
+
+
+                <span class="meta-label">Cargo</span>
+
+
+                <span class="meta-value">{{ data.jobRoleName || '' }}</span>
+
+
+                <span class="meta-sub">{{ data.caseName || 'Entrevista simulada' }}</span>
+
+
+              </div>
+
+
+              <div class="meta-item">
+
+
+                <span class="meta-label">Fecha</span>
+
+
+                <span class="meta-value">{{ formatDate(data.ended_at || data.started_at) }}</span>
+
+
+                <span class="meta-sub">{{ formatModeLabel(data.mode) }}</span>
+
+
+              </div>
+
+
+            </div>
+
+
+          </header>
+
+
+
+
+
+          <section class="report-section report-narrative">
+
+
+            <h4>Resumen de la entrevista</h4>
+
+
+            <p>{{ buildNarrative(data) }}</p>
+
+
+          </section>
+
+
+
+
+
+          <section class="report-section report-metrics">
+
+
+            <h4>Datos clave</h4>
+
+
+            <div class="metric-grid">
+
+
+              <div class="metric-card">
+
+
+                <span class="metric-label">Duración</span>
+
+
+                <span class="metric-value">{{ formatDuration(data.duration_seconds) }}</span>
+
+
+              </div>
+
+
+              <div class="metric-card">
+
+
+                <span class="metric-label">Modalidad</span>
+
+
+                <span class="metric-value">Entrevista en línea</span>
+
+
+              </div>
+
+
+              <div class="metric-card">
+
+
+                <span class="metric-label">Tipo de entrevista</span>
+
+
+                <span class="metric-value">{{ data.caseName || 'Escenario estndar' }}</span>
+
+
+              </div>
+
+
+              <div class="metric-card">
+
+
+                <span class="metric-label">Modo</span>
+
+
+                <span class="metric-value">{{ formatModeLabel(data.mode) }}</span>
+
+
+              </div>
+
+
+            </div>
+
+
+          </section>
+
+
+
+
+
+          <section class="report-section report-feedback">
+
+
+            <div class="feedback-header">
+
+
+              <div>
+
+
+                <h4>Retroalimentación del tutor</h4>
+
+
+                <p class="feedback-subtitle">Se publicará cuando el tutor revise la entrevista.</p>
+
+
+              </div>
+
+
+              <span class="feedback-status" [class.is-ready]="!!completedSessionSummary()">
+
+
+                {{ completedSessionSummary() ? 'Disponible' : 'Pendiente' }}
+
+
+              </span>
+
+
+            </div>
+
+
+            <div class="feedback-body">
+
+
+              @if (isProfessionalView()) {
+
+
+                @if (completedSessionSummary(); as summary) {
+
+
+                  <p>{{ summary.summary_text }}</p>
+
+
+                  @if (summary.competency_tags?.length) {
+
+
+                    <div class="feedback-tags">
+
+
+                      @for (tag of summary.competency_tags; track tag) {
+
+
+                        <span class="tag">{{ tag }}</span>
+
+
+                      }
+
+
+                    </div>
+
+
+                  }
+
+
+                } @else {
+
+
+                  <p>La retroalimentación estará disponible cuando finalice la revisión del tutor.</p>
+
+
+                }
+
+
+              } @else {
+
+
+                <p>Tu tutor revisará esta entrevista y dejará comentarios cuando estén disponibles.</p>
+
+
+                <a [routerLink]="['/joven/retroalimentacion', sessionId]" class="btn-secondary">Ir a retroalimentación</a>
+
+
+              }
+
+
+            </div>
+
+
+          </section>
+
+
+
+
+
+          <section class="report-section report-next">
+
+
+            <h4>Qué puedes hacer ahora</h4>
+
+
+            <ul class="next-steps">
+
+
+              @if (data.status === 'COMPLETADA' && !isProfessionalView()) {
+
+
+                <li>Revisa material de apoyo y refuerza tu preparación.</li>
+
+
+                <li>Vuelve a practicar para ganar confianza.</li>
+
+
+                <li>Consulta <strong>Mis prácticas</strong> cuando esté disponible la retroalimentación.</li>
+
+
+              } @else if (data.status === 'COMPLETADA' && isProfessionalView()) {
+
+
+                <li>Registra un resumen y retroalimentación para el joven.</li>
+
+
+                <li>Revisa avances en su perfil y próximas metas.</li>
+
+
+              } @else {
+
+
+                <li>Cuando quieras, vuelve a intentar la entrevista.</li>
+
+
+                <li>Revisa <strong>Mis prácticas</strong> o el material de apoyo.</li>
+
+
+              }
+
+
+            </ul>
+
+
+          </section>
+
+
+
+
+
+          <div class="report-actions">
+
+
+            <a [routerLink]="primaryReturnLink()" class="btn-primary">{{ primaryReturnLabel() }}</a>
+
+
+            @if (!isProfessionalView()) {
+
+
+              <a routerLink="/joven/material" class="btn-secondary">Ver material</a>
+
+
+              <a [routerLink]="secondaryReturnLink()" class="btn-secondary">{{ secondaryReturnLabel() }}</a>
+
+
+            } @else {
+
+
+              <a [routerLink]="secondaryReturnLink()" class="btn-secondary">{{ secondaryReturnLabel() }}</a>
+
+
+            }
+
+
+          </div>
+
+
+        </div>
+
+
+      } @else {
+
+
+        <div class="session-report">
+
+
+          <h3>Informe de entrevista</h3>
+
+
+          <p>Estamos preparando el informe de esta entrevista.</p>
+
+
+        </div>
+
+
+      }
+
+
+    } @else {
+
+
+      @if (sessionNotFound()) {
+
+
+        <div class="banner-session-not-found">
+
+
+          <p>Esta entrevista no existe o expir.</p>
+
+
+          <p class="banner-hint">Para iniciar una entrevista, primero debes elegir cargo y caso.</p>
+
+
+          <div class="banner-actions">
+
+
+            <button type="button" class="btn-primary" (click)="goToElegirCargo()">Elegir cargo y caso</button>
+
+
+          </div>
+
+
+        </div>
+
+
+      } @else if (connectionErrorBanner() || error()) {
+
+
+        <div class="banner-connection-error">
+
+
+          <p>No se pudo conectar con LiveAvatar.</p>
+          @if (error()) {
+            <p class="banner-detail">{{ error() }}</p>
+          }
+
+
+          <div class="banner-actions">
+
+
+            <button type="button" class="btn-primary" (click)="onReintentar()" [disabled]="retrying()">Reintentar</button>
+
+
+            <button type="button" class="btn-secondary" (click)="onSalirConnectionError()">Salir</button>
+
+
+          </div>
+
+
+        </div>
+
+
+      } @else if (loading()) {
+
+
+        <div class="call-loading">
+          <div class="loading-card">
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <div>
+              <h3>Preparando la entrevista</h3>
+              <p>Estamos conectando la sala y ajustando los recursos de audio y video.</p>
+            </div>
+          </div>
+          <div class="loading-skeleton">
+            <span class="skeleton-line skeleton-line--lg"></span>
+            <span class="skeleton-line"></span>
+            <span class="skeleton-line skeleton-line--sm"></span>
+          </div>
+        </div>
+
+
+      } @else if (embedUrl() || useLiveKit()) {
+
+
+        <div class="simulacion-video-block">
+
+
+          <div class="call-deck">
+
+
+            <div class="simulacion-meta">
+
+
+              <div class="meta-left">
+
+
+                <div class="call-title">
+
+
+                  <span class="call-main">{{ sessionContext()?.jobRoleName || 'Entrevista' }}</span>
+
+
+                </div>
+
+
+                @if (sessionContext(); as ctx) {
+
+
+                  <div class="session-context">
+
+
+                    <span class="context-badge context-badge--ai">Javiera (IA)</span>
+
+
+                    <span class="context-badge">Cargo: {{ ctx.jobRoleName }}</span>
+
+
+                    <span class="context-badge">Caso: {{ ctx.caseName }}</span>
+
+
+                  </div>
+
+
+                } @else {
+
+
+                  <span class="call-subtitle">Conexión en línea con Javiera (IA)</span>
+
+
+                }
+
+
+              </div>
+
+
+              <div class="meta-right">
+
+
+                <div class="status-strip">
+
+
+                @if (sessionMode() === 'SUPERVISADA') {
+
+
+                  <span class="badge-supervisada badge-supervisada--compact">Supervisada</span>
+
+
+                }
+
+
+                <div class="contador" aria-live="polite">
+
+
+                    <span class="contador-icon" aria-hidden="true">
+
+
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+                        <circle cx="12" cy="12" r="10" />
+
+
+                        <path d="M12 6v6l4 2" />
+
+
+                      </svg>
+
+
+                    </span>
+
+
+                    <span class="contador-value">{{ elapsedTime() }}</span>
+
+
+                  </div>
+
+
+                  @if (audioRecording() === 'recording') {
+
+
+                    <span class="recording-badge">Grabando audio</span>
+
+
+                  } @else if (audioRecording() === 'error') {
+
+
+                    <span class="recording-badge recording-badge--error">Audio no disponible</span>
+
+
+                  }
+
+
+                </div>
+
+
+              </div>
+
+
+            </div>
+
+
+
+
+
+            @if (useLiveKit() && audioHintVisible()) {
+
+
+              <div class="audio-hint">Activa el audio para escuchar la entrevista.</div>
+
+
+            }
+
+
+
+
+
+            <div class="simulacion-stage">
+
+
+              @if (useLiveKit()) {
+
+
+                <div class="embed-wrap livekit-wrap">
+
+
+                  <video #avatarVideo autoplay playsinline class="avatar-video"></video>
+
+
+                  <audio #avatarAudio autoplay playsinline muted></audio>
+
+
+                  @if (audioBlocked()) {
+
+
+                    <button type="button" class="audio-unlock-btn" (click)="onActivarAudio()">
+
+
+                      Haz clic para activar el audio
+
+
+                    </button>
+
+
+                  }
+
+
+                  <div class="participant-strip">
+
+
+                    <div class="participant-bubble participant-bubble--avatar">
+
+
+                      IA
+
+
+                      <span class="participant-dot"></span>
+
+
+                    </div>
+
+
+                    <div class="participant-bubble participant-bubble--user">
+
+
+                      TU
+
+
+                      <span class="participant-dot"></span>
+
+
+                    </div>
+
+
+                  </div>
+
+
+                  <div class="turn-indicator">{{ turnIndicator() }}</div>
+
+
+                </div>
+
+
+              } @else {
+
+
+                <div class="embed-wrap">
+
+
+                  <iframe [src]="embedUrl()!" title="LiveAvatar" class="embed-iframe"></iframe>
+
+
+                </div>
+
+
+              }
+
+
+            </div>
+
+
+
+
+
+            <div class="call-toolbar">
+
+
+              <div class="call-tools">
+
+
+                @if (useLiveKit()) {
+
+
+                  <div class="audio-popover" [class.is-open]="audioPanelOpen()">
+
+
+                    <button type="button" class="audio-toggle" (click)="toggleAudioPanel()" aria-label="Control de audio">
+
+
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+
+
+                        <path d="M9 9L5 12l4 3V9zm4.5-3.5v13l-5-3.7V9.2l5-3.7zm3.5 2.5a6 6 0 010 8l-1.4-1.4a4 4 0 000-5.2L17 8z" />
+
+
+                      </svg>
+
+
+                    </button>
+
+
+                    <div class="audio-panel">
+
+
+                      <button type="button" class="audio-btn" (click)="toggleMute()" [attr.aria-pressed]="muted()">
+
+
+                        @if (muted() || volume() === 0) {
+
+
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+
+
+                            <path d="M9 9L5 12l4 3V9zm4.5-3.5v13l-5-3.7V9.2l5-3.7zm6 6.5l2.5 2.5-1 1-2.5-2.5-2.5 2.5-1-1 2.5-2.5-2.5-2.5 1-1 2.5 2.5 2.5-2.5 1 1-2.5 2.5z" />
+
+
+                          </svg>
+
+
+                        } @else {
+
+
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+
+
+                            <path d="M9 9L5 12l4 3V9zm4.5-3.5v13l-5-3.7V9.2l5-3.7zm3.5 2.5a6 6 0 010 8l-1.4-1.4a4 4 0 000-5.2L17 8z" />
+
+
+                          </svg>
+
+
+                        }
+
+
+                      </button>
+
+
+                      <input
+
+
+                        type="range"
+
+
+                        min="0"
+
+
+                        max="1"
+
+
+                        step="0.05"
+
+
+                        [value]="volume()"
+
+
+                        (input)="onVolumeChange($event)"
+
+
+                        [disabled]="!audioReady() || audioBlocked()"
+
+
+                        aria-label="Control de volumen"
+
+
+                      />
+
+
+                      <span class="volume-value">{{ volumePercent() }}%</span>
+
+
+                    </div>
+
+
+                  </div>
+
+
+                }
+
+
+              </div>
+
+
+              <div class="simulacion-controls">
+
+
+                <button type="button" class="call-control btn-secondary" (click)="closeSession('CANCELADA')">Cancelar</button>
+
+
+                <button type="button" class="call-control call-control--end" (click)="closeSession('COMPLETADA')">Finalizar</button>
+
+
+              </div>
+
+
+              <div class="call-tools call-tools--ghost"></div>
+
+
+            </div>
+
+
+
+
+
+            @if (!useLiveKit()) {
+
+
+              <p class="hint">Placeholder: configurar LIVEAVATAR_* en .env para usar LiveAvatar real.</p>
+
+
+            }
+
+
+          </div>
+
+
+        </div>
+
+
+      }
+
+
+    }
+
+
+  </div>
+
+
+</div>
+
+
+

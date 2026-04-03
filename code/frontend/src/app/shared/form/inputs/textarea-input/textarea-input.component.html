@@ -1,0 +1,11 @@
+<textarea
+  class="form-control"
+  [attr.id]="id"
+  [attr.name]="name"
+  [attr.rows]="rows"
+  [attr.placeholder]="placeholder || null"
+  [readonly]="readonly"
+  [disabled]="disabled"
+  (input)="handleInput($event)"
+  (blur)="handleBlur()"
+>{{ value }}</textarea>

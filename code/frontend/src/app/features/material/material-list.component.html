@@ -1,0 +1,118 @@
+<div class="page-header">
+
+  <h2>Materiales</h2>
+
+  <a [routerLink]="createLink" class="btn-primary">Crear material</a>
+
+</div>
+
+
+
+@if (materials$ | async; as catalog) {
+
+  @if (catalog.items.length === 0) {
+
+    <p class="empty-hint">No hay material registrado.</p>
+
+  } @else {
+
+    <ul class="material-list">
+
+      @for (m of catalog.items; track m.id) {
+
+        <li class="material-card">
+
+          <div class="material-icon" [class]="'material-icon material-icon--' + m.type.toLowerCase()">
+
+            {{ typeAbbr(m.type) }}
+
+          </div>
+
+          <div class="material-body">
+
+            <div class="material-header">
+
+              <span class="title">{{ m.title }}</span>
+
+              <span class="badge" [class.badge--success]="m.active" [class.badge--danger]="!m.active">
+
+                {{ m.active ? 'Activo' : 'Inactivo' }}
+
+              </span>
+
+            </div>
+
+            <p class="material-desc">{{ materialSummary(m) }}</p>
+
+            <div class="material-meta">
+
+              <span class="meta-chip">{{ typeLabel(m.type) }}</span>
+
+              <span class="meta-chip">Actualizado: {{ formatDate(m.updated_at) }}</span>
+
+            </div>
+
+          </div>
+
+          <div class="material-actions">
+
+            <button type="button" class="btn-secondary" (click)="openMaterial(m.url)">Abrir</button>
+
+          </div>
+
+        </li>
+
+      }
+
+    </ul>
+
+    <div class="pager">
+
+      <span>Página {{ catalog.page }} de {{ totalPages(catalog.total, catalog.page_size) }}  Total {{ catalog.total }}</span>
+
+      <div class="pager-actions">
+
+        <button type="button" class="pager-btn" (click)="prevPage(catalog.page)" [disabled]="catalog.page <= 1">Anterior</button>
+
+        <button
+
+          type="button"
+
+          class="pager-btn"
+
+          (click)="nextPage(catalog.page, catalog.total, catalog.page_size)"
+
+          [disabled]="catalog.page >= totalPages(catalog.total, catalog.page_size)"
+
+        >
+
+          Siguiente
+
+        </button>
+
+      </div>
+
+    </div>
+
+  }
+
+} @else {
+
+  <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
+
+}
+
+

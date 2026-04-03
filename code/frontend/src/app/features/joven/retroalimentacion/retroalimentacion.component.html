@@ -1,0 +1,111 @@
+<div class="retro-hero page-header">
+  <h2>Lo que dice tu tutor</h2>
+  <p class="retro-hero__lede">
+    Cada entrevista puede incluir un mensaje y consejos. Aquí se leen como cartas cortas, sin tablas ni formularios.
+  </p>
+</div>
+
+@if (feedback$ | async; as data) {
+  @if (data.items.length === 0) {
+    <div class="retro-empty">
+      <p class="retro-empty__title">Todavía no hay mensajes</p>
+      <p class="retro-empty__text">
+        Cuando tu tutor deje comentarios después de una entrevista, aparecerán aquí con este formato.
+      </p>
+    </div>
+  } @else {
+    <div class="retro-letters">
+      @for (item of data.items; track item.sessionId) {
+        <article class="retro-letter">
+          <header class="retro-letter__masthead">
+            <span class="retro-letter__date">{{ formatDate(item.startedAt) }}</span>
+            <span class="retro-letter__status">{{ formatStatusLabel(item.status) }}</span>
+            @if (item.jobRoleName || item.caseName) {
+              <p class="retro-letter__context">
+                @if (item.jobRoleName) {
+                  <span>{{ item.jobRoleName }}</span>
+                }
+                @if (item.jobRoleName && item.caseName) {
+                  <span class="retro-letter__sep">·</span>
+                }
+                @if (item.caseName) {
+                  <span>{{ item.caseName }}</span>
+                }
+              </p>
+            }
+          </header>
+
+          <blockquote class="retro-letter__quote">
+            @if (item.summaryText) {
+              <p>{{ item.summaryText }}</p>
+            } @else {
+              <p class="retro-letter__pending">Tu tutor aún puede completar este mensaje.</p>
+            }
+          </blockquote>
+
+          <div class="retro-letter__grid">
+            <div class="retro-letter__col retro-letter__col--strength">
+              <h4 class="retro-letter__col-title">
+                <span class="retro-letter__glyph" aria-hidden="true">✓</span>
+                Lo que vas bien
+              </h4>
+              @if (item.strengths.length > 0) {
+                <ul class="retro-letter__bullets">
+                  @for (point of item.strengths; track point) {
+                    <li>{{ point }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="muted">Pendiente por el tutor.</p>
+              }
+            </div>
+            <div class="retro-letter__col retro-letter__col--tips">
+              <h4 class="retro-letter__col-title">
+                <span class="retro-letter__glyph" aria-hidden="true">→</span>
+                Para seguir mejorando
+              </h4>
+              @if (item.suggestions.length > 0) {
+                <ul class="retro-letter__bullets">
+                  @for (tip of item.suggestions; track tip) {
+                    <li>{{ tip }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="muted">Pendiente por el tutor.</p>
+              }
+            </div>
+          </div>
+
+          <footer class="retro-letter__foot">
+            <a [routerLink]="['/joven/retroalimentacion', item.sessionId]" class="btn-secondary">Ver completo</a>
+          </footer>
+        </article>
+      }
+    </div>
+
+    <div class="pager">
+      <span>Página {{ data.page }} de {{ totalPages(data.total) }} · {{ data.total }} entrevistas</span>
+      <div class="pager-actions">
+        <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="data.page <= 1">Anterior</button>
+        <button type="button" class="pager-btn" (click)="nextPage(data.total)" [disabled]="data.page >= totalPages(data.total)">
+          Siguiente
+        </button>
+      </div>
+    </div>
+  }
+} @else {
+  <div class="loading-state">
+    <div class="loading-state__card">
+      <span class="loading-state__spinner" aria-hidden="true"></span>
+      <div>
+        <div class="loading-state__title">Cargando mensajes…</div>
+        <div class="loading-state__subtitle">Un momento.</div>
+      </div>
+    </div>
+    <div class="loading-state__skeleton">
+      <span class="loading-state__line loading-state__line--lg"></span>
+      <span class="loading-state__line"></span>
+      <span class="loading-state__line loading-state__line--sm"></span>
+    </div>
+  </div>
+}

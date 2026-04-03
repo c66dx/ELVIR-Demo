@@ -1,0 +1,471 @@
+{
+  "info": {
+    "name": "ELVIR API",
+    "description": "Colección Postman para probar la API REST de ELVIR. Importar en Postman y usar la variable {{baseUrl}} (http://localhost:8000/api/v1). Tras hacer Login, el token se guarda en {{token}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000/api/v1" },
+    { "key": "token", "value": "" },
+    { "key": "youthId", "value": "1" },
+    { "key": "sessionId", "value": "1" },
+    { "key": "templateId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('token', json.access_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.cl\",\n  \"password\": \"test123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        },
+        {
+          "name": "Me (usuario autenticado)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        },
+        {
+          "name": "Validar token activación",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auth/activate/validate?token=xxx"
+          }
+        },
+        {
+          "name": "Activar cuenta (joven)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"abc123-def456\",\n  \"password\": \"contraseña_segura\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/activate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catálogos",
+      "item": [
+        {
+          "name": "Listar cargos (job-roles)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/job-roles"
+          }
+        },
+        {
+          "name": "Listar casos",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/cases"
+          }
+        },
+        {
+          "name": "Listar plantillas simulación",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/simulation-templates"
+          }
+        },
+        {
+          "name": "Resolver plantilla (por cargo)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/simulation-templates/resolve?job_role_id=1"
+          }
+        },
+        {
+          "name": "Obtener plantilla por ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/simulation-templates/{{templateId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Jóvenes",
+      "item": [
+        {
+          "name": "Listar jóvenes",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/youths"
+          }
+        },
+        {
+          "name": "Listar jóvenes (con filtros)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/youths?search=María&is_active=true&login_enabled=true"
+          }
+        },
+        {
+          "name": "Crear joven (sin login)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"display_name\": \"Juan Pérez\",\n  \"identifier\": \"ID002\",\n  \"phone\": \"+56912345678\",\n  \"login_enabled\": false\n}"
+            },
+            "url": "{{baseUrl}}/youths"
+          }
+        },
+        {
+          "name": "Crear joven (con login)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"display_name\": \"María López\",\n  \"identifier\": \"ID003\",\n  \"phone\": \"+56987654321\",\n  \"login_enabled\": true,\n  \"email\": \"maria.lopez@ejemplo.cl\"\n}"
+            },
+            "url": "{{baseUrl}}/youths"
+          }
+        },
+        {
+          "name": "Obtener joven",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/youths/{{youthId}}"
+          }
+        },
+        {
+          "name": "Editar joven",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"display_name\": \"María García\",\n  \"identifier\": \"ID001\",\n  \"phone\": \"+56911111111\",\n  \"login_enabled\": true,\n  \"email\": \"maria.garcia@ejemplo.cl\"\n}"
+            },
+            "url": "{{baseUrl}}/youths/{{youthId}}"
+          }
+        },
+        {
+          "name": "Desactivar joven",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/youths/{{youthId}}/deactivate"
+          }
+        },
+        {
+          "name": "Activar joven",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/youths/{{youthId}}/activate"
+          }
+        },
+        {
+          "name": "Accesos plataforma (entradas/salidas)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/youths/{{youthId}}/platform-sessions"
+          }
+        },
+        {
+          "name": "Cambiar email del joven",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"new_email\": \"nuevo@correo.cl\"\n}"
+            },
+            "url": "{{baseUrl}}/youths/{{youthId}}/change-email"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sesiones",
+      "item": [
+        {
+          "name": "Crear sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"youth_id\": 1,\n  \"simulation_template_id\": 1,\n  \"mode\": \"AUTOGESTIONADA\"\n}"
+            },
+            "url": "{{baseUrl}}/sessions"
+          }
+        },
+        {
+          "name": "Listar sesiones (por joven)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/sessions?youth_id={{youthId}}"
+          }
+        },
+        {
+          "name": "Obtener sesión",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/sessions/{{sessionId}}"
+          }
+        },
+        {
+          "name": "Contexto sesión",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/sessions/{{sessionId}}/context"
+          }
+        },
+        {
+          "name": "Iniciar sesión (LiveAvatar)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/sessions/{{sessionId}}/start"
+          }
+        },
+        {
+          "name": "Cerrar sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETADA\",\n  \"metrics\": {\n    \"turn_count\": 12,\n    \"duration_seconds\": 900\n  }\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{sessionId}}/close"
+          }
+        },
+        {
+          "name": "Transcripción",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/sessions/{{sessionId}}/transcript"
+          }
+        },
+        {
+          "name": "Eventos sesión",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/sessions/{{sessionId}}/events"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Resúmenes",
+      "item": [
+        {
+          "name": "Crear/actualizar resumen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"summary_text\": \"Buen manejo de comunicación. Reforzar seguridad al responder preguntas abiertas.\",\n  \"competency_tags\": [\"comunicacion\", \"seguridad\"]\n}"
+            },
+            "url": "{{baseUrl}}/sessions/{{sessionId}}/summary"
+          }
+        },
+        {
+          "name": "Obtener resumen",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/sessions/{{sessionId}}/summary"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Material de apoyo",
+      "item": [
+        {
+          "name": "Listar material",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/support-material"
+          }
+        },
+        {
+          "name": "Crear material",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Técnicas de comunicación efectiva\",\n  \"description\": \"Consejos prácticos para entrevistas.\",\n  \"type\": \"VIDEO\",\n  \"url\": \"https://example.com/video\",\n  \"job_role_id\": 1,\n  \"case_id\": null\n}"
+            },
+            "url": "{{baseUrl}}/support-material"
+          }
+        },
+        {
+          "name": "Sugerir material a joven",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"youth_id\": 1,\n  \"material_id\": 1,\n  \"session_id\": 1,\n  \"reason\": \"Refuerzo posterior a la simulación.\"\n}"
+            },
+            "url": "{{baseUrl}}/support-material/suggest"
+          }
+        },
+        {
+          "name": "Sugerencias de un joven",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/youths/{{youthId}}/material-suggestions"
+          }
+        },
+        {
+          "name": "Visualizaciones de un joven",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/youths/{{youthId}}/material-views"
+          }
+        },
+        {
+          "name": "Registrar visualización",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"youth_id\": 1\n}"
+            },
+            "url": "{{baseUrl}}/support-material/1/view"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profesionales",
+      "item": [
+        {
+          "name": "Listar profesionales",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/professionals"
+          }
+        },
+        {
+          "name": "Crear profesional (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.prof@institucion.cl\",\n  \"password\": \"contraseña_inicial\",\n  \"display_name\": \"María González\",\n  \"specialty\": \"Terapia ocupacional\",\n  \"institution\": \"Teletón Santiago\"\n}"
+            },
+            "url": "{{baseUrl}}/professionals"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Upload",
+      "item": [
+        {
+          "name": "Subir archivo",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "file", "type": "file", "src": ""}
+              ]
+            },
+            "url": "{{baseUrl}}/upload"
+          }
+        }
+      ]
+    }
+  ]
+}

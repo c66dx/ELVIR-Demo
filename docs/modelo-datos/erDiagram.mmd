@@ -1,0 +1,222 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5f4', 'primaryTextColor': '#1a1a2e', 'primaryBorderColor': '#1b7f79', 'lineColor': '#1b7f79', 'secondaryColor': '#f7f8fa', 'tertiaryColor': '#e2e4e8'}}}%%
+erDiagram
+  %% ADMIN: rol en USERS (sin tabla propia). Crea PROFESSIONALS y SUPPORT_MATERIAL (created_by=null).
+  USERS {
+    int id PK
+    string email
+    string password_hash
+    string role "JOVEN|PROFESIONAL|ADMIN"
+    boolean is_active
+    datetime created_at
+    datetime updated_at
+  }
+
+  YOUTH_INVITATIONS {
+    int id PK
+    int youth_id FK
+    string email
+    string token
+    datetime expires_at
+    datetime used_at "nullable"
+    datetime created_at
+  }
+
+  YOUTH {
+    int id PK
+    int user_id FK "nullable"
+    boolean login_enabled
+    string display_name
+    string identifier "RUT o ID"
+    string phone
+    int year_of_birth "nullable"
+    text diagnosis "nullable"
+    boolean is_active
+    text general_notes
+    text profile_checklist "JSON array slugs"
+    datetime created_at
+    datetime updated_at
+  }
+
+  PROFESSIONALS {
+    int id PK
+    int user_id FK
+    string display_name
+    string specialty
+    string institution
+    boolean is_active
+    datetime created_at
+    datetime updated_at
+  }
+
+  ASSIGNMENTS {
+    int id PK
+    int youth_id FK
+    int professional_id FK
+    string status "ACTIVO|INACTIVO"
+    datetime assigned_at
+    datetime ended_at
+  }
+
+  JOB_ROLES {
+    int id PK
+    string slug
+    string name
+    text description "nullable"
+    text objetivo "nullable"
+    text competencias "JSON array"
+    boolean is_active
+  }
+
+  CASES {
+    int id PK
+    string slug
+    string name
+    string difficulty "NORMAL|BAJA|MEDIA|ALTA"
+    text prompt_instructions "nullable"
+    boolean is_active
+  }
+
+  SIMULATION_TEMPLATES {
+    int id PK
+    int job_role_id FK
+    int case_id FK
+    string liveavatar_context_id
+    string liveavatar_avatar_id
+    string liveavatar_voice_id
+    boolean is_active
+    datetime created_at
+    datetime updated_at
+  }
+
+  SESSIONS {
+    int id PK
+    int youth_id FK
+    int professional_id FK "nullable"
+    int simulation_template_id FK
+    string mode "AUTOGESTIONADA|SUPERVISADA"
+    string liveavatar_session_id
+    datetime started_at
+    datetime ended_at
+    string status "EN_CURSO|COMPLETADA|CANCELADA|ERROR"
+    int duration_seconds
+    json metrics
+    datetime created_at
+    datetime updated_at
+  }
+
+  SESSION_EVENTS {
+    int id PK
+    int session_id FK
+    string event_type "CREATED|LIVEAVATAR_STARTED|ENDED|ERROR"
+    datetime occurred_at
+    json payload "nullable"
+  }
+
+  SESSION_TRANSCRIPTS {
+    int id PK
+    int session_id FK "UQ"
+    json transcript_data
+    boolean session_active "nullable"
+    datetime fetched_at
+    datetime created_at
+    datetime updated_at
+  }
+
+  INTERVIEW_SUMMARIES {
+    int id PK
+    int session_id FK
+    int professional_id FK
+    text summary_text
+    json competency_tags
+    datetime created_at
+    datetime updated_at
+  }
+
+  SUPPORT_MATERIAL {
+    int id PK
+    string title
+    string description
+    string type "VIDEO|PDF|LINK"
+    string url
+    int job_role_id FK "nullable"
+    int case_id FK "nullable"
+    int created_by FK "nullable, PROFESSIONALS.id"
+    boolean active
+    datetime created_at
+    datetime updated_at
+  }
+
+  MATERIAL_VIEWS {
+    int id PK
+    int youth_id FK
+    int material_id FK
+    datetime seen_at
+  }
+
+  MATERIAL_SUGGESTIONS {
+    int id PK
+    int youth_id FK
+    int material_id FK
+    int professional_id FK
+    int session_id FK "nullable"
+    string reason
+    datetime suggested_at
+  }
+
+  COMPETENCIES {
+    int id PK
+    string slug
+    string name
+    string description
+    boolean is_active
+  }
+
+  COMPETENCY_LEVELS {
+    int id PK
+    string slug "BAJO|MEDIO|ALTO"
+    string label
+    int sort_order
+  }
+
+  SESSION_COMPETENCIES {
+    int id PK
+    int session_id FK
+    int competency_id FK
+    int level_id FK
+    text comment
+    datetime created_at
+  }
+
+  USERS ||--o| YOUTH : "optional login"
+  USERS ||--o| PROFESSIONALS : has
+  YOUTH ||--o{ YOUTH_INVITATIONS : invites
+
+  YOUTH ||--o{ ASSIGNMENTS : assigned
+  PROFESSIONALS ||--o{ ASSIGNMENTS : manages
+
+  JOB_ROLES ||--o{ SIMULATION_TEMPLATES : defines
+  CASES ||--o{ SIMULATION_TEMPLATES : defines
+
+  YOUTH ||--o{ SESSIONS : performs
+  PROFESSIONALS ||--o{ SESSIONS : supervises
+  SIMULATION_TEMPLATES ||--o{ SESSIONS : configured_by
+
+  SESSIONS ||--o{ SESSION_EVENTS : logs
+  SESSIONS ||--o| SESSION_TRANSCRIPTS : has
+  SESSIONS ||--o| INTERVIEW_SUMMARIES : summarized
+
+  SUPPORT_MATERIAL ||--o{ MATERIAL_VIEWS : viewed
+  YOUTH ||--o{ MATERIAL_VIEWS : views
+
+  SUPPORT_MATERIAL ||--o{ MATERIAL_SUGGESTIONS : suggested
+  YOUTH ||--o{ MATERIAL_SUGGESTIONS : receives
+  PROFESSIONALS ||--o{ MATERIAL_SUGGESTIONS : suggests
+  SESSIONS ||--o{ MATERIAL_SUGGESTIONS : after
+
+  SESSIONS ||--o{ SESSION_COMPETENCIES : evaluates
+  COMPETENCIES ||--o{ SESSION_COMPETENCIES : includes
+  COMPETENCY_LEVELS ||--o{ SESSION_COMPETENCIES : level
+
+  PROFESSIONALS ||--o{ SUPPORT_MATERIAL : created_by
+  JOB_ROLES ||--o{ SUPPORT_MATERIAL : "opcional"
+  CASES ||--o{ SUPPORT_MATERIAL : "opcional"

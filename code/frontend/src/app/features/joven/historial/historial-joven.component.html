@@ -1,0 +1,93 @@
+<header class="historial-hero page-header">
+  <div>
+    <h2>Mis prácticas</h2>
+    <p class="historial__lede">
+      Tu recorrido en una sola vista: fechas agrupadas para que no tengas que leer el mismo bloque una y otra vez. Toca una línea para volver a esa práctica.
+    </p>
+  </div>
+</header>
+
+@if (data$ | async; as data) {
+  @if (data.items.length === 0) {
+    <div class="historial-empty">
+      <p class="historial-empty__title">¡Aquí empezará tu recorrido!</p>
+      <p class="historial-empty__text">
+        Cada simulación que hagas se irá sumando en una línea del tiempo: verás el avance sin sensación de “lista interminable”.
+      </p>
+      <a routerLink="/joven/simulacion/nueva" class="btn-primary">Empezar una práctica</a>
+    </div>
+  } @else {
+    <div class="historial-strip" role="status">
+      <p class="historial-strip__line">
+        @if (data.total === 1) {
+          <strong>1</strong> práctica registrada.
+        } @else {
+          Llevas <strong>{{ data.total }}</strong> prácticas en tu recorrido.
+        }
+      </p>
+      @if (data.total >= 3) {
+        <p class="historial-strip__cheer">Sigue así: cada sesión suma para el día de una entrevista real.</p>
+      }
+    </div>
+
+    <div class="historial-timeline-wrap">
+      @for (g of groupedSessions(data.items); track $index; let gi = $index) {
+        <section class="timeline-group" [attr.aria-labelledby]="'tg-' + gi">
+          <h3 class="timeline-group__title" [id]="'tg-' + gi">{{ g.label }}</h3>
+          <ul class="timeline-list" role="list">
+            @for (s of g.items; track s.id) {
+              <li class="timeline-row">
+                <div class="timeline-row__rail" aria-hidden="true">
+                  <span class="timeline-dot" [ngClass]="timelineDotClass(s.status)"></span>
+                </div>
+                <a [routerLink]="['/joven/simulacion', s.id]" class="timeline-row__body">
+                  <div class="timeline-row__head">
+                    <span class="timeline-row__title">{{ s.templateLabel || 'Entrevista de práctica' }}</span>
+                    <app-status-badge [status]="s.status" />
+                  </div>
+                  <div class="timeline-row__meta">
+                    {{ formatDate(s.started_at) }}
+                    <span class="timeline-row__sep">·</span>
+                    {{ modeLabel(s.mode) }}
+                    @if (s.duration_seconds != null && s.duration_seconds > 0) {
+                      <span class="timeline-row__sep">·</span>
+                      {{ formatDuration(s.duration_seconds) }}
+                    }
+                  </div>
+                  @if (summaryTeaser(s); as teaser) {
+                    <p class="timeline-row__teaser">{{ teaser }}</p>
+                  }
+                </a>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
+
+    <div class="pager">
+      <span>Página {{ data.page }} de {{ totalPages(data.total) }} · {{ data.total }} prácticas</span>
+      <div class="pager-actions">
+        <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="data.page <= 1">Anterior</button>
+        <button type="button" class="pager-btn" (click)="nextPage(data.total)" [disabled]="data.page >= totalPages(data.total)">
+          Siguiente
+        </button>
+      </div>
+    </div>
+  }
+} @else {
+  <div class="loading-state">
+    <div class="loading-state__card">
+      <span class="loading-state__spinner" aria-hidden="true"></span>
+      <div>
+        <div class="loading-state__title">Cargando tu recorrido…</div>
+        <div class="loading-state__subtitle">Solo un momento.</div>
+      </div>
+    </div>
+    <div class="loading-state__skeleton">
+      <span class="loading-state__line loading-state__line--lg"></span>
+      <span class="loading-state__line"></span>
+      <span class="loading-state__line loading-state__line--sm"></span>
+    </div>
+  </div>
+}

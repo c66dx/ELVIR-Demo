@@ -1,0 +1,24 @@
+%% Flujo del Admin – ELVIR
+%% Admin: crear profesionales, subir material general. No gestiona catálogos.
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5f4', 'primaryTextColor': '#1a1a2e', 'primaryBorderColor': '#1b7f79', 'lineColor': '#1b7f79'}}}%%
+flowchart TD
+    A((Inicio)) --> B[Login Admin]
+    B --> C{Credenciales válidas?}
+    C -->|No| D[Error de login]
+    D --> B
+    C -->|Sí| E[Dashboard Admin]
+    
+    E --> F[Crear profesional]
+    E --> G[Crear material general]
+    
+    F --> F1[Formulario: email, contraseña, nombre]
+    F1 --> F2[Especialidad e institución opcionales]
+    F2 --> F3[Guardar]
+    F3 --> E
+    
+    G --> G1[Formulario: título, tipo, URL]
+    G1 --> G2[Cargo y caso opcionales]
+    G2 --> G3[Guardar material general]
+    G3 --> E
+    
+    N[Catálogos: cargos, casos, plantillas] -.->|No los gestiona Admin| E

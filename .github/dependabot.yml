@@ -1,0 +1,27 @@
+# Dependabot: agrupa herramientas de desarrollo en un PR; dependencias de runtime (requirements.txt) van aparte.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: pip
+    directory: /code/backend
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      dev-tools:
+        patterns:
+          - "ruff"
+          - "black"
+          - "mypy"
+          - "pre-commit"
+          - "pytest*"
+          - "types-*"

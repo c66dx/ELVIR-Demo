@@ -1,0 +1,212 @@
+<app-form-container
+  [title]="isEdit ? 'Editar joven' : 'Crear joven'"
+  [subtitle]="isEdit   ? 'Actualiza la información del joven y su configuración de acceso.'   : 'Registra un nuevo joven para iniciar su acompañamiento.'"
+>
+  @if (activationUrl) {
+    <app-form-section
+      title="Enlace de activación"
+      description="Entrega este enlace al joven para que active su cuenta y defina su contraseña. El enlace expira en 7 días."
+    >
+      <div class="activation-success">
+        <div class="activation-header">
+          <div>
+            <p class="activation-success-title">{{ isEdit ? 'Joven actualizado' : 'Joven creado correctamente' }}</p>
+            <p class="activation-success-msg">
+              Comparte este enlace con el joven para completar la activación.
+            </p>
+          </div>
+          <button type="button" class="btn-primary" (click)="goToList()">Ir al listado</button>
+        </div>
+        <div class="activation-url-wrap">
+          <input type="text" [value]="activationUrl" readonly class="form-control activation-url-input" />
+          <button type="button" class="btn-secondary btn-sm" (click)="copyActivationUrl()">Copiar</button>
+        </div>
+      </div>
+    </app-form-section>
+  } @else {
+    <form id="joven-form" class="form-layout" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <app-form-section
+        title="Datos personales"
+        description="Información básica para identificar al joven."
+      >
+        <app-form-grid variant="media">
+          <app-form-grid columns="2">
+            <app-form-field label="Nombre" [required]="true" forId="display_name">
+              <app-text-input id="display_name" formControlName="display_name"></app-text-input>
+            </app-form-field>
+
+            <app-form-field
+              label="RUT"
+              forId="rut"
+              [error]="
+                form.get('rut')?.errors?.['server'] ||   (form.get('rut')?.invalid && (form.get('rut')?.dirty || form.get('rut')?.touched)   ? 'RUT inválido. Verifica el dígito verificador.'   : null)
+              "
+            >
+              <app-text-input
+                id="rut"
+                formControlName="rut"
+                placeholder="12.345.678-9"
+                (blur)="onRutBlur()"
+              ></app-text-input>
+            </app-form-field>
+
+            <app-form-field label="Teléfono" forId="phone">
+              <app-text-input id="phone" formControlName="phone"></app-text-input>
+            </app-form-field>
+
+            <app-form-field label="Año de nacimiento" forId="year_of_birth">
+              <app-text-input
+                id="year_of_birth"
+                type="number"
+                formControlName="year_of_birth"
+                placeholder="Ej. 2005"
+                min="1900"
+                [max]="currentYear"
+              ></app-text-input>
+            </app-form-field>
+
+            @if (isEdit && currentYouth?.identifier) {
+              <app-form-field label="Identificador" span="full">
+                <div class="form-readonly">{{ currentYouth?.identifier }}</div>
+              </app-form-field>
+            }
+          </app-form-grid>
+
+          <div class="form-media-card">
+            <div class="form-media-preview" [class.is-empty]="!photoSrc()">
+              @if (photoSrc()) {
+                <img [src]="photoSrc()! | uploadUrl" alt="" />
+              } @else {
+                <span class="form-media-initials">{{ photoInitials() }}</span>
+              }
+            </div>
+            <div class="form-media-actions">
+              <label class="btn-secondary btn-sm btn-file">
+                {{ photoUploading ? 'Subiendo...' : (photoSrc() ? 'Cambiar foto' : 'Subir foto') }}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  (change)="onPhotoSelected($event)"
+                  [disabled]="photoUploading"
+                />
+              </label>
+            </div>
+            <p class="form-media-hint">JPG, PNG o WebP. Máx. 5 MB.</p>
+            @if (photoError) {
+              <span class="form-error">{{ photoError }}</span>
+            }
+          </div>
+        </app-form-grid>
+      </app-form-section>
+
+      <app-form-section
+        title="Configuración de acceso"
+        description="Define si el joven podrá ingresar a la plataforma."
+      >
+        <app-form-grid columns="1">
+          <app-form-field
+            label="Login habilitado"
+            [hint]="'Cuando está activo, se generará un enlace de acceso.'"
+            [inline]="true"
+          >
+            <app-toggle-input formControlName="login_enabled"></app-toggle-input>
+          </app-form-field>
+
+          @if (form.get('login_enabled')?.value) {
+            @if (hasUserAccount) {
+              <app-form-field label="Correo electrónico" span="full">
+                <div class="form-readonly-row">
+                  <div class="form-readonly">{{ currentYouth?.email || '-' }}</div>
+                  <button type="button" class="btn-secondary btn-sm" (click)="openChangeEmailModal()">
+                    Cambiar correo
+                  </button>
+                </div>
+              </app-form-field>
+            } @else {
+              <app-form-field
+                label="Correo electrónico"
+                [required]="true"
+                forId="email"
+                [error]="
+                  form.get('email')?.errors?.['server'] ||   (form.get('email')?.invalid && (form.get('email')?.dirty || form.get('email')?.touched)   ? 'Correo inválido. Verifica el formato.'   : null)
+                "
+                [hint]="
+                  needsInvitation   ?  'Si ya enviaste un enlace, ingresa el mismo u otro correo para generar uno nuevo.'   : 'El joven recibirá un enlace para definir su contraseña. Entrégalo en persona o por WhatsApp.'
+                "
+              >
+                <app-text-input id="email" type="email" formControlName="email" placeholder="ejemplo@correo.cl"></app-text-input>
+              </app-form-field>
+            }
+          }
+        </app-form-grid>
+      </app-form-section>
+
+      <app-form-section
+        title="Información adicional"
+        description="Observaciones clínicas o antecedentes relevantes."
+      >
+        <app-form-grid columns="1">
+          <app-form-field label="Diagnóstico" forId="diagnosis">
+            <app-textarea-input id="diagnosis" formControlName="diagnosis" [rows]="3" placeholder="Opcional"></app-textarea-input>
+          </app-form-field>
+        </app-form-grid>
+      </app-form-section>
+
+      <app-form-section title="Notas" description="Registro interno para el equipo tutor.">
+        <app-form-grid columns="1">
+          <app-form-field label="Notas generales" forId="general_notes">
+            <app-textarea-input id="general_notes" formControlName="general_notes" [rows]="5"></app-textarea-input>
+          </app-form-field>
+        </app-form-grid>
+      </app-form-section>
+
+      <app-form-section
+        title="Perfil postulante"
+        description="Selecciona competencias y características clave para la inserción laboral."
+      >
+        <app-form-field span="full">
+          <app-checkbox-group
+            formControlName="profile_checklist"
+            [items]="checklistItems"
+            valueKey="slug"
+            labelKey="label"
+          ></app-checkbox-group>
+        </app-form-field>
+      </app-form-section>
+
+      @if (errorMessage) {
+        <p class="form-error-banner">{{ errorMessage }}</p>
+      }
+
+      <app-form-actions>
+        <a routerLink="/profesional/jovenes" class="btn-secondary">Cancelar</a>
+        <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary">
+          {{ isEdit ? 'Guardar' : 'Guardar' }}
+        </button>
+      </app-form-actions>
+    </form>
+  }
+
+  @if (showChangeEmailModal) {
+    <div class="modal-overlay" (click)="closeChangeEmailModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3>Cambiar correo</h3>
+        <p class="modal-hint">
+          Se generará un nuevo enlace de activación. El joven deberá usarlo para actualizar su correo y contraseña.
+        </p>
+        <app-form-field label="Nuevo correo" forId="change_email">
+          <app-text-input id="change_email" type="email" [(ngModel)]="newEmailForChange"></app-text-input>
+        </app-form-field>
+        @if (changeEmailError) {
+          <p class="form-error-banner">{{ changeEmailError }}</p>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeChangeEmailModal()">Cancelar</button>
+          <button type="button" class="btn-primary" (click)="submitChangeEmail()" [disabled]="changingEmail">
+            {{ changingEmail ? 'Guardando...' : 'Cambiar y generar enlace' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</app-form-container>

@@ -1,0 +1,125 @@
+<app-form-container
+  [title]="isEdit ? 'Editar tutor' : 'Crear tutor'"
+  subtitle="Completa los datos del tutor para su acceso y seguimiento."
+>
+  <a form-header-actions routerLink="/admin/profesionales" class="btn-link">← Volver</a>
+
+  @if (isEdit && professional) {
+    <app-form-section
+      title="Perfil del tutor"
+      description="Resumen del tutor, estado de acceso y acciones rápidas."
+    >
+      <div class="profile-card">
+        <div class="profile-main">
+          <div class="profile-avatar" [class.profile-avatar--image]="professional.profile_photo_url">
+            @if (professional.profile_photo_url) {
+              <img [src]="professional.profile_photo_url | uploadUrl" alt="" />
+            } @else {
+              <span>{{ initials(professional.display_name) }}</span>
+            }
+          </div>
+          <div class="profile-info">
+            <h3>{{ professional.display_name }}</h3>
+            <p>{{ professional.specialty || 'Sin especialidad' }}</p>
+            <p>{{ professional.institution || 'Sin institución' }}</p>
+          </div>
+        </div>
+        <div class="profile-meta">
+          <span class="profile-status" [class.is-active]="professional.is_active">
+            {{ professional.is_active ? 'Activo' : 'Inactivo' }}
+          </span>
+          <div class="profile-actions">
+            <button type="button" class="btn-secondary btn-sm" (click)="toggleActive()">
+              {{ professional.is_active ? 'Desactivar' : 'Activar' }}
+            </button>
+            <button type="button" class="btn-danger btn-sm" (click)="deleteProfessional()">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </app-form-section>
+  }
+
+  @if (activationUrl) {
+    <app-form-section
+      title="Enlace de activación"
+      description="Entrega este enlace al tutor para que active su cuenta y defina su contraseña. El enlace expira en 7 días."
+    >
+      <div class="activation-success">
+        <div class="activation-header">
+          <div>
+            <p class="activation-success-title">Tutor creado correctamente</p>
+            <p class="activation-success-msg">
+              Comparte este enlace con el tutor para completar la activación.
+            </p>
+          </div>
+          <button type="button" class="btn-primary" (click)="goToList()">Ir al listado</button>
+        </div>
+        <div class="activation-url-wrap">
+          <input type="text" [value]="activationUrl" readonly class="form-control activation-url-input" />
+          <button type="button" class="btn-secondary btn-sm" (click)="copyActivationUrl()">Copiar</button>
+        </div>
+      </div>
+    </app-form-section>
+  } @else {
+    <form class="form-layout" [formGroup]="form" (ngSubmit)="onSubmit()">
+      @if (!isEdit) {
+        <app-form-section
+          title="Acceso inicial"
+          description="Se generará un enlace de activación para el primer ingreso."
+        >
+          <app-form-grid [columns]="2">
+            <app-form-field label="Correo electrónico" forId="email" [required]="true">
+              <app-text-input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="tutor@institucion.cl"
+                autocomplete="email"
+              ></app-text-input>
+            </app-form-field>
+          </app-form-grid>
+        </app-form-section>
+      }
+
+      <app-form-section title="Información profesional" description="Datos básicos para identificar al tutor.">
+        <app-form-grid [columns]="2">
+          <app-form-field label="Nombre" forId="display_name" [required]="true">
+            <app-text-input
+              id="display_name"
+              type="text"
+              formControlName="display_name"
+              placeholder="Nombre del tutor"
+            ></app-text-input>
+          </app-form-field>
+          <app-form-field label="Especialidad" forId="specialty">
+            <app-text-input
+              id="specialty"
+              type="text"
+              formControlName="specialty"
+              placeholder="Ej. Terapia ocupacional"
+            ></app-text-input>
+          </app-form-field>
+          <app-form-field label="Institución" forId="institution" span="full">
+            <app-text-input
+              id="institution"
+              type="text"
+              formControlName="institution"
+              placeholder="Ej. Teletón Santiago"
+            ></app-text-input>
+          </app-form-field>
+        </app-form-grid>
+
+        @if (errorMessage) {
+          <div class="form-error-banner" role="alert">{{ errorMessage }}</div>
+        }
+      </app-form-section>
+
+      <app-form-actions>
+        <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary">
+          {{ isEdit ? 'Guardar cambios' : 'Crear tutor' }}
+        </button>
+        <a routerLink="/admin/profesionales" class="btn-secondary">Cancelar</a>
+      </app-form-actions>
+    </form>
+  }
+</app-form-container>

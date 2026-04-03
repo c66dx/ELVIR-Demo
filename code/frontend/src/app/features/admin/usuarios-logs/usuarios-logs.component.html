@@ -1,0 +1,516 @@
+<div class="page-header">
+
+  <h2>Control de logs</h2>
+
+</div>
+
+
+
+<div class="tabs">
+
+  <button type="button" class="tab-btn" [class.active]="activeTab === 'youths'" (click)="setTab('youths')">Jóvenes</button>
+
+  <button type="button" class="tab-btn" [class.active]="activeTab === 'professionals'" (click)="setTab('professionals')">
+
+    Tutores
+
+  </button>
+
+</div>
+
+
+
+@if (loading) {
+
+  <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
+
+} @else {
+
+  @if (activeTab === 'youths') {
+
+    @if (!youths.length) {
+
+      <p class="empty">No hay jóvenes registrados.</p>
+
+    } @else {
+
+      <div class="table-wrap">
+
+        <table class="data-table">
+
+          <thead>
+
+            <tr>
+
+              <th>Foto</th>
+
+              <th>Nombre</th>
+
+              <th>RUT</th>
+
+              <th>ID</th>
+
+              <th>Correo</th>
+
+              <th>Login</th>
+
+              <th>Últ. login</th>
+
+              <th>Últ. intento</th>
+
+              <th>Tutor</th>
+
+              <th class="col-actions">Acciones</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            @for (y of youths; track y.id) {
+
+              <tr [class.inactive]="!y.is_active">
+
+                <td>
+
+                  <div class="avatar" [class.avatar--image]="y.profile_photo_url">
+
+                    @if (y.profile_photo_url) {
+
+                      <img [src]="y.profile_photo_url | uploadUrl" alt="" />
+
+                    } @else {
+
+                      <span>{{ initials(y.display_name) }}</span>
+
+                    }
+
+                  </div>
+
+                </td>
+
+                <td class="cell--name">{{ y.display_name }}</td>
+
+                <td>{{ y.rut  ?? '-' }}</td>
+
+                <td class="cell--id">{{ y.identifier  ?? '-' }}</td>
+
+                <td>{{ y.email  ?? '-' }}</td>
+
+                <td>{{ loginTypeLabel(y.login_type) }}</td>
+
+                <td>{{ formatDateCompact(y.last_login_at) }}</td>
+
+                <td>
+
+                  {{ formatDateCompact(y.last_interview_at) }}
+
+                  <span class="muted">
+
+                    {{ y.last_interview_status ?  formatStatusLabel(y.last_interview_status) : '' }}
+
+                  </span>
+
+                </td>
+
+                <td>
+
+                  {{ y.assigned_professional?.display_name  ?? '-' }}
+
+                  <span class="muted">{{ y.assigned_professional?.email  ?? '' }}</span>
+
+                </td>
+
+                <td class="actions">
+
+                  <div class="actions-wrap">
+
+                    <button type="button" (click)="openLogs(y)" class="action-btn action-btn--view">Ver</button>
+
+                    <button type="button" (click)="onDeleteYouth(y)" class="action-btn action-btn--delete">Desactivar</button>
+
+                    <button type="button" (click)="onHardDeleteYouth(y)" class="action-btn action-btn--hard">Eliminar definitivo</button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div class="pager">
+
+        <span>
+
+          Página {{ youthsPage }} de {{ totalPages(youthsTotal) }} · Total {{ youthsTotal }}
+
+        </span>
+
+        <div class="pager-actions">
+
+          <button type="button" class="pager-btn" (click)="prevPage('youths')" [disabled]="!canPrev('youths')">
+
+            Anterior
+
+          </button>
+
+          <button type="button" class="pager-btn" (click)="nextPage('youths')" [disabled]="!canNext('youths')">
+
+            Siguiente
+
+          </button>
+
+        </div>
+
+      </div>
+
+    }
+
+  } @else {
+
+    @if (!professionals.length) {
+
+      <p class="empty">No hay tutores registrados.</p>
+
+    } @else {
+
+      <div class="table-wrap">
+
+        <table class="data-table">
+
+          <thead>
+
+            <tr>
+
+              <th>Foto</th>
+
+              <th>Nombre</th>
+
+              <th>Correo</th>
+
+              <th>Login</th>
+
+              <th>Últ. login</th>
+
+              <th>Estado</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            @for (p of professionals; track p.id) {
+
+              <tr [class.inactive]="!p.is_active">
+
+                <td>
+
+                  <div class="avatar" [class.avatar--image]="p.profile_photo_url">
+
+                    @if (p.profile_photo_url) {
+
+                      <img [src]="p.profile_photo_url | uploadUrl" alt="" />
+
+                    } @else {
+
+                      <span>{{ initials(p.display_name) }}</span>
+
+                    }
+
+                  </div>
+
+                </td>
+
+                <td class="cell--name">{{ p.display_name }}</td>
+
+                <td>{{ p.email  ?? '-' }}</td>
+
+                <td>{{ loginTypeLabel(p.login_type) }}</td>
+
+                <td>{{ formatDateCompact(p.last_login_at) }}</td>
+
+                <td>
+
+                  <span class="badge" [class.badge-active]="p.is_active" [class.badge-inactive]="!p.is_active">
+
+                    {{ p.is_active ? 'Activo' : 'Inactivo' }}
+
+                  </span>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div class="pager">
+
+        <span>
+
+          Página {{ professionalsPage }} de {{ totalPages(professionalsTotal) }} · Total {{ professionalsTotal }}
+
+        </span>
+
+        <div class="pager-actions">
+
+          <button type="button" class="pager-btn" (click)="prevPage('professionals')" [disabled]="!canPrev('professionals')">
+
+            Anterior
+
+          </button>
+
+          <button type="button" class="pager-btn" (click)="nextPage('professionals')" [disabled]="!canNext('professionals')">
+
+            Siguiente
+
+          </button>
+
+        </div>
+
+      </div>
+
+    }
+
+  }
+
+}
+
+
+
+@if (logsOpen) {
+
+  <div class="modal-overlay" (click)="closeLogs()">
+
+    <div class="modal-content modal-content--logs" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+
+        <div>
+
+          <h3>Logs históricos</h3>
+
+          <p class="modal-subtitle">{{ selectedYouthName }}</p>
+
+        </div>
+
+        <button type="button" class="btn-icon" (click)="closeLogs()" aria-label="Cerrar">
+
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <line x1="18" y1="6" x2="6" y2="18"/>
+
+            <line x1="6" y1="6" x2="18" y2="18"/>
+
+          </svg>
+
+        </button>
+
+      </div>
+
+
+
+      @if (logsLoading) {
+
+        <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando logs...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
+
+      } @else if (logsError) {
+
+        <p class="error">{{ logsError }}</p>
+
+      } @else {
+
+        <div class="logs-sections">
+
+          <section class="logs-section">
+
+            <h4>Accesos a la plataforma</h4>
+
+            @if (youthLogs.platform_sessions.length === 0) {
+
+              <p class="empty">Sin registros de acceso.</p>
+
+            } @else {
+
+              <div class="mini-table">
+
+                <div class="mini-row mini-row--head">
+
+                  <div>Inicio</div>
+
+                  <div>Cierre</div>
+
+                </div>
+
+                @for (p of youthLogs.platform_sessions; track p.started_at) {
+
+                  <div class="mini-row">
+
+                    <div>{{ formatDate(p.started_at) }}</div>
+
+                    <div>{{ p.ended_at ?  formatDate(p.ended_at) : 'Activa' }}</div>
+
+                  </div>
+
+                }
+
+              </div>
+
+              <div class="pager mini-pager">
+
+                <span>
+
+                  Página {{ platformPage }} de {{ logsTotalPages(platformTotal, platformPageSize) }} · Total {{ platformTotal }}
+
+                </span>
+
+                <div class="pager-actions">
+
+                  <button type="button" class="pager-btn" (click)="prevLogsPage('platform')" [disabled]="!canPrevLogs('platform')">
+
+                    Anterior
+
+                  </button>
+
+                  <button type="button" class="pager-btn" (click)="nextLogsPage('platform')" [disabled]="!canNextLogs('platform')">
+
+                    Siguiente
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            }
+
+          </section>
+
+
+
+          <section class="logs-section">
+
+            <h4>Entrevistas</h4>
+
+            @if (youthLogs.interviews.length === 0) {
+
+              <p class="empty">Sin entrevistas registradas.</p>
+
+            } @else {
+
+              <div class="mini-table">
+
+                <div class="mini-row mini-row--head">
+
+                  <div>Inicio</div>
+
+                  <div>Estado</div>
+
+                  <div>Modo</div>
+
+                  <div>Tutor</div>
+
+                  <div>Cierre</div>
+
+                </div>
+
+                @for (s of youthLogs.interviews; track s.id) {
+
+                  <div class="mini-row">
+
+                    <div>{{ formatDate(s.started_at) }}</div>
+
+                    <div>{{ formatStatusLabel(s.status) }}</div>
+
+                    <div>{{ s.mode }}</div>
+
+                    <div>{{ s.professional_name || '-' }}</div>
+
+                    <div>{{ s.ended_at ?  formatDate(s.ended_at) : '-' }}</div>
+
+                  </div>
+
+                }
+
+              </div>
+
+              <div class="pager mini-pager">
+
+                <span>
+
+                  Página {{ interviewsPage }} de {{ logsTotalPages(interviewsTotal, interviewsPageSize) }} · Total {{ interviewsTotal }}
+
+                </span>
+
+                <div class="pager-actions">
+
+                  <button type="button" class="pager-btn" (click)="prevLogsPage('interviews')" [disabled]="!canPrevLogs('interviews')">
+
+                    Anterior
+
+                  </button>
+
+                  <button type="button" class="pager-btn" (click)="nextLogsPage('interviews')" [disabled]="!canNextLogs('interviews')">
+
+                    Siguiente
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            }
+
+          </section>
+
+        </div>
+
+      }
+
+    </div>
+
+  </div>
+
+}
+

@@ -1,0 +1,15 @@
+@if (title || description) {
+  <div class="section-header">
+    <div>
+      @if (title) {
+        <h3>{{ title }}</h3>
+      }
+      @if (description) {
+        <p>{{ description }}</p>
+      }
+    </div>
+    <ng-content select="[section-actions]"></ng-content>
+  </div>
+}
+
+<ng-content></ng-content>

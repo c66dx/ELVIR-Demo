@@ -1,0 +1,11 @@
+<label class="form-switch">
+  <input
+    type="checkbox"
+    [checked]="value"
+    [disabled]="disabled"
+    [attr.aria-label]="ariaLabel || null"
+    (change)="handleChange($event)"
+    (blur)="handleBlur()"
+  />
+  <span class="form-switch-track"></span>
+</label>

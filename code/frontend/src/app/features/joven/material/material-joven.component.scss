@@ -1,0 +1,329 @@
+/* Material: zona “spotlight” + estantería compacta — distinto de retro y notifs */
+
+.material-hero__lede {
+  margin: var(--space-2) 0 0;
+  max-width: 40rem;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.material-zone {
+  margin-bottom: var(--space-8);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+}
+
+.material-zone--spotlight {
+  background: linear-gradient(160deg, var(--color-primary-soft-06) 0%, var(--color-card) 45%, var(--color-card) 100%);
+  box-shadow: var(--shadow-md);
+}
+
+.material-zone--catalog {
+  background: var(--color-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.material-zone__head {
+  margin-bottom: var(--space-4);
+}
+
+.material-zone__title {
+  margin: 0 0 var(--space-1);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.material-zone__sub {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.material-empty {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+/* Sugeridos: tarjetas “pick” horizontales */
+.material-picks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.material-pick {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: var(--color-primary-soft-35);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.material-pick__icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+
+.material-pick__icon.type-video {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.material-pick__icon.type-pdf {
+  color: var(--color-danger);
+  background: var(--color-danger-light);
+}
+
+.material-pick__icon.type-link {
+  color: var(--color-info);
+  background: var(--color-info-light);
+}
+
+.material-pick__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.material-pick__title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.material-pick__badge {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+
+  &.is-viewed {
+    background: var(--color-success-light);
+    color: var(--color-success);
+  }
+}
+
+.material-pick__desc {
+  margin: var(--space-2) 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.material-pick__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+
+  span {
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    background: var(--color-surface-alt);
+  }
+}
+
+.material-pick__why {
+  margin: var(--space-2) 0 0;
+  font-size: 0.82rem;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.material-pick__btn {
+  align-self: center;
+}
+
+/* Catálogo: filas tipo estantería */
+.material-shelf {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.material-shelf__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--color-primary-soft-04);
+  }
+
+  .material-shelf__main {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+
+  .material-shelf__open {
+    margin-left: auto;
+  }
+}
+
+.material-shelf__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  letter-spacing: 0.04em;
+
+  &.type-video {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+
+  &.type-pdf {
+    color: var(--color-danger);
+    background: var(--color-danger-light);
+  }
+
+  &.type-link {
+    color: var(--color-info);
+    background: var(--color-info-light);
+  }
+}
+
+.material-shelf__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.material-shelf__title {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.material-shelf__meta {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.material-shelf__seen {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  width: 1.5rem;
+  text-align: center;
+
+  &.is-viewed {
+    color: var(--color-success);
+  }
+}
+
+.material-shelf__open {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.pager-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.pager-btn {
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@media (max-width: 720px) {
+  .material-pick {
+    grid-template-columns: 1fr;
+  }
+
+  .material-pick__icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .material-pick__btn {
+    justify-self: start;
+  }
+
+  .material-shelf__row .material-shelf__open {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .pager {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

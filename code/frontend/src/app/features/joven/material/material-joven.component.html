@@ -1,0 +1,123 @@
+<div class="material-hero page-header">
+  <h2>Material para practicar</h2>
+  <p class="material-hero__lede">
+    Recursos elegidos para ti y catálogo para explorar. Cada bloque tiene un estilo distinto para que no se sienta todo igual.
+  </p>
+</div>
+
+<section class="material-zone material-zone--spotlight">
+  <div class="material-zone__head">
+    <h3 class="material-zone__title">Elegido para ti</h3>
+    <p class="material-zone__sub">Lo que tu tutor recomienda según tu proceso.</p>
+  </div>
+
+  @if (suggested$ | async; as suggested) {
+    @if (suggested.items.length === 0) {
+      <p class="material-empty">Aún no hay sugerencias. Tu tutor puede recomendarte material desde tu perfil.</p>
+    } @else {
+      <ul class="material-picks" role="list">
+        @for (s of suggested.items; track s.id) {
+          <li class="material-pick">
+            @if (s.material) {
+              <div class="material-pick__icon" [class]="'type-' + s.material.type.toLowerCase()">
+                {{ typeAbbr(s.material.type) }}
+              </div>
+              <div class="material-pick__body">
+                <div class="material-pick__row">
+                  <span class="material-pick__title">{{ s.material.title }}</span>
+                  <span class="material-pick__badge" [class.is-viewed]="isViewed(s.material_id)">
+                    {{ isViewed(s.material_id) ? 'Visto' : 'Nuevo' }}
+                  </span>
+                </div>
+                <p class="material-pick__desc">{{ materialSummary(s.material) }}</p>
+                <div class="material-pick__chips">
+                  <span>{{ typeLabel(s.material.type) }}</span>
+                  <span>{{ estimateDuration(s.material.type) }}</span>
+                </div>
+                @if (s.reason) {
+                  <p class="material-pick__why"><strong>Por qué:</strong> {{ s.reason }}</p>
+                }
+              </div>
+              <button type="button" class="btn-primary material-pick__btn" (click)="openMaterial(s.material_id, s.material!.url)">
+                Abrir
+              </button>
+            } @else {
+              <span>Material no encontrado</span>
+            }
+          </li>
+        }
+      </ul>
+
+      <div class="pager">
+        <span>Página {{ suggested.page }} de {{ totalPages(suggested.total, suggested.page_size) }} · {{ suggested.total }} sugerencias</span>
+        <div class="pager-actions">
+          <button type="button" class="pager-btn" (click)="prevSuggested()" [disabled]="suggested.page <= 1">Anterior</button>
+          <button
+            type="button"
+            class="pager-btn"
+            (click)="nextSuggested(suggested.total)"
+            [disabled]="suggested.page >= totalPages(suggested.total, suggested.page_size)"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+    }
+  } @else {
+    <div class="loading-state">
+      <div class="loading-state__card">
+        <span class="loading-state__spinner" aria-hidden="true"></span>
+        <div>
+          <div class="loading-state__title">Cargando sugerencias…</div>
+        </div>
+      </div>
+    </div>
+  }
+</section>
+
+<section class="material-zone material-zone--catalog">
+  <div class="material-zone__head">
+    <h3 class="material-zone__title">Catálogo</h3>
+    <p class="material-zone__sub">Lista compacta para hojear como una estantería.</p>
+  </div>
+
+  @if (catalog$ | async; as catalog) {
+    <ul class="material-shelf" role="list">
+      @for (m of catalog.items; track m.id) {
+        <li class="material-shelf__row">
+          <div class="material-shelf__icon" [class]="'type-' + m.type.toLowerCase()">{{ typeAbbr(m.type) }}</div>
+          <div class="material-shelf__main">
+            <span class="material-shelf__title">{{ m.title }}</span>
+            <span class="material-shelf__meta">{{ typeLabel(m.type) }} · ~{{ estimateDuration(m.type) }}</span>
+          </div>
+          <span class="material-shelf__seen" [class.is-viewed]="isViewed(m.id)">{{ isViewed(m.id) ? '✓' : '○' }}</span>
+          <button type="button" class="btn-secondary material-shelf__open" (click)="openMaterial(m.id, m.url)">Abrir</button>
+        </li>
+      }
+    </ul>
+
+    <div class="pager">
+      <span>Página {{ catalog.page }} de {{ totalPages(catalog.total, catalog.page_size) }} · {{ catalog.total }} recursos</span>
+      <div class="pager-actions">
+        <button type="button" class="pager-btn" (click)="prevCatalog()" [disabled]="catalog.page <= 1">Anterior</button>
+        <button
+          type="button"
+          class="pager-btn"
+          (click)="nextCatalog(catalog.total)"
+          [disabled]="catalog.page >= totalPages(catalog.total, catalog.page_size)"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="loading-state">
+      <div class="loading-state__card">
+        <span class="loading-state__spinner" aria-hidden="true"></span>
+        <div>
+          <div class="loading-state__title">Cargando catálogo…</div>
+        </div>
+      </div>
+    </div>
+  }
+</section>

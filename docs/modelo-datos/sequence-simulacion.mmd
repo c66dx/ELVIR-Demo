@@ -1,0 +1,44 @@
+%% Diagrama de secuencia – Ciclo completo de simulación ELVIR
+%% Creación, inicio con LiveAvatar, cierre (normal/cancelar/error).
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5f4', 'primaryTextColor': '#1a1a2e', 'primaryBorderColor': '#1b7f79', 'lineColor': '#1b7f79'}}}%%
+sequenceDiagram
+    autonumber
+    participant U as Joven / Profesional
+    participant FE as Frontend Angular
+    participant BE as Backend FastAPI
+    participant DB as Base de Datos
+    participant LA as LiveAvatar API
+    participant AV as LiveAvatar Runtime (Web)
+
+    U->>FE: Inicia simulación (elige cargo/caso)
+    FE->>BE: POST /sessions (youth_id, template_id, mode)
+    BE->>DB: INSERT SESSIONS (status=EN_CURSO)
+    DB-->>BE: session_id
+    BE-->>FE: session_id
+
+    FE->>BE: POST /sessions/{id}/start
+    BE->>DB: SELECT plantilla (cargo + caso)
+    DB-->>BE: prompt, context_id
+    BE->>LA: PATCH contexto + POST token + POST start
+    LA-->>BE: livekit_url + access_token
+    BE->>DB: UPDATE SESSIONS (liveavatar_session_id)
+    BE-->>FE: livekit_url + access_token
+
+    FE->>AV: Conecta LiveKit (video/audio)
+    AV->>LA: Streaming / conversación (WebRTC)
+
+    alt Termina normal
+        U->>FE: Finalizar
+        FE->>BE: POST /sessions/{id}/close (status=COMPLETADA)
+        BE->>DB: UPDATE SESSIONS (ended_at, duration, status)
+        BE-->>FE: OK
+    else Usuario abandona
+        U->>FE: Cancelar
+        FE->>BE: POST /sessions/{id}/close (status=CANCELADA)
+        BE->>DB: UPDATE SESSIONS (ended_at, status)
+        BE-->>FE: OK
+    else Falla técnica
+        FE->>BE: POST /sessions/{id}/close (status=ERROR, motivo)
+        BE->>DB: UPDATE SESSIONS (ended_at, status)
+        BE-->>FE: OK
+    end

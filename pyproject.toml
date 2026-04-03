@@ -1,0 +1,58 @@
+# Metadatos mínimos (PEP 621): pip y herramientas pueden leer requires-python.
+[project]
+name = "elvir-demo"
+version = "0.0.0"
+requires-python = ">=3.11"
+description = "Monorepo ELVIR (backend FastAPI + frontend Angular)"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+src = ["code/backend"]
+exclude = [
+  "code/backend/alembic/versions",
+  "code/backend/.venv",
+  "code/frontend",
+  "docs",
+]
+
+[tool.ruff.lint]
+# E/F: sintaxis y nombres; I: orden de imports; UP: sintaxis moderna (pyupgrade)
+select = ["E9", "F", "I", "UP"]
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+exclude = '''
+/(
+  code/backend/alembic/versions
+)/
+'''
+
+[tool.pytest.ini_options]
+# Evita el aviso de pytest-asyncio sobre el scope del event loop por defecto.
+asyncio_default_fixture_loop_scope = "function"
+
+# Cobertura (pytest-cov): ejecutar desde `code/backend` con `pytest --cov=app`.
+[tool.coverage.run]
+source = ["app"]
+omit = [
+  "*/alembic/*",
+  "*/tests/*",
+]
+
+[tool.coverage.report]
+fail_under = 70
+precision = 1
+show_missing = false
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_return_any = false
+no_implicit_optional = false
+pretty = true
+files = ["app/core", "app/schemas"]
+exclude = "code/backend/alembic/versions"
+disable_error_code = ["import-untyped"]

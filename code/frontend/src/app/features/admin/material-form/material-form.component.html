@@ -1,0 +1,116 @@
+<app-form-container
+  [title]="isAdmin ? 'Crear material general' : 'Crear material propio'"
+  subtitle="Define el contenido y a quién aplica este material."
+>
+  <a form-header-actions [routerLink]="backRoute" class="btn-link">← Volver</a>
+
+  <form class="form-layout" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <app-form-section
+      title="Detalle del material"
+      description="Completa la información principal del recurso."
+    >
+      <app-form-grid columns="2">
+        <app-form-field label="Título" [required]="true" forId="title">
+          <app-text-input id="title" formControlName="title" placeholder="Ej. Técnicas de comunicación"></app-text-input>
+        </app-form-field>
+
+        <app-form-field label="Tipo" [required]="true" forId="type">
+          <app-select-input id="type" formControlName="type">
+            @for (t of types; track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </app-select-input>
+        </app-form-field>
+
+        <app-form-field label="Descripción" forId="description" span="full">
+          <app-textarea-input
+            id="description"
+            formControlName="description"
+            [rows]="3"
+            placeholder="Descripción opcional"
+          ></app-textarea-input>
+        </app-form-field>
+
+        <app-form-field label="URL" forId="url" span="full" hint="Puedes usar un enlace o subir un archivo.">
+          <app-text-input
+            id="url"
+            type="url"
+            formControlName="url"
+            placeholder="https://..."
+            [readonly]="!!selectedFile"
+          ></app-text-input>
+        </app-form-field>
+
+        @if (canUploadFile) {
+          <app-form-field label="Archivo" span="full" hint="PDF o video (mp4, webm, mov, avi, mkv). Máx. 50 MB.">
+            <div class="form-file-upload">
+              <input
+                type="file"
+                #fileInput
+                (change)="onFileSelected($event)"
+                accept=".pdf,.mp4,.webm,.mov,.avi,.mkv"
+                class="form-file-input-hidden"
+              />
+              @if (selectedFile) {
+                <span class="form-file-name">{{ selectedFile.name }}</span>
+                <button type="button" class="btn-link btn-sm" (click)="clearFile(); fileInput.value=''">Quitar</button>
+              } @else {
+                <button type="button" class="btn-secondary" (click)="fileInput.click()">Seleccionar archivo</button>
+              }
+            </div>
+          </app-form-field>
+        }
+      </app-form-grid>
+    </app-form-section>
+
+    <app-form-section
+      title="Asociación (opcional)"
+      description="Vincula el material a un cargo o caso específico."
+    >
+      <app-form-grid columns="2">
+        <app-form-field label="Cargo" forId="job_role_id">
+          <app-select-input id="job_role_id" formControlName="job_role_id" placeholder="- Ninguno -">
+            @if (jobRoles$ | async; as roles) {
+              @for (r of roles; track r.id) {
+                <option [value]="r.id">{{ r.name }}</option>
+              }
+            }
+          </app-select-input>
+        </app-form-field>
+        <app-form-field label="Caso" forId="case_id">
+          <app-select-input id="case_id" formControlName="case_id" placeholder="- Ninguno -">
+            @if (cases$ | async; as cases) {
+              @for (c of cases; track c.id) {
+                <option [value]="c.id">{{ c.name }}</option>
+              }
+            }
+          </app-select-input>
+        </app-form-field>
+      </app-form-grid>
+    </app-form-section>
+
+    @if (errorMessage) {
+      <p class="form-error-banner">{{ errorMessage }}</p>
+    }
+
+    @if (uploadProgress !== null && submitting && selectedFile) {
+      <div class="material-upload-progress" role="status" aria-live="polite">
+        @if (uploadProgress >= 0) {
+          <div class="material-upload-progress-track">
+            <div class="material-upload-progress-fill" [style.width.%]="uploadProgress"></div>
+          </div>
+          <span class="material-upload-progress-label">Subiendo… {{ uploadProgress }}%</span>
+        } @else {
+          <span class="material-upload-progress-label">Subiendo archivo…</span>
+        }
+      </div>
+    }
+
+    <app-form-actions>
+      <button type="submit" [disabled]="submitting || !form.get('title')?.value?.trim()" class="btn-primary">
+        Crear material
+      </button>
+      <a [routerLink]="backRoute" class="btn-secondary">Cancelar</a>
+    </app-form-actions>
+  </form>
+</app-form-container>

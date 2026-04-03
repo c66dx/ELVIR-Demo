@@ -1,0 +1,57 @@
+# Dependencias
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+code/backend/*.db
+
+# Secretos backend (usar .env.example como plantilla)
+code/backend/.env
+
+# Python venv/cache
+.venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build
+dist/
+frontend/dist/
+code/frontend/dist/
+code/frontend/.angular/
+
+# Cobertura Karma (artefactos locales; no versionar)
+code/frontend/coverage/
+
+# Angular cache
+.angular/cache/
+
+# Tests temp
+code/backend/tests/_tmp/
+
+# DB
+*.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Archivos subidos (backend)
+code/backend/uploads/
+docs/material

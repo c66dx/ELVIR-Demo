@@ -1,0 +1,448 @@
+<div class="dashboard">
+
+  <header class="dashboard-header page-header">
+
+    <div class="page-header-left">
+
+      <h2>Dashboard Tutor</h2>
+
+      <p class="page-subtitle">Panel de seguimiento y retroalimentación de entrevistas.</p>
+
+    </div>
+
+    <div class="page-header-actions">
+
+      <a routerLink="/profesional/jovenes" class="btn-primary">Ir a Jóvenes</a>
+
+      <a routerLink="/profesional/jovenes/nuevo" class="btn-secondary">Crear joven</a>
+
+    </div>
+
+  </header>
+
+
+
+  @if (data$ | async; as data) {
+
+    <section class="dashboard-summary">
+
+      <article class="summary-card summary-card--pending">
+
+        <div>
+
+          <span class="summary-label">Pendientes</span>
+
+          <span class="summary-value">{{ data.pendingSessions.length }}</span>
+
+          <span class="summary-meta">Retroalimentación</span>
+
+        </div>
+
+        <span class="summary-pill">Prioridad alta</span>
+
+      </article>
+
+      <article class="summary-card summary-card--progress">
+
+        <div>
+
+          <span class="summary-label">En curso</span>
+
+          <span class="summary-value">{{ data.inProgressSessions.length }}</span>
+
+          <span class="summary-meta">Sesiones activas</span>
+
+        </div>
+
+        <span class="summary-pill">Seguimiento</span>
+
+      </article>
+
+      <article class="summary-card summary-card--done">
+
+        <div>
+
+          <span class="summary-label">Completadas</span>
+
+          <span class="summary-value">{{ data.completedSessions.length }}</span>
+
+          <span class="summary-meta">Últimas sesiones</span>
+
+        </div>
+
+        <span class="summary-pill">Historial</span>
+
+      </article>
+
+    </section>
+
+
+
+    <section class="dashboard-section">
+
+      <div class="section-header">
+
+        <div>
+
+          <h3>Pendientes de retroalimentación</h3>
+
+          <p class="section-subtitle">Entrevistas completadas que aún requieren retroalimentación.</p>
+
+        </div>
+
+        <a routerLink="/profesional/sesiones" class="link-more">Ver todas</a>
+
+      </div>
+
+      @if (data.pendingSessions.length === 0) {
+
+        <p class="empty-state">No hay entrevistas pendientes de retroalimentación.</p>
+
+      } @else {
+
+        <div class="session-grid">
+
+          @for (s of data.pendingSessions; track s.id) {
+
+            <article class="session-card session-card--pending">
+
+              <div class="session-card-main">
+
+                <div class="youth-avatar" [class.youth-avatar--image]="s.youthPhotoUrl">
+
+                  @if (s.youthPhotoUrl) {
+
+                    <img [src]="s.youthPhotoUrl | uploadUrl" alt="" />
+
+                  } @else {
+
+                    <span>{{ initials(s.youthName) }}</span>
+
+                  }
+
+                </div>
+
+                <div class="session-content">
+
+                  <div class="session-head">
+
+                    <a [routerLink]="['/profesional/jovenes', s.youthId]" class="youth-name">{{ s.youthName }}</a>
+
+                    <app-status-badge [status]="s.status" />
+
+                  </div>
+
+                  <div class="session-meta">
+
+                    <span>{{ formatDate(s.started_at) }}</span>
+
+                    <span></span>
+
+                    <span>{{ modeLabel(s.mode) }}</span>
+
+                  </div>
+
+                  <div class="session-chips">
+
+                    <span class="session-chip">{{ s.templateLabel  ?? 'Sin plantilla' }}</span>
+
+                    @if (s.youthRut) {
+
+                      <span class="session-chip session-chip--muted">{{ s.youthRut }}</span>
+
+                    }
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="session-actions">
+
+                <a
+
+                  [routerLink]="['/profesional/sesiones', s.id]"
+
+                  [queryParams]="{ returnUrl: '/profesional/dashboard', summary: 1, editSummary: 1 }"
+
+                  class="btn-primary btn-sm"
+
+                >
+
+                  Registrar retroalimentación
+
+                </a>
+
+                <a
+
+                  [routerLink]="['/profesional/sesiones', s.id]"
+
+                  [queryParams]="{ returnUrl: '/profesional/dashboard' }"
+
+                  class="session-secondary"
+
+                >
+
+                  Ver entrevista
+
+                </a>
+
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+
+
+    <section class="dashboard-section">
+
+      <div class="section-header">
+
+        <div>
+
+          <h3>En curso</h3>
+
+          <p class="section-subtitle">Sesiones activas que requieren seguimiento.</p>
+
+        </div>
+
+        <a routerLink="/profesional/sesiones" class="link-more">Ver todas</a>
+
+      </div>
+
+      @if (data.inProgressSessions.length === 0) {
+
+        <p class="empty-state">No hay entrevistas en curso en este momento.</p>
+
+      } @else {
+
+        <div class="session-grid">
+
+          @for (s of data.inProgressSessions; track s.id) {
+
+            <article class="session-card session-card--progress">
+
+              <div class="session-card-main">
+
+                <div class="youth-avatar" [class.youth-avatar--image]="s.youthPhotoUrl">
+
+                  @if (s.youthPhotoUrl) {
+
+                    <img [src]="s.youthPhotoUrl | uploadUrl" alt="" />
+
+                  } @else {
+
+                    <span>{{ initials(s.youthName) }}</span>
+
+                  }
+
+                </div>
+
+                <div class="session-content">
+
+                  <div class="session-head">
+
+                    <a [routerLink]="['/profesional/jovenes', s.youthId]" class="youth-name">{{ s.youthName }}</a>
+
+                    <app-status-badge [status]="s.status" />
+
+                  </div>
+
+                  <div class="session-meta">
+
+                    <span>{{ formatDate(s.started_at) }}</span>
+
+                    <span></span>
+
+                    <span>{{ modeLabel(s.mode) }}</span>
+
+                  </div>
+
+                  <div class="session-chips">
+
+                    <span class="session-chip">{{ s.templateLabel  ?? 'Sin plantilla' }}</span>
+
+                    @if (s.youthRut) {
+
+                      <span class="session-chip session-chip--muted">{{ s.youthRut }}</span>
+
+                    }
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="session-actions">
+
+                <a
+
+                  [routerLink]="['/profesional/sesiones', s.id]"
+
+                  [queryParams]="{ returnUrl: '/profesional/dashboard' }"
+
+                  class="btn-primary btn-sm"
+
+                >
+
+                  Ver entrevista
+
+                </a>
+
+                <a [routerLink]="['/profesional/jovenes', s.youthId]" class="session-secondary">Ver joven</a>
+
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+
+
+    <section class="dashboard-section">
+
+      <div class="section-header">
+
+        <div>
+
+          <h3>Completadas</h3>
+
+          <p class="section-subtitle">Entrevistas finalizadas recientemente.</p>
+
+        </div>
+
+        <a routerLink="/profesional/sesiones" class="link-more">Ver todas</a>
+
+      </div>
+
+      @if (data.completedSessions.length === 0) {
+
+        <p class="empty-state">No hay entrevistas completadas recientemente.</p>
+
+      } @else {
+
+        <div class="session-grid session-grid--compact">
+
+          @for (s of data.completedSessions; track s.id) {
+
+            <article class="session-card session-card--completed">
+
+              <div class="session-card-main">
+
+                <div class="youth-avatar" [class.youth-avatar--image]="s.youthPhotoUrl">
+
+                  @if (s.youthPhotoUrl) {
+
+                    <img [src]="s.youthPhotoUrl | uploadUrl" alt="" />
+
+                  } @else {
+
+                    <span>{{ initials(s.youthName) }}</span>
+
+                  }
+
+                </div>
+
+                <div class="session-content">
+
+                  <div class="session-head">
+
+                    <a [routerLink]="['/profesional/jovenes', s.youthId]" class="youth-name">{{ s.youthName }}</a>
+
+                    <app-status-badge [status]="s.status" />
+
+                  </div>
+
+                  <div class="session-meta">
+
+                    <span>{{ formatDate(s.started_at) }}</span>
+
+                    <span></span>
+
+                    <span>{{ modeLabel(s.mode) }}</span>
+
+                  </div>
+
+                  <div class="session-chips">
+
+                    <span class="session-chip">{{ s.templateLabel  ?? 'Sin plantilla' }}</span>
+
+                    @if (s.youthRut) {
+
+                      <span class="session-chip session-chip--muted">{{ s.youthRut }}</span>
+
+                    }
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="session-actions">
+
+                <a
+
+                  [routerLink]="['/profesional/sesiones', s.id]"
+
+                  [queryParams]="{ returnUrl: '/profesional/dashboard' }"
+
+                  class="btn-primary btn-sm"
+
+                >
+
+                  Ver entrevista
+
+                </a>
+
+                <a [routerLink]="['/profesional/jovenes', s.youthId]" class="session-secondary">Ver joven</a>
+
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+  } @else {
+
+    <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
+
+  }
+
+</div>
+
+

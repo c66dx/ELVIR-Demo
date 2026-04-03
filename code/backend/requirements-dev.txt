@@ -1,0 +1,7 @@
+ruff==0.6.8
+black==24.8.0
+mypy==1.11.2
+pre-commit==3.8.0
+types-python-jose==3.3.4.20240106
+pytest==8.3.4
+pytest-cov==6.0.0

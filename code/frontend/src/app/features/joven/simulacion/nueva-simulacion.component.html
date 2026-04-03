@@ -1,0 +1,239 @@
+<div class="lobby-page">
+  <div class="lobby-header">
+    <div class="lobby-title">
+      <h2>Sala previa de entrevista</h2>
+      <p>Confirma el rol, el escenario y revisa el briefing antes de ingresar a la videollamada.</p>
+    </div>
+    <div class="lobby-meta">
+      <span class="lobby-chip">Modalidad: Videollamada</span>
+      <span class="lobby-chip">Entrevistadora: Javiera (IA)</span>
+    </div>
+  </div>
+
+  <div class="lobby-steps">
+    <div class="step-item" [class.is-active]="currentStep() === 1" [class.is-done]="hasRole()">
+      <span class="step-index">1</span>
+      <div>
+        <span class="step-title">Cargo</span>
+        <span class="step-desc">Define el rol</span>
+      </div>
+    </div>
+    <div class="step-item" [class.is-active]="currentStep() === 2" [class.is-done]="hasCase()">
+      <span class="step-index">2</span>
+      <div>
+        <span class="step-title">Escenario</span>
+        <span class="step-desc">Nivel de dificultad</span>
+      </div>
+    </div>
+    <div class="step-item" [class.is-active]="currentStep() === 3 && !form.valid" [class.is-done]="form.valid">
+      <span class="step-index">3</span>
+      <div>
+        <span class="step-title">Briefing</span>
+        <span class="step-desc">Contexto de la empresa</span>
+      </div>
+    </div>
+    <div class="step-item" [class.is-active]="currentStep() === 3 && form.valid" [class.is-done]="form.valid">
+      <span class="step-index">4</span>
+      <div>
+        <span class="step-title">Ingreso</span>
+        <span class="step-desc">Conectaráse</span>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+  <div class="loading-state__card">
+    <span class="loading-state__spinner" aria-hidden="true"></span>
+    <div>
+      <div class="loading-state__title">Cargando...</div>
+      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    </div>
+  </div>
+  <div class="loading-state__skeleton">
+    <span class="loading-state__line loading-state__line--lg"></span>
+    <span class="loading-state__line"></span>
+    <span class="loading-state__line loading-state__line--sm"></span>
+  </div>
+</div>
+  } @else {
+    <form id="simulacion-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+      @if (currentStep() === 1) {
+        <section class="lobby-section is-active">
+          <div class="section-header">
+            <div>
+              <span class="section-kicker">Paso 1</span>
+              <h3>Selecciona el cargo al que postulas</h3>
+              <p>Esto define el perfil de la entrevista y el contexto de la empresa.</p>
+            </div>
+          </div>
+          <div class="role-toolbar">
+            <div class="role-search">
+              <input
+                type="text"
+                placeholder="Buscar cargo..."
+                [value]="searchTerm"
+                (input)="onSearchChange($event)"
+                aria-label="Buscar cargo"
+              />
+              <span class="role-count">{{ roleCountLabel() }}</span>
+            </div>
+            <div class="role-filters">
+              @for (filter of roleFilters; track filter) {
+                <button
+                  type="button"
+                  class="filter-chip"
+                  [class.is-selected]="selectedCategory === filter"
+                  (click)="setCategory(filter)"
+                >
+                  {{ categoryLabel(filter) }}
+                </button>
+              }
+            </div>
+          </div>
+          @let roles = filteredRoles();
+          <div class="role-scroll">
+          <div class="role-grid">
+          @for (jr of roles; track jr.id) {
+            <button
+              type="button"
+              class="role-card"
+              [class.is-selected]="form.get('job_role_id')?.value === jr.id"
+              (click)="selectJobRole(jr)"
+              [attr.aria-pressed]="form.get('job_role_id')?.value === jr.id"
+            >
+              <div class="role-card-title">{{ jr.name }}</div>
+              <div class="role-card-sub">{{ roleFocus(jr) }}</div>
+              <div class="role-card-meta">{{ getCompanyContext(jr).name }}</div>
+            </button>
+          }
+          </div>
+            @if (!roles.length) {
+              <div class="role-empty">No encontramos cargos con ese criterio.</div>
+            }
+          </div>
+        </section>
+      }
+
+      @if (currentStep() === 2) {
+        <section class="lobby-section is-active">
+        <div class="section-header">
+          <div>
+            <span class="section-kicker">Paso 2</span>
+            <h3>Selecciona el escenario de entrevista</h3>
+            <p>Elige el nivel de exigencia y el tono con el que se desarrollar la entrevista.</p>
+          </div>
+        </div>
+        <div class="case-grid">
+          @for (c of cases; track c.id) {
+            <button
+              type="button"
+              class="case-card"
+              [class.is-selected]="form.get('case_id')?.value === c.id"
+              [class.is-disabled]="!hasRole()"
+              [disabled]="!hasRole()"
+              (click)="selectCase(c)"
+              [attr.aria-pressed]="form.get('case_id')?.value === c.id"
+            >
+              <div class="case-card-header">
+                <div>
+                  <div class="case-card-title">{{ c.name }}</div>
+                  <div class="case-card-sub">{{ caseDescription(c) }}</div>
+                  <div class="case-card-time">Duración estimada: {{ estimatedDuration(c.difficulty) }}</div>
+                </div>
+                <span
+                  class="difficulty-pill"
+                  [class.difficulty-pill--baja]="c.difficulty === 'BAJA'"
+                  [class.difficulty-pill--media]="c.difficulty === 'MEDIA'"
+                  [class.difficulty-pill--alta]="c.difficulty === 'ALTA'"
+                  [class.difficulty-pill--normal]="c.difficulty === 'NORMAL'"
+                >
+                  {{ difficultyLabel(c.difficulty) }}
+                </span>
+              </div>
+            </button>
+          }
+        </div>
+        @if (!hasRole()) {
+          <p class="helper-muted">Primero define el cargo para habilitar los escenarios.</p>
+        }
+        </section>
+      }
+
+      @if (currentStep() === 3) {
+        <section class="lobby-section is-active">
+        <div class="section-header">
+          <div>
+            <span class="section-kicker">Paso 3</span>
+            <h3>Briefing de la entrevista</h3>
+            <p>Revisa el contexto para entrar con seguridad a la sala.</p>
+          </div>
+        </div>
+        <div class="briefing-card" [class.is-empty]="!selectedJobRole()">
+          @if (selectedJobRole(); as role) {
+            @let company = getCompanyContext(role);
+            <div class="briefing-tags">
+              <span class="briefing-tag">Empresa: {{ company.name }}</span>
+              <span class="briefing-tag">Rol: {{ role.name }}</span>
+              @if (selectedCase(); as caseItem) {
+                <span class="briefing-tag">Escenario: {{ caseItem.name }}</span>
+              }
+            </div>
+            <p class="briefing-text">
+              Te conectarás con <strong>{{ company.name }}</strong>. La persona entrevistadora quiere conocer tu experiencia,
+              tu motivación y tu ajuste al rol de <strong>{{ role.name }}</strong>.
+            </p>
+            <div class="briefing-grid">
+              <div>
+                <span class="briefing-label">Situación</span>
+                <p>
+                  @if (selectedCase(); as caseItem) {
+                    {{ caseNarrative(caseItem) }}
+                  } @else {
+                    Selecciona un escenario para definir el estilo de la entrevista.
+                  }
+                </p>
+              </div>
+              <div>
+                <span class="briefing-label">Expectativas del entrevistador</span>
+                <p>Se valoran respuestas claras, ejemplos concretos y una comunicación profesional.</p>
+              </div>
+            </div>
+            <div class="briefing-footer">
+              <span>Modalidad: Videollamada</span>
+              <span>Duración estimada: {{ selectedCase() ?  estimatedDuration(selectedCase()!.difficulty) : '8-12 min' }}</span>
+            </div>
+          } @else {
+            <p class="briefing-empty">Selecciona un rol y un escenario para generar el briefing.</p>
+          }
+        </div>
+        </section>
+      }
+
+      @if (errorMessage) {
+        <p class="error">{{ errorMessage }}</p>
+      }
+
+      <div class="lobby-actions">
+        <button type="button" class="btn-secondary" (click)="goBack()" [disabled]="currentStep() === 1">
+          ← Volver
+        </button>
+        <div class="lobby-actions-right">
+          @if (currentStep() < 3) {
+            <button type="button" class="btn-primary btn-start" (click)="goNext()" [disabled]="!canContinue()">
+              Continuar
+            </button>
+          } @else {
+            <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary btn-start">
+              Iniciar entrevista
+            </button>
+          }
+          <div class="lobby-footnote">
+            Al iniciar, pasarás por la sala de espera y luego la entrevistadora se conectará.
+          </div>
+        </div>
+      </div>
+    </form>
+  }
+</div>
+
