@@ -1,7 +1,1 @@
-# Commit message (English, imperative). Subject ~50 chars.
-# Types: feat fix docs style refactor test chore ci
-#
-# Example:
-# docs: update API reference for health endpoints
-#
-# Body (optional): what and why, wrap at 72 chars.
+# One line, English. Example: fix: return 404 when youth not found
