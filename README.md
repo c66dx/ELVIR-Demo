@@ -253,6 +253,12 @@ python code/backend/clean_user_data.py --delete-uploads
 python code/backend/clean_user_data.py --skip-reseed
 ```
 
+---
+
+## Ramas: `main` y `preview-seed`
+
+- **`main`**: desarrollo y documentación; es la rama que conviene mantener al día en GitHub.
+- **`preview-seed`**: despliegue de demo para feedback en vivo. Para actualizarla con lo probado en `main`: `git checkout preview-seed`, `git pull`, `git merge main`, `git push origin preview-seed`. Si Git marca conflicto en **`code/backend/seed.py`** o **`code/frontend/src/environments/environment.prod.ts`**, quédate con la versión de **preview** para no cambiar el seed ni las credenciales mostradas en el frontend de esa demo.
 
 ---
 
