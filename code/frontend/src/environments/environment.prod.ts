@@ -1,18 +1,17 @@
 /**
- * Build de producci√≥n. En main coincide con el seed m√≠nimo (dos j√≥venes @test.cl).
- * Otra rama (p. ej. preview) puede reemplazar este archivo con credenciales extendidas (Gmail, etc.).
+ * Build de producciÛn (demo). URL absoluta del API + credenciales alineadas con seed.py.
  */
 export const environment = {
   production: true,
-  apiUrl: '/api/v1',
-  /** Producci√≥n: alineado con `PASSWORD_MIN_LENGTH` ‚â• 12 en el backend cuando `ENV=prod`. */
+  apiUrl: 'https://elvir-demo.onrender.com/api/v1',
+  /** ProducciÛn: alineado con `PASSWORD_MIN_LENGTH` = 12 en el backend cuando `ENV=prod`. */
   passwordMinLength: 12,
   demoCredentials: {
-    joven: 'joven1@test.cl',
+    joven: 'elvir.demo+joven1@gmail.com',
     tutor: 'prof@test.cl',
     admin: 'admin@test.cl',
     password: 'test123',
-    note: 'joven2@test.cl tiene el inicio de sesi√≥n deshabilitado.',
-    more: '',
+    note: 'elvir.demo+joven2@gmail.com tiene el inicio de sesiÛn deshabilitado.',
+    more: 'Otros jÛvenes de prueba: elvir.demo+joven3@gmail.com a elvir.demo+joven6@gmail.com (misma clave).',
   },
 };
