@@ -1,13 +1,13 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BehaviorSubject, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { YouthService } from '../../../core/services/youth.service';
-import { ApiService } from '../../../core/services/api.service';
-import type { Session } from '../../../core/models/session.model';
-import type { InterviewSummary } from '../../../core/models/interview-summary.model';
-import { formatDate, formatStatusLabel } from '../../../shared/utils/date-format.util';
+import { YouthService } from '@core/services/youth.service';
+import { SessionApiService } from '@core/services/session-api.service';
+import type { Session } from '@core/models/session.model';
+import type { InterviewSummary } from '@core/models/interview-summary.model';
+import { formatDate, formatStatusLabel } from '@shared/utils/date-format.util';
 import { parseSummary } from './retroalimentacion.utils'; 
  interface FeedbackItem { 
  sessionId: string; 
@@ -27,23 +27,24 @@ import { parseSummary } from './retroalimentacion.utils';
 } 
  @Component({ 
  selector: 'app-retroalimentacion-joven',   standalone: true,   imports: [CommonModule, RouterLink],   templateUrl: './retroalimentacion.component.html',   styleUrl: './retroalimentacion.component.scss',
+ changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RetroalimentacionJovenComponent { 
  private youthService = inject(YouthService); 
- private api = inject(ApiService); 
+ private sessionsApi = inject(SessionApiService); 
  private pageSubject = new BehaviorSubject(1); 
  readonly pageSize = 10; 
  feedback$: Observable<FeedbackPage> = combineLatest([this.youthService.getCurrentYouthId(), this.pageSubject]).pipe(   switchMap(([youthId, page]) => { 
  if (!youthId) { 
  return of({ items: [], total: 0, page, page_size: this.pageSize } as FeedbackPage); 
  } 
- return this.api.getSessionsPaged({ youth_id: youthId, page, page_size: this.pageSize }).pipe(   switchMap((paged) =>   this.buildFeedbackItems(paged.items).pipe(   map((items) => ({ 
+ return this.sessionsApi.getSessionsPaged({ youth_id: youthId, page, page_size: this.pageSize }).pipe(   switchMap((paged) =>   this.buildFeedbackItems(paged.items).pipe(   map((items) => ({ 
  items,   total: paged.total,   page: paged.page,   page_size: paged.page_size,   }))   )   ),   catchError(() => of({ items: [], total: 0, page, page_size: this.pageSize } as FeedbackPage))   ); 
  }),   catchError(() => of({ items: [], total: 0, page: 1, page_size: this.pageSize } as FeedbackPage))   ); 
  private buildFeedbackItems(sessions: Session[]) { 
  if (sessions.length === 0) return of([] as FeedbackItem[]); 
  const items$ = sessions.map((session) =>   forkJoin({ 
- context: this.api.getSessionContext(session.id).pipe(catchError(() => of(null))),   summary: this.api.getSessionSummary(session.id).pipe(catchError(() => of(null))),   }).pipe(map(({ context, summary }) => this.mapFeedbackItem(session, summary, context?.jobRoleName, context?.caseName)))   ); 
+ context: this.sessionsApi.getSessionContext(session.id).pipe(catchError(() => of(null))),   summary: this.sessionsApi.getSessionSummary(session.id).pipe(catchError(() => of(null))),   }).pipe(map(({ context, summary }) => this.mapFeedbackItem(session, summary, context?.jobRoleName, context?.caseName)))   ); 
  return forkJoin(items$).pipe(   map((items) =>   items.sort((a, b) => { 
  if (!a.startedAt || !b.startedAt) return 0; 
  return b.startedAt.localeCompare(a.startedAt); 
@@ -72,3 +73,5 @@ export class RetroalimentacionJovenComponent {
  this.pageSubject.next(current + 1); 
  }
 }
+
+

@@ -1,8 +1,8 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
-import { NotificationService } from '../services/notification.service';
-import { extractErrorMessage } from '../utils/http-error.util'; 
+import { NotificationService } from '@core/services/notification.service';
+import { extractErrorMessage } from '@core/utils/http-error.util'; 
  /** URLs donde el componente maneja el error (evitar toast duplicado). */
 const SKIP_TOAST_URLS = ['/auth/login', '/auth/activate', '/auth/logout', '/auth/change-password'];
 const SKIP_TOAST_PATTERNS = [/\/sessions\/[^/]+\/audio/]; 

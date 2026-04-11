@@ -2,18 +2,19 @@ import { Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ApiService } from '../../../core/services/api.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { NotificationService } from '../../../core/services/notification.service';
-import type { MaterialType } from '../../../core/models/types.model';
-import { FormContainerComponent } from '../../../shared/form/form-container/form-container.component';
-import { FormSectionComponent } from '../../../shared/form/form-section/form-section.component';
-import { FormGridComponent } from '../../../shared/form/form-grid/form-grid.component';
-import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
-import { FormActionsComponent } from '../../../shared/form/form-actions/form-actions.component';
-import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component';
-import { TextareaInputComponent } from '../../../shared/form/inputs/textarea-input/textarea-input.component';
-import { SelectInputComponent } from '../../../shared/form/inputs/select-input/select-input.component';
+import { CatalogApiService } from '@core/services/catalog-api.service';
+import { MaterialApiService } from '@core/services/material-api.service';
+import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
+import type { MaterialType } from '@core/models/types.model';
+import { FormContainerComponent } from '@shared/form/form-container/form-container.component';
+import { FormSectionComponent } from '@shared/form/form-section/form-section.component';
+import { FormGridComponent } from '@shared/form/form-grid/form-grid.component';
+import { FormFieldComponent } from '@shared/form/form-field/form-field.component';
+import { FormActionsComponent } from '@shared/form/form-actions/form-actions.component';
+import { TextInputComponent } from '@shared/form/inputs/text-input/text-input.component';
+import { TextareaInputComponent } from '@shared/form/inputs/textarea-input/textarea-input.component';
+import { SelectInputComponent } from '@shared/form/inputs/select-input/select-input.component';
 
 /** Alineado con `app.services.upload_files` (backend). */
 const MATERIAL_MAX_BYTES = 50 * 1024 * 1024;
@@ -40,7 +41,8 @@ const MATERIAL_ALLOWED_EXT = new Set(['.pdf', '.mp4', '.webm', '.mov', '.avi', '
 })
 export class MaterialFormComponent {
   private fb = inject(FormBuilder);
-  private api = inject(ApiService);
+  private catalogApi = inject(CatalogApiService);
+  private materialsApi = inject(MaterialApiService);
   private auth = inject(AuthService);
   private router = inject(Router);
   private notification = inject(NotificationService);
@@ -68,8 +70,8 @@ export class MaterialFormComponent {
     });
   }
 
-  jobRoles$ = this.api.getJobRoles();
-  cases$ = this.api.getCases();
+  jobRoles$ = this.catalogApi.getJobRoles();
+  cases$ = this.catalogApi.getCases();
   submitting = false;
   errorMessage = '';
   /** 0–100 durante subida; -1 si el navegador no informa total; null si no hay subida activa. */
@@ -132,7 +134,7 @@ export class MaterialFormComponent {
     this.uploadProgress = null;
 
     const doCreate = (url: string) => {
-      this.api
+      this.materialsApi
         .createSupportMaterial({
           title: v.title,
           description: v.description || undefined,
@@ -162,7 +164,7 @@ export class MaterialFormComponent {
 
     if (this.selectedFile) {
       this.uploadProgress = 0;
-      this.api.uploadFile(this.selectedFile).subscribe({
+      this.materialsApi.uploadFile(this.selectedFile).subscribe({
         next: (res) => {
           if ('progress' in res) {
             this.uploadProgress = res.progress;
@@ -188,3 +190,5 @@ export class MaterialFormComponent {
     }
   }
 }
+
+

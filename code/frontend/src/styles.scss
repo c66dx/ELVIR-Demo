@@ -62,11 +62,15 @@
   --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
   --shadow-lg: 0 18px 40px rgba(15, 23, 42, 0.12);
 
-  // Layout
+  // Layout (mobile first: base = móvil; ampliar con @media min-width)
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 960px;
   --content-max-width: 1400px;
-  --content-padding: var(--space-6);
+  --content-padding: var(--space-4);
+  --content-padding-desktop: var(--space-6);
   --section-gap: var(--space-8);
   --header-gap: var(--space-4);
+  --touch-target-min: 44px;
 
   // Tipografía
   --font-size-title: 1.45rem;
@@ -79,6 +83,12 @@
   --motion-slow: 280ms;
   --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --content-padding: var(--content-padding-desktop);
+  }
 }
 
 /* Shared loading state */
@@ -765,6 +775,8 @@ a.btn-supervisada {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.6rem 1.2rem;
+  min-height: var(--touch-target-min);
+  box-sizing: border-box;
   font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -908,6 +920,8 @@ a.btn-link {
   background: transparent;
   color: var(--color-primary);
   padding: 0.4rem 0;
+  min-height: unset;
+  min-width: unset;
   box-shadow: none;
 
   &:hover {
@@ -947,8 +961,10 @@ a.btn-supervisada {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  height: var(--touch-target-min);
   padding: 0;
   background: transparent;
   color: var(--color-text-muted);
@@ -1079,6 +1095,7 @@ a.btn-supervisada {
   .btn-sm {
     padding: 0.45rem 0.9rem;
     font-size: 0.82rem;
+    min-height: var(--touch-target-min);
   }
 }
 

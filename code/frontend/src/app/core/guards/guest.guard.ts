@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '@core/services/auth.service';
 
 /** Solo para rutas de invitado (ej. login). Si ya hay sesión, redirige al inicio según rol. */
 export const guestGuard: CanActivateFn = () => {

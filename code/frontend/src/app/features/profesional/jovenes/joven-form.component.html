@@ -188,10 +188,25 @@
   }
 
   @if (showChangeEmailModal) {
-    <div class="modal-overlay" (click)="closeChangeEmailModal()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <h3>Cambiar correo</h3>
-        <p class="modal-hint">
+    <div
+      class="modal-overlay"
+      role="presentation"
+      (click)="closeChangeEmailModal()"
+      (keydown)="onChangeEmailOverlayKeydown($event)"
+    >
+      <div
+        class="modal-content"
+        appModalDialog
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="change-email-dialog-title"
+        aria-describedby="change-email-dialog-desc"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="onChangeEmailModalPanelKeydown($event)"
+      >
+        <h3 id="change-email-dialog-title">Cambiar correo</h3>
+        <p id="change-email-dialog-desc" class="modal-hint">
           Se generará un nuevo enlace de activación. El joven deberá usarlo para actualizar su correo y contraseña.
         </p>
         <app-form-field label="Nuevo correo" forId="change_email">

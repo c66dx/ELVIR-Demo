@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import type { Session } from '../../../core/models/session.model';
-import type { SessionStatus } from '../../../core/models/types.model';
-import type { SessionEndData } from '../../../core/services/session-end.service';
+import type { Session } from '@core/models/session.model';
+import type { SessionStatus } from '@core/models/types.model';
+import type { SessionEndData } from '@core/services/session-end.service';
 
 export interface SessionContextInfo {
   jobRoleName?: string;
@@ -76,3 +76,5 @@ export class SimulacionRuntimeService {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
 }
+
+

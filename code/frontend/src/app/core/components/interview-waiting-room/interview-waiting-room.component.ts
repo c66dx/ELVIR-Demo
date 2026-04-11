@@ -1,21 +1,26 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApiService } from '../../services/api.service'; 
- type WaitingState = { 
+import { SessionApiService } from '@core/services/session-api.service'; 
+ interface WaitingState {
  companyName?: string; 
  companyDescription?: string; 
  jobRoleName?: string; 
  caseName?: string; 
  returnUrl?: string;
-}; 
+ companySector?: string;
+ interviewMode?: string;
+ interviewerName?: string;
+ contextSummary?: string;
+ motivationMessage?: string;
+} 
  @Component({ 
- selector: 'app-interview-waiting-room',   standalone: true,   imports: [CommonModule],   templateUrl: './interview-waiting-room.component.html',   styleUrl: './interview-waiting-room.component.scss',
+ selector: 'app-interview-waiting-room',   standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,   imports: [CommonModule],   templateUrl: './interview-waiting-room.component.html',   styleUrl: './interview-waiting-room.component.scss',
 })
 export class InterviewWaitingRoomComponent implements OnInit, OnDestroy { 
  private route = inject(ActivatedRoute); 
  private router = inject(Router); 
- private api = inject(ApiService); 
+ private sessionsApi = inject(SessionApiService); 
  sessionId = ''; 
  companyName = signal('Empresa colaboradora'); 
  companyDescription = signal(''); 
@@ -54,17 +59,17 @@ export class InterviewWaitingRoomComponent implements OnInit, OnDestroy {
  if (state?.companyDescription) this.companyDescription.set(state.companyDescription); 
  if (state?.jobRoleName) this.jobRoleName.set(state.jobRoleName); 
  if (state?.caseName) this.caseName.set(state.caseName); 
- if ((state as any)?.companySector) this.companySector.set((state as any).companySector); 
- if ((state as any)?.interviewMode) this.interviewMode.set((state as any).interviewMode); 
- if ((state as any)?.interviewerName) this.interviewerName.set((state as any).interviewerName); 
- if ((state as any)?.contextSummary) this.contextSummary.set((state as any).contextSummary); 
- if ((state as any)?.motivationMessage) this.motivationMessage.set((state as any).motivationMessage); 
+ if (state?.companySector) this.companySector.set(state.companySector); 
+ if (state?.interviewMode) this.interviewMode.set(state.interviewMode); 
+ if (state?.interviewerName) this.interviewerName.set(state.interviewerName); 
+ if (state?.contextSummary) this.contextSummary.set(state.contextSummary); 
+ if (state?.motivationMessage) this.motivationMessage.set(state.motivationMessage); 
  if (!this.contextSummary() && state?.companyDescription) { 
  this.contextSummary.set(this.buildContextSummary(state.companyDescription, state.jobRoleName, state.caseName)); 
  } 
  } 
  private loadContextFromApi(): void { 
- this.api.getSessionContext(this.sessionId).subscribe({ 
+ this.sessionsApi.getSessionContext(this.sessionId).subscribe({ 
  next: (ctx) => { 
  if (!ctx) return; 
  if (ctx.jobRoleName) this.jobRoleName.set(ctx.jobRoleName); 

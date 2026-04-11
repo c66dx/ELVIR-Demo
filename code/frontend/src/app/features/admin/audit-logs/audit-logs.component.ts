@@ -1,12 +1,13 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiService, type AuditLogRow } from '../../../core/services/api.service';
-import { formatDate } from '../../../shared/utils/date-format.util'; 
+import type { AuditLogRow } from '@core/services/admin-api.types';
+import { AdminApiService } from '@core/services/admin-api.service';
+import { formatDate } from '@shared/utils/date-format.util'; 
  @Component({ 
  selector: 'app-audit-logs',   standalone: true,   imports: [FormsModule],   templateUrl: './audit-logs.component.html',   styleUrl: './audit-logs.component.scss',
 })
 export class AuditLogsComponent implements OnInit { 
- private api = inject(ApiService); 
+ private adminApi = inject(AdminApiService); 
  logs: AuditLogRow[] = []; 
  loading = true; 
  page = 1; 
@@ -38,7 +39,7 @@ export class AuditLogsComponent implements OnInit {
  if (this.filterMethod) params.method = this.filterMethod; 
  const statusValue = Number(this.filterStatus); 
  if (this.filterStatus && !Number.isNaN(statusValue)) params.status_code = statusValue; 
- this.api.getAuditLogs(params).subscribe({ 
+ this.adminApi.getAuditLogs(params).subscribe({ 
  next: (res) => { 
  this.logs = res.items; 
  this.total = res.total; 
@@ -109,3 +110,5 @@ export class AuditLogsComponent implements OnInit {
  } 
  readonly formatDate = formatDate;
 }
+
+

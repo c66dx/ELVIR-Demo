@@ -1,11 +1,13 @@
 import { Component, ElementRef, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Subscription, timer } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
-import { ApiService } from '../../core/services/api.service';
-import { ThemeService } from '../../core/services/theme.service';
-import { YouthNotificationsService, YouthNotification } from '../../core/services/youth-notifications.service';
-import { UploadUrlPipe } from '../../core/pipes/upload-url.pipe';
+import { AuthService } from '@core/services/auth.service';
+import { AuthApiService } from '@core/services/auth-api.service';
+import { YouthApiService } from '@core/services/youth-api.service';
+import { ProfessionalApiService } from '@core/services/professional-api.service';
+import { ThemeService } from '@core/services/theme.service';
+import { YouthNotificationsService, YouthNotification } from '@core/services/youth-notifications.service';
+import { UploadUrlPipe } from '@core/pipes/upload-url.pipe';
 
 @Component({
   selector: 'app-topbar',
@@ -16,7 +18,9 @@ import { UploadUrlPipe } from '../../core/pipes/upload-url.pipe';
 })
 export class TopbarComponent implements OnInit, OnDestroy { 
  private auth = inject(AuthService); 
- private api = inject(ApiService); 
+ private authApi = inject(AuthApiService);
+ private youthsApi = inject(YouthApiService);
+ private professionalsApi = inject(ProfessionalApiService);
  private router = inject(Router); 
  private elementRef = inject(ElementRef); 
  private themeService = inject(ThemeService); 
@@ -50,7 +54,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
  this.accountRoute = '/cambiar-contrasena'; 
  this.accountLabel = 'Mi perfil'; 
  } 
- this.api.getMe().subscribe({ 
+ this.authApi.getMe().subscribe({ 
  next: (me) => { 
  if (!me) { 
  this.displayName = this.roleLabel || 'Usuario'; 
@@ -62,7 +66,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
  if (me.role === 'JOVEN' && me.youth_id) { 
  this.youthId = me.youth_id; 
  this.startNotificationsPolling(); 
- this.api.getYouth(me.youth_id).subscribe({ 
+ this.youthsApi.getYouth(me.youth_id).subscribe({ 
  next: (youth) => { 
  this.displayName = youth?.display_name || fallbackName; 
  if (youth?.profile_photo_url) {
@@ -73,7 +77,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
  return; 
  } 
  if (me.role === 'PROFESIONAL' && me.professional_id) { 
- this.api.getProfessional(me.professional_id).subscribe({ 
+ this.professionalsApi.getProfessional(me.professional_id).subscribe({ 
  next: (prof) => { 
  this.displayName = prof?.display_name || fallbackName; 
  },   error: () => (this.displayName = fallbackName),   }); 
@@ -97,7 +101,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
  onLogout(): void { 
     const confirmed = window.confirm('¿Seguro que quieres cerrar sesión?');
  if (!confirmed) return; 
- this.api.logout().subscribe({ 
+ this.authApi.logout().subscribe({ 
  complete: () => { 
  this.auth.logout(); 
  this.router.navigate(['/login']); 
@@ -184,3 +188,5 @@ onDocumentClick(event: Event): void {
  return base   .split(' ')   .filter(Boolean)   .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))   .join(' '); 
  }
 }
+
+

@@ -2,20 +2,21 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../../core/services/api.service';
-import { NotificationService } from '../../../core/services/notification.service';
-import { PROFILE_CHECKLIST_ITEMS } from '../../../core/models/youth.model';
-import { extractErrorMessage } from '../../../core/utils/http-error.util';
-import { FormContainerComponent } from '../../../shared/form/form-container/form-container.component';
-import { FormSectionComponent } from '../../../shared/form/form-section/form-section.component';
-import { FormGridComponent } from '../../../shared/form/form-grid/form-grid.component';
-import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
-import { FormActionsComponent } from '../../../shared/form/form-actions/form-actions.component';
-import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component';
-import { TextareaInputComponent } from '../../../shared/form/inputs/textarea-input/textarea-input.component';
-import { ToggleInputComponent } from '../../../shared/form/inputs/toggle-input/toggle-input.component';
-import { CheckboxGroupComponent } from '../../../shared/form/inputs/checkbox-group/checkbox-group.component';
-import { UploadUrlPipe } from '../../../core/pipes/upload-url.pipe';
+import { YouthApiService } from '@core/services/youth-api.service';
+import { NotificationService } from '@core/services/notification.service';
+import { PROFILE_CHECKLIST_ITEMS } from '@core/models/youth.model';
+import { extractErrorMessage } from '@core/utils/http-error.util';
+import { FormContainerComponent } from '@shared/form/form-container/form-container.component';
+import { FormSectionComponent } from '@shared/form/form-section/form-section.component';
+import { FormGridComponent } from '@shared/form/form-grid/form-grid.component';
+import { FormFieldComponent } from '@shared/form/form-field/form-field.component';
+import { FormActionsComponent } from '@shared/form/form-actions/form-actions.component';
+import { TextInputComponent } from '@shared/form/inputs/text-input/text-input.component';
+import { TextareaInputComponent } from '@shared/form/inputs/textarea-input/textarea-input.component';
+import { ToggleInputComponent } from '@shared/form/inputs/toggle-input/toggle-input.component';
+import { CheckboxGroupComponent } from '@shared/form/inputs/checkbox-group/checkbox-group.component';
+import { UploadUrlPipe } from '@core/pipes/upload-url.pipe';
+import { ModalDialogDirective } from '@shared/a11y/modal-dialog.directive';
 
  function normalizeRut(value: string): string { 
  return value.replace(/[^0-9kK]/g, '').toUpperCase();
@@ -69,13 +70,14 @@ import { UploadUrlPipe } from '../../../core/pipes/upload-url.pipe';
  ToggleInputComponent,
  CheckboxGroupComponent,
  UploadUrlPipe,
+ ModalDialogDirective,
  ],
  templateUrl: './joven-form.component.html',
  styleUrl: './joven-form.component.scss',
 })
 export class JovenFormComponent implements OnInit { 
  private fb = inject(FormBuilder); 
- private api = inject(ApiService); 
+ private youthsApi = inject(YouthApiService); 
  private router = inject(Router); 
  private route = inject(ActivatedRoute); 
  private notification = inject(NotificationService); 
@@ -119,7 +121,7 @@ export class JovenFormComponent implements OnInit {
  emailCtrl.updateValueAndValidity(); 
  }); 
  if (this.isEdit && this.youthId) { 
- this.api.getYouth(this.youthId).subscribe({ 
+ this.youthsApi.getYouth(this.youthId).subscribe({ 
  next: (youth) => { 
  if (youth) { 
  this.hasUserAccount = !!youth.user_id; 
@@ -159,7 +161,7 @@ export class JovenFormComponent implements OnInit {
  const shouldSendEmail = value.login_enabled && (!this.isEdit || !this.hasUserAccount); 
  const emailValue = shouldSendEmail && value.email ? value.email : undefined; 
  if (this.isEdit && this.youthId) { 
- this.api   .updateYouth(this.youthId, { 
+ this.youthsApi   .updateYouth(this.youthId, { 
  display_name: value.display_name,   rut: rutValue,   phone: value.phone || undefined,   year_of_birth: value.year_of_birth ?? undefined,   diagnosis: value.diagnosis || undefined,   login_enabled: value.login_enabled,   email: emailValue,   general_notes: value.general_notes || undefined,   profile_checklist: value.profile_checklist?.length ? value.profile_checklist : undefined,   })   .subscribe({ 
  next: (res) => { 
  if (res === null) { 
@@ -186,7 +188,7 @@ export class JovenFormComponent implements OnInit {
  this.submitting = false; 
  },   }); 
  } else { 
- this.api   .createYouth({ 
+ this.youthsApi   .createYouth({ 
  display_name: value.display_name,   rut: rutValue,   phone: value.phone || undefined,   year_of_birth: value.year_of_birth ?? undefined,   diagnosis: value.diagnosis || undefined,   login_enabled: value.login_enabled,   email: emailValue,   general_notes: value.general_notes || undefined,   profile_checklist: value.profile_checklist?.length ? value.profile_checklist : undefined,   is_active: true,   })   .subscribe({ 
  next: (res) => { 
  if (this.pendingPhotoFile) { 
@@ -259,7 +261,7 @@ export class JovenFormComponent implements OnInit {
  private uploadYouthPhoto(youthId: string | null, file: File): void { 
  if (!youthId) return; 
  this.photoUploading = true; 
- this.api.uploadYouthPhoto(youthId, file).subscribe({ 
+ this.youthsApi.uploadYouthPhoto(youthId, file).subscribe({ 
  next: (res) => { 
  this.photoUploading = false; 
  if ('error' in res) { 
@@ -340,13 +342,15 @@ export class JovenFormComponent implements OnInit {
  private clearRutServerError(): void { 
  const ctrl = this.form.get('rut'); 
  if (!ctrl?.errors?.['server']) return; 
- const { server, ...rest } = ctrl.errors as Record<string, unknown>; 
+ const rest = { ...(ctrl.errors as Record<string, unknown>) }; 
+ delete rest['server']; 
  ctrl.setErrors(Object.keys(rest).length ? rest : null); 
  } 
  private clearEmailServerError(): void { 
  const ctrl = this.form.get('email'); 
  if (!ctrl?.errors?.['server']) return; 
- const { server, ...rest } = ctrl.errors as Record<string, unknown>; 
+ const rest = { ...(ctrl.errors as Record<string, unknown>) }; 
+ delete rest['server']; 
  ctrl.setErrors(Object.keys(rest).length ? rest : null); 
  } 
  openChangeEmailModal(): void { 
@@ -359,6 +363,16 @@ export class JovenFormComponent implements OnInit {
  this.newEmailForChange = ''; 
  this.changeEmailError = ''; 
  } 
+ onChangeEmailOverlayKeydown(e: KeyboardEvent): void {
+ if (e.key === 'Escape') {
+ this.closeChangeEmailModal();
+ }
+ }
+ onChangeEmailModalPanelKeydown(e: KeyboardEvent): void {
+ if (e.key !== 'Escape') {
+ e.stopPropagation();
+ }
+ }
  submitChangeEmail(): void { 
  const email = this.newEmailForChange.trim(); 
  this.changeEmailError = ''; 
@@ -370,7 +384,7 @@ export class JovenFormComponent implements OnInit {
  return; 
  } 
  this.changingEmail = true; 
- this.api.changeYouthEmail(this.youthId, email).subscribe({ 
+ this.youthsApi.changeYouthEmail(this.youthId, email).subscribe({ 
  next: (res) => { 
  this.changingEmail = false; 
  if (res === null) { 
@@ -394,4 +408,6 @@ export class JovenFormComponent implements OnInit {
  },   }); 
  }
 }
+
+
 

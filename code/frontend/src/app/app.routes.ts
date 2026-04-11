@@ -1,176 +1,76 @@
-/**
+/**
  * Rutas de la app. Login es público (guestGuard). El resto requiere authGuard.
- * jovenGuard y profesionalGuard restringen por rol. Rutas hijas bajo AppShell.
- */
-import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
-import { guestGuard } from './core/guards/guest.guard';
-import { redirectToDashboardGuard } from './core/guards/redirect-dashboard.guard';
+ * jovenGuard y profesionalGuard restringen por rol. Rutas hijas bajo AppShell.
+ * Áreas joven / profesional / admin usan loadChildren para chunks perezosos.
+ */
+import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { guestGuard } from './core/guards/guest.guard';
+import { redirectToDashboardGuard } from './core/guards/redirect-dashboard.guard';
 import { jovenGuard, profesionalGuard, adminGuard } from './core/guards/role.guard';
-import { interviewLeaveGuard } from './core/guards/interview-leave.guard';
-import { AppShellComponent } from './layout/app-shell/app-shell.component';
-import { LoginComponent } from './features/auth/login/login.component';
-import { NuevaSimulacionComponent } from './features/joven/simulacion/nueva-simulacion.component';
-import { SimulacionDetailComponent } from './features/joven/simulacion/simulacion-detail.component';
+import { AppShellComponent } from './layout/app-shell/app-shell.component';
+import { LoginComponent } from './features/auth/login/login.component';
 import { SessionEndComponent } from './features/joven/simulacion/session-end/session-end.component';
-import { InterviewWaitingRoomComponent } from './core/components/interview-waiting-room/interview-waiting-room.component';
-import { InterviewPreparationComponent } from './core/components/interview-preparation/interview-preparation.component';
-import { HistorialJovenComponent } from './features/joven/historial/historial-joven.component';
-import { MaterialJovenComponent } from './features/joven/material/material-joven.component';
-import { MaterialListComponent } from './features/material/material-list.component';
-import { MyAccountComponent } from './features/joven/account/account.component';
-import { RetroalimentacionJovenComponent } from './features/joven/retroalimentacion/retroalimentacion.component';
-import { RetroalimentacionDetailJovenComponent } from './features/joven/retroalimentacion/retroalimentacion-detail.component';
-import { NotificationsJovenComponent } from './features/joven/notificaciones/notifications-joven.component';
-import { DashboardProfesionalComponent } from './features/profesional/dashboard/dashboard-profesional.component';
-import { JovenesListComponent } from './features/profesional/jovenes/jovenes-list.component';
-import { JovenFormComponent } from './features/profesional/jovenes/joven-form.component';
-import { PerfilJovenComponent } from './features/profesional/jovenes/perfil-joven.component';
-import { JovenDetailWrapperComponent } from './features/profesional/jovenes/joven-detail-wrapper.component';
-import { SupervisedStartComponent } from './features/profesional/jovenes/supervisada/supervised-start.component';
-import { SessionViewComponent } from './features/profesional/sesiones/session-view.component';
-import { SessionsListComponent } from './features/profesional/sesiones/sessions-list.component';
-import { ProfessionalAccountComponent } from './features/profesional/account/professional-account.component';
-import { ActivateComponent } from './features/auth/activate/activate.component';
-import { ChangePasswordComponent } from './features/auth/change-password/change-password.component';
-import { DashboardAdminComponent } from './features/admin/dashboard/dashboard-admin.component';
-import { ProfesionalFormComponent } from './features/admin/profesional-form/profesional-form.component';
-import { ProfesionalesListComponent } from './features/admin/profesionales-list/profesionales-list.component';
-import { MaterialFormComponent } from './features/admin/material-form/material-form.component';
-import { UsuariosLogsComponent } from './features/admin/usuarios-logs/usuarios-logs.component';
-import { AuditLogsComponent } from './features/admin/audit-logs/audit-logs.component';
-import { RedirectPlaceholderComponent } from './core/components/redirect-placeholder/redirect-placeholder.component';
-
-export const routes: Routes = [
-  {
-    path: 'login',
-    component: LoginComponent,
-    canActivate: [guestGuard],
-  },
-  {
-    path: 'activar',
-    component: ActivateComponent,
-    canActivate: [guestGuard],
-  },
-  {
-    path: '',
-    component: AppShellComponent,
-    canActivate: [authGuard],
-    children: [
-      {
-        path: '',
-        component: RedirectPlaceholderComponent,
-        canActivate: [redirectToDashboardGuard],
-        pathMatch: 'full',
-      },
-      {
-        path: 'session-end',
-        canActivate: [authGuard],
-        component: SessionEndComponent,
-      },
-      {
-        path: 'cambiar-contrasena',
-        canActivate: [authGuard],
-        component: ChangePasswordComponent,
-      },
+import { ActivateComponent } from './features/auth/activate/activate.component';
+import { ChangePasswordComponent } from './features/auth/change-password/change-password.component';
+import { RedirectPlaceholderComponent } from './core/components/redirect-placeholder/redirect-placeholder.component';
+
+export const routes: Routes = [
+  {
+    path: 'login',
+    title: 'Iniciar sesión',
+    component: LoginComponent,
+    canActivate: [guestGuard],
+  },
+  {
+    path: 'activar',
+    title: 'Activar cuenta',
+    component: ActivateComponent,
+    canActivate: [guestGuard],
+  },
+  {
+    path: '',
+    component: AppShellComponent,
+    canActivate: [authGuard],
+    children: [
       {
-        path: 'joven/simulacion/nueva',
-        canActivate: [jovenGuard],
-        component: NuevaSimulacionComponent,
+        path: '',
+        component: RedirectPlaceholderComponent,
+        canActivate: [redirectToDashboardGuard],
+        pathMatch: 'full',
       },
       {
-        path: 'joven/simulacion/:sessionId/preparacion',
-        canActivate: [jovenGuard],
-        component: InterviewPreparationComponent,
-        data: { target: 'joven' },
+        path: 'session-end',
+        title: 'Fin de sesión',
+        canActivate: [authGuard],
+        component: SessionEndComponent,
       },
       {
-        path: 'joven/simulacion/:sessionId/espera',
-        canActivate: [jovenGuard],
-        component: InterviewWaitingRoomComponent,
-        data: { target: 'joven' },
+        path: 'cambiar-contrasena',
+        title: 'Cambiar contraseña',
+        canActivate: [authGuard],
+        component: ChangePasswordComponent,
       },
       {
-        path: 'joven/simulacion/:sessionId',
+        path: 'joven',
         canActivate: [jovenGuard],
-        canDeactivate: [interviewLeaveGuard],
-        component: SimulacionDetailComponent,
-      },
-      {
-        path: 'joven',
-        canActivate: [jovenGuard],
-        children: [
-          { path: '', redirectTo: '/joven/simulacion/nueva', pathMatch: 'full' },
-          { path: 'historial', component: HistorialJovenComponent },
-          { path: 'retroalimentacion/:sessionId', component: RetroalimentacionDetailJovenComponent },
-          { path: 'retroalimentacion', component: RetroalimentacionJovenComponent },
-          { path: 'material', component: MaterialJovenComponent },
-          { path: 'notificaciones', component: NotificationsJovenComponent },
-          { path: 'cuenta', component: MyAccountComponent },
-        ],
+        loadChildren: () =>
+          import('./features/joven/joven.routes').then((m) => m.JOVEN_ROUTES),
       },
       {
         path: 'profesional',
         canActivate: [profesionalGuard],
-        children: [
-          { path: 'dashboard', component: DashboardProfesionalComponent },
-          { path: 'material', component: MaterialListComponent },
-          { path: 'material/nuevo', component: MaterialFormComponent },
-          { path: 'sesiones', component: SessionsListComponent },
-          { path: 'sesiones/:sessionId', component: SessionViewComponent },
-          {
-            path: 'simulacion/:sessionId/preparacion',
-            component: InterviewPreparationComponent,
-            data: { target: 'profesional' },
-          },
-          {
-            path: 'simulacion/:sessionId/espera',
-            component: InterviewWaitingRoomComponent,
-            data: { target: 'profesional' },
-          },
-          { path: 'simulacion/:sessionId', component: SimulacionDetailComponent, canDeactivate: [interviewLeaveGuard] },
-          { path: 'cuenta', component: ProfessionalAccountComponent },
-          {
-            path: 'jovenes',
-            children: [
-              { path: '', component: JovenesListComponent },
-              { path: 'nuevo', component: JovenFormComponent },
-              {
-                path: ':youthId',
-                component: JovenDetailWrapperComponent,
-                children: [
-                  { path: '', component: PerfilJovenComponent },
-                  { path: 'editar', component: JovenFormComponent },
-                  { path: 'supervisada/nueva', component: SupervisedStartComponent },
-                ],
-              },
-            ],
-          },
-        ],
-      },
+        loadChildren: () =>
+          import('./features/profesional/profesional.routes').then((m) => m.PROFESIONAL_ROUTES),
+      },
       {
         path: 'admin',
         canActivate: [adminGuard],
-        children: [
-          { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-          { path: 'dashboard', component: DashboardAdminComponent },
-          { path: 'usuarios', component: UsuariosLogsComponent },
-          { path: 'auditoria', component: AuditLogsComponent },
-          {
-            path: 'profesionales',
-            children: [
-              { path: '', component: ProfesionalesListComponent },
-              { path: 'nuevo', component: ProfesionalFormComponent },
-              { path: ':professionalId/editar', component: ProfesionalFormComponent },
-            ],
-          },
-          { path: 'material', component: MaterialListComponent },
-          { path: 'material/nuevo', component: MaterialFormComponent },
-        ],
+        loadChildren: () =>
+          import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
       },
-    ],
-  },
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: '**', redirectTo: 'login' },
-];
-
+    ],
+  },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login' },
+];

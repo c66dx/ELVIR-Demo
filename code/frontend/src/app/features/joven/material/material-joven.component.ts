@@ -1,22 +1,23 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import { Observable, of, BehaviorSubject, combineLatest } from 'rxjs';
+import { of, BehaviorSubject, combineLatest } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
-import { YouthService } from '../../../core/services/youth.service';
-import { ApiService } from '../../../core/services/api.service';
-import type { MaterialSuggestion } from '../../../core/models/material-suggestion.model';
-import type { SupportMaterial } from '../../../core/models/support-material.model';
-import type { MaterialType } from '../../../core/models/types.model'; 
+import { YouthService } from '@core/services/youth.service';
+import { MaterialApiService } from '@core/services/material-api.service';
+import type { MaterialSuggestion } from '@core/models/material-suggestion.model';
+import type { SupportMaterial } from '@core/models/support-material.model';
+import type { MaterialType } from '@core/models/types.model'; 
  interface SuggestionWithMaterial extends MaterialSuggestion { 
  material?: SupportMaterial;
 } 
 /**   * Material de apoyo: sección "Sugerido para ti" (por profesional) y "Catálogo".   * Registra vistas al abrir material para marcar como visto.   */
 @Component({ 
  selector: 'app-material-joven',   standalone: true,   imports: [AsyncPipe],   templateUrl: './material-joven.component.html',   styleUrl: './material-joven.component.scss',
+ changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MaterialJovenComponent { 
  private youthService = inject(YouthService); 
- private api = inject(ApiService); 
+ private materials = inject(MaterialApiService); 
  viewedMaterialIds = signal<Set<string>>(new Set()); 
  private suggestedPage$ = new BehaviorSubject(1); 
  private catalogPage$ = new BehaviorSubject(1); 
@@ -27,7 +28,7 @@ export class MaterialJovenComponent {
    switchMap(([youthId, page]) => {
      this.currentYouthId = youthId;
      return youthId
-       ? this.api.getYouthMaterialSuggestionsPaged(youthId, { page, page_size: this.suggestedPageSize }).pipe(
+       ? this.materials.getYouthMaterialSuggestionsPaged(youthId, { page, page_size: this.suggestedPageSize }).pipe(
            map((paged) => ({
              ...paged,
              items: paged.items.map((s) => ({
@@ -39,12 +40,12 @@ export class MaterialJovenComponent {
        : of({ items: [], total: 0, page: 1, page_size: this.suggestedPageSize });
    })
  );
- catalog$ = this.catalogPage$.pipe(   switchMap((page) =>   this.api.getSupportMaterialPaged({ page, page_size: this.catalogPageSize }).pipe(   map((paged) => ({ ...paged }))   )   )   ); 
+ catalog$ = this.catalogPage$.pipe(   switchMap((page) =>   this.materials.getSupportMaterialPaged({ page, page_size: this.catalogPageSize }).pipe(   map((paged) => ({ ...paged }))   )   )   ); 
  constructor() { 
  this.youthService.getCurrentYouthId().subscribe((youthId) => { 
  this.currentYouthId = youthId; 
  if (youthId) { 
- this.api.getYouthMaterialViewsPaged(youthId, { page: 1, page_size: 200 }).subscribe({ 
+ this.materials.getYouthMaterialViewsPaged(youthId, { page: 1, page_size: 200 }).subscribe({ 
  next: (views) => { 
  this.viewedMaterialIds.update((set) => new Set([...set, ...views.items.map((v) => v.material_id)])); 
  },   }); 
@@ -57,7 +58,7 @@ export class MaterialJovenComponent {
  openMaterial(materialId: string, url: string): void { 
  const youthId = this.currentYouthId; 
  if (youthId) { 
- this.api.recordMaterialView(materialId, youthId).subscribe({ 
+ this.materials.recordMaterialView(materialId, youthId).subscribe({ 
  next: () => { 
  this.viewedMaterialIds.update((set) => new Set([...set, materialId])); 
  },   }); 
@@ -119,4 +120,6 @@ export class MaterialJovenComponent {
  return 'Recurso externo con consejos aplicables a entrevistas laborales.'; 
  }
 }
+
+
 

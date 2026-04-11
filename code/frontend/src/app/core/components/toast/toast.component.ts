@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NotificationService, ToastMessage } from '../../services/notification.service';
+import { NotificationService, ToastMessage } from '@core/services/notification.service';
 import { Subscription } from 'rxjs'; 
  @Component({ 
  selector: 'app-toast',   standalone: true,   imports: [CommonModule],   template: `   <div class="toast-container"> 

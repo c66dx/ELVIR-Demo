@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UserRole } from '../models/user.model'; 
+import { UserRole } from '@core/models/user.model'; 
  const ROLE_KEY = 'elvir_role';
 const TOKEN_KEY = 'elvir_token'; 
  /** Servicio de autenticación. La autenticación principal usa cookie HttpOnly emitida por backend. En frontend solo persistimos el rol para routing/UI. */

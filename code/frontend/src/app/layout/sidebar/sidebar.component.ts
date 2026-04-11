@@ -1,10 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
-import { ApiService } from '../../core/services/api.service';
-import { UserRole } from '../../core/models/user.model';
+import { AuthService } from '@core/services/auth.service';
+import { AuthApiService } from '@core/services/auth-api.service';
+import { YouthApiService } from '@core/services/youth-api.service';
+import { ProfessionalApiService } from '@core/services/professional-api.service';
+import { UserRole } from '@core/models/user.model';
 import { JOVEN_NAV, PROFESIONAL_NAV, ADMIN_NAV, type NavItem } from '../navigation';
-import { UploadUrlPipe } from '../../core/pipes/upload-url.pipe';
+import { UploadUrlPipe } from '@core/pipes/upload-url.pipe';
 
 @Component({
   selector: 'app-sidebar',
@@ -15,7 +17,9 @@ import { UploadUrlPipe } from '../../core/pipes/upload-url.pipe';
 })
 export class SidebarComponent implements OnInit { 
  private auth = inject(AuthService); 
- private api = inject(ApiService); 
+ private authApi = inject(AuthApiService);
+ private youthsApi = inject(YouthApiService);
+ private professionalsApi = inject(ProfessionalApiService);
  role = this.auth.getRole(); 
  roleLabel = ''; 
  displayName = ''; 
@@ -33,7 +37,7 @@ export class SidebarComponent implements OnInit {
  ngOnInit(): void { 
  if (!this.showProfile) return; 
  this.roleLabel = this.mapRoleLabel(this.role); 
- this.api.getMe().subscribe({ 
+ this.authApi.getMe().subscribe({ 
  next: (me) => { 
  if (!me) { 
  this.displayName = this.roleLabel || 'Usuario'; 
@@ -43,7 +47,7 @@ export class SidebarComponent implements OnInit {
  this.avatarUrl = me.profile_photo_url ?? null;
  this.avatarLoadFailed = false;
  if (me.role === 'JOVEN' && me.youth_id) { 
- this.api.getYouth(me.youth_id).subscribe({ 
+ this.youthsApi.getYouth(me.youth_id).subscribe({ 
  next: (youth) => { 
  this.displayName = youth?.display_name || fallbackName; 
  if (youth?.profile_photo_url) {
@@ -54,7 +58,7 @@ export class SidebarComponent implements OnInit {
  return; 
  } 
  if (me.role === 'PROFESIONAL' && me.professional_id) { 
- this.api.getProfessional(me.professional_id).subscribe({ 
+ this.professionalsApi.getProfessional(me.professional_id).subscribe({ 
  next: (prof) => { 
  this.displayName = prof?.display_name || fallbackName; 
  },   error: () => (this.displayName = fallbackName),   }); 
@@ -85,5 +89,7 @@ export class SidebarComponent implements OnInit {
  return base   .split(' ')   .filter(Boolean)   .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))   .join(' '); 
  }
 }
+
+
 
 

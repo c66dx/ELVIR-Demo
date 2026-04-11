@@ -1,15 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ApiService } from '../../../core/services/api.service';
-import { NotificationService } from '../../../core/services/notification.service';
-import { FormActionsComponent } from '../../../shared/form/form-actions/form-actions.component';
-import { FormContainerComponent } from '../../../shared/form/form-container/form-container.component';
-import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
-import { FormGridComponent } from '../../../shared/form/form-grid/form-grid.component';
-import { FormSectionComponent } from '../../../shared/form/form-section/form-section.component';
-import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component';
-import { UploadUrlPipe } from '../../../core/pipes/upload-url.pipe';
+import { AdminApiService } from '@core/services/admin-api.service';
+import { ProfessionalApiService } from '@core/services/professional-api.service';
+import { NotificationService } from '@core/services/notification.service';
+import { FormActionsComponent } from '@shared/form/form-actions/form-actions.component';
+import { FormContainerComponent } from '@shared/form/form-container/form-container.component';
+import { FormFieldComponent } from '@shared/form/form-field/form-field.component';
+import { FormGridComponent } from '@shared/form/form-grid/form-grid.component';
+import { FormSectionComponent } from '@shared/form/form-section/form-section.component';
+import { TextInputComponent } from '@shared/form/inputs/text-input/text-input.component';
+import { UploadUrlPipe } from '@core/pipes/upload-url.pipe';
 
 @Component({
   selector: 'app-profesional-form',
@@ -30,7 +31,8 @@ import { UploadUrlPipe } from '../../../core/pipes/upload-url.pipe';
 })
 export class ProfesionalFormComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private api = inject(ApiService);
+  private professionalsApi = inject(ProfessionalApiService);
+  private adminApi = inject(AdminApiService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private notification = inject(NotificationService);
@@ -73,7 +75,7 @@ export class ProfesionalFormComponent implements OnInit {
   }
 
   private loadProfessional(id: string): void {
-    this.api.getProfessional(id).subscribe((prof) => {
+    this.professionalsApi.getProfessional(id).subscribe((prof) => {
       if (!prof) return;
       this.professional = {
         id: prof.id,
@@ -97,7 +99,7 @@ export class ProfesionalFormComponent implements OnInit {
     const label = nextActive ? 'Reactivar' : 'Desactivar';
     if (!confirm(`¿${label} a ${this.professional.display_name}?`)) return;
     const v = this.form.getRawValue();
-    this.api
+    this.professionalsApi
       .updateProfessional(this.professionalId, {
         display_name: v.display_name,
         specialty: v.specialty || undefined,
@@ -120,7 +122,7 @@ export class ProfesionalFormComponent implements OnInit {
   deleteProfessional(): void {
     if (!this.professionalId || !this.professional) return;
     if (!confirm(`¿Eliminar a ${this.professional.display_name}? Esta acción no se puede deshacer.`)) return;
-    this.api.deleteProfessionalAsAdmin(this.professionalId).subscribe({
+    this.adminApi.deleteProfessionalAsAdmin(this.professionalId).subscribe({
       next: (res) => {
         if ('error' in res) {
           this.notification.error(res.error);
@@ -149,7 +151,7 @@ export class ProfesionalFormComponent implements OnInit {
     const v = this.form.getRawValue();
 
     if (this.isEdit && this.professionalId) {
-      this.api
+      this.professionalsApi
         .updateProfessional(this.professionalId, {
           display_name: v.display_name,
           specialty: v.specialty || undefined,
@@ -172,7 +174,7 @@ export class ProfesionalFormComponent implements OnInit {
       return;
     }
 
-    this.api
+    this.professionalsApi
       .createProfessional({
         email: v.email,
         display_name: v.display_name,
@@ -210,3 +212,5 @@ export class ProfesionalFormComponent implements OnInit {
     this.router.navigate(['/admin/profesionales']);
   }
 }
+
+

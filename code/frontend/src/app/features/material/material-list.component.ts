@@ -1,23 +1,24 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { ApiService } from '../../core/services/api.service';
-import { AuthService } from '../../core/services/auth.service';
-import type { SupportMaterial } from '../../core/models/support-material.model';
-import type { MaterialType } from '../../core/models/types.model';
-import { formatDate } from '../../shared/utils/date-format.util'; 
+import { MaterialApiService } from '@core/services/material-api.service';
+import { AuthService } from '@core/services/auth.service';
+import type { SupportMaterial } from '@core/models/support-material.model';
+import type { MaterialType } from '@core/models/types.model';
+import { formatDate } from '@shared/utils/date-format.util'; 
  @Component({ 
  selector: 'app-material-list',   standalone: true,   imports: [AsyncPipe, RouterLink],   templateUrl: './material-list.component.html',   styleUrl: './material-list.component.scss',
+ changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MaterialListComponent { 
- private api = inject(ApiService); 
+ private materials = inject(MaterialApiService); 
  private auth = inject(AuthService); 
  private page$ = new BehaviorSubject(1); 
  readonly pageSize = 10; 
  readonly formatDate = formatDate; 
- materials$ = this.page$.pipe(   switchMap((page) => this.api.getSupportMaterialPaged({ page, page_size: this.pageSize }))   ); 
+ materials$ = this.page$.pipe(   switchMap((page) => this.materials.getSupportMaterialPaged({ page, page_size: this.pageSize }))   ); 
  get createLink(): string { 
  return this.auth.getRole() === 'ADMIN' ? '/admin/material/nuevo' : '/profesional/material/nuevo'; 
  } 
@@ -62,3 +63,5 @@ export class MaterialListComponent {
  return 'Recurso externo con consejos aplicables a entrevistas laborales.'; 
  }
 }
+
+

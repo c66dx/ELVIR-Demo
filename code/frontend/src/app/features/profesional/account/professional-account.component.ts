@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ApiService } from '../../../core/services/api.service';
-import type { Professional } from '../../../core/models/professional.model';
-import { FormActionsComponent } from '../../../shared/form/form-actions/form-actions.component';
-import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
-import { FormGridComponent } from '../../../shared/form/form-grid/form-grid.component';
-import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component';
-import { UploadUrlPipe } from '../../../core/pipes/upload-url.pipe';
+import { AuthApiService } from '@core/services/auth-api.service';
+import { ProfessionalApiService } from '@core/services/professional-api.service';
+import type { Professional } from '@core/models/professional.model';
+import { FormActionsComponent } from '@shared/form/form-actions/form-actions.component';
+import { FormFieldComponent } from '@shared/form/form-field/form-field.component';
+import { FormGridComponent } from '@shared/form/form-grid/form-grid.component';
+import { TextInputComponent } from '@shared/form/inputs/text-input/text-input.component';
+import { UploadUrlPipe } from '@core/pipes/upload-url.pipe';
 
 interface MeInfo {
   user_id: string;
@@ -20,7 +21,7 @@ interface MeInfo {
 
 @Component({
   selector: 'app-professional-account',
-  standalone: true,
+  standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -35,7 +36,8 @@ interface MeInfo {
   styleUrl: './professional-account.component.scss',
 })
 export class ProfessionalAccountComponent implements OnInit {
-  private api = inject(ApiService);
+  private authApi = inject(AuthApiService);
+  private professionalsApi = inject(ProfessionalApiService);
   private fb = inject(FormBuilder);
 
   me = signal<MeInfo | null>(null);
@@ -61,11 +63,11 @@ export class ProfessionalAccountComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.api.getMe().subscribe((me) => {
+    this.authApi.getMe().subscribe((me) => {
       this.me.set(me as MeInfo | null);
       this.photoUrl.set(me?.profile_photo_url ?? null);
       if (me?.professional_id) {
-        this.api.getProfessional(me.professional_id).subscribe((p) => this.professional.set(p));
+        this.professionalsApi.getProfessional(me.professional_id).subscribe((p) => this.professional.set(p));
       }
       this.loading.set(false);
     });
@@ -77,7 +79,7 @@ export class ProfessionalAccountComponent implements OnInit {
     if (!file) return;
     this.photoError.set(null);
     this.photoLoading.set(true);
-    this.api.uploadProfilePhoto(file).subscribe((res) => {
+    this.authApi.uploadProfilePhoto(file).subscribe((res) => {
       this.photoLoading.set(false);
       if ('error' in res) {
         this.photoError.set(res.error);
@@ -95,7 +97,7 @@ export class ProfessionalAccountComponent implements OnInit {
     this.activationUrl.set(null);
     const { new_email, current_password } = this.emailForm.value;
     if (!new_email || !current_password) return;
-    this.api.requestEmailChange(new_email, current_password).subscribe((res) => {
+    this.authApi.requestEmailChange(new_email, current_password).subscribe((res) => {
       if ('error' in res) {
         this.emailError.set(res.error);
         return;
@@ -108,3 +110,5 @@ export class ProfessionalAccountComponent implements OnInit {
     });
   }
 }
+
+

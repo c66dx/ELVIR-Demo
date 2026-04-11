@@ -45,11 +45,12 @@ export class TextInputComponent implements ControlValueAccessor {
  @Input() max?: string | number; 
  @Input() step?: string | number; 
  @Input() readonly = false; 
- @Output() blur = new EventEmitter<void>(); 
+ /** Emite cuando el input pierde el foco (no usar el nombre `blur`: reservado en el DOM). */
+ @Output() fieldBlur = new EventEmitter<void>(); 
  value = ''; 
  disabled = false; 
- private onChange: (value: string) => void = () => {}; 
- private onTouched: () => void = () => {}; 
+ private onChange: (value: string) => void = () => undefined; 
+ private onTouched: () => void = () => undefined; 
  writeValue(value: string | null): void { 
  this.value = value  ?? ''; 
  } 
@@ -69,6 +70,6 @@ export class TextInputComponent implements ControlValueAccessor {
  } 
  handleBlur(): void { 
  this.onTouched(); 
- this.blur.emit(); 
+ this.fieldBlur.emit(); 
  }
 }

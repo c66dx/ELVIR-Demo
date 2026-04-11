@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { resolveUploadUrl } from '../utils/media-url.util';
+import { resolveUploadUrl } from '@core/utils/media-url.util';
 
 @Pipe({
   name: 'uploadUrl',

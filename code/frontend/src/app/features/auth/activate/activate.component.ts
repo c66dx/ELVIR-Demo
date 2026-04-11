@@ -1,17 +1,17 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ApiService } from '../../../core/services/api.service';
+import { AuthApiService } from '@core/services/auth-api.service';
 import { environment } from '../../../../environments/environment';
-import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
-import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component'; 
+import { FormFieldComponent } from '@shared/form/form-field/form-field.component';
+import { TextInputComponent } from '@shared/form/inputs/text-input/text-input.component'; 
  type ActivateState = 'loading' | 'valid' | 'invalid' | 'success' | 'error'; 
  @Component({ 
- selector: 'app-activate',   standalone: true,   imports: [ReactiveFormsModule, RouterLink, FormFieldComponent, TextInputComponent],   templateUrl: './activate.component.html',   styleUrl: './activate.component.scss',
+ selector: 'app-activate',   standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,   imports: [ReactiveFormsModule, RouterLink, FormFieldComponent, TextInputComponent],   templateUrl: './activate.component.html',   styleUrl: './activate.component.scss',
 })
 export class ActivateComponent implements OnInit { 
  private fb = inject(FormBuilder); 
- private api = inject(ApiService); 
+ private authApi = inject(AuthApiService); 
  private router = inject(Router); 
  private route = inject(ActivatedRoute); 
  state = signal<ActivateState>('loading'); 
@@ -31,7 +31,7 @@ export class ActivateComponent implements OnInit {
  this.errorCode.set('TOKEN_NOT_FOUND'); 
  return; 
  } 
- this.api.validateActivationToken(this.token).subscribe({ 
+ this.authApi.validateActivationToken(this.token).subscribe({ 
  next: (res) => { 
  if (res.valid && res.email) { 
  this.email.set(res.email); 
@@ -99,7 +99,7 @@ export class ActivateComponent implements OnInit {
  } else { 
  params.password = password; 
  } 
- this.api.activateAccount(params).subscribe({ 
+ this.authApi.activateAccount(params).subscribe({ 
  next: (res) => { 
  if (res.success) { 
  this.state.set('success'); 
@@ -116,3 +116,5 @@ export class ActivateComponent implements OnInit {
  this.router.navigate(['/login']); 
  }
 }
+
+

@@ -1,15 +1,16 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { ApiService } from '../../../core/services/api.service';
-import type { Session } from '../../../core/models/session.model';
-import type { Youth } from '../../../core/models/youth.model';
-import type { SessionWithTemplateLabel } from '../../../core/services/api.service';
-import { UploadUrlPipe } from '../../../core/pipes/upload-url.pipe';
-import { StatusBadgeComponent } from '../../../shared/status-badge/status-badge.component';
-import { formatDate } from '../../../shared/utils/date-format.util'; 
+import { SessionApiService } from '@core/services/session-api.service';
+import { YouthApiService } from '@core/services/youth-api.service';
+import type { Session } from '@core/models/session.model';
+import type { Youth } from '@core/models/youth.model';
+import type { SessionWithTemplateLabel } from '@core/services/api-types';
+import { UploadUrlPipe } from '@core/pipes/upload-url.pipe';
+import { StatusBadgeComponent } from '@shared/status-badge/status-badge.component';
+import { formatDate } from '@shared/utils/date-format.util'; 
  export interface DashboardSessionItem { 
  id: string; 
  youthId: string; 
@@ -34,15 +35,17 @@ import { formatDate } from '../../../shared/utils/date-format.util';
  imports: [AsyncPipe, RouterLink, StatusBadgeComponent, UploadUrlPipe],
  templateUrl: './dashboard-profesional.component.html',
  styleUrl: './dashboard-profesional.component.scss',
+ changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardProfesionalComponent { 
- private api = inject(ApiService); 
+ private sessionsApi = inject(SessionApiService); 
+ private youthsApi = inject(YouthApiService); 
  data$: Observable<DashboardProfesionalData> = forkJoin({ 
- youths: this.api.getYouths(),   sessions: this.api.getSessionsWithTemplateLabel(),   }).pipe(   switchMap(({ youths, sessions }) => { 
+ youths: this.youthsApi.getYouths(),   sessions: this.sessionsApi.getSessionsWithTemplateLabel(),   }).pipe(   switchMap(({ youths, sessions }) => { 
  const youthMap = new Map<string, Youth>(youths.map((y) => [y.id, y])); 
  const ordered = [...sessions].sort((a, b) => this.sessionTimestamp(b) - this.sessionTimestamp(a)); 
  const recentCompleted = ordered.filter((s) => s.status === 'COMPLETADA').slice(0, 8); 
- const summaries$ = recentCompleted.length ? forkJoin(recentCompleted.map((session) => this.api.getSessionSummary(session.id))) : of([]); 
+ const summaries$ = recentCompleted.length ? forkJoin(recentCompleted.map((session) => this.sessionsApi.getSessionSummary(session.id))) : of([]); 
  return summaries$.pipe(   map((summaries) => { 
  const pendingSessions = recentCompleted   .filter((session, index) => !summaries[index])   .map((s) => ({ ...this.buildSessionItem(s, youthMap), pendingFeedback: true })); 
  const pendingIds = new Set(pendingSessions.map((s) => s.id)); 
@@ -75,3 +78,5 @@ export class DashboardProfesionalComponent {
  return mode === 'AUTOGESTIONADA' ? 'Autogestionada' : 'Supervisada'; 
  }
 }
+
+

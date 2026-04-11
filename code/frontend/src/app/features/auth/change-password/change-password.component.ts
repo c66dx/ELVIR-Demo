@@ -1,16 +1,16 @@
-import { Component, computed, inject, signal } from "@angular/core";
+import { Component, computed, inject, OnInit, signal, ChangeDetectionStrategy } from "@angular/core";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
-import { ApiService } from "../../../core/services/api.service";
-import { NotificationService } from "../../../core/services/notification.service";
-import { FormActionsComponent } from "../../../shared/form/form-actions/form-actions.component";
-import { FormContainerComponent } from "../../../shared/form/form-container/form-container.component";
-import { FormFieldComponent } from "../../../shared/form/form-field/form-field.component";
-import { FormGridComponent } from "../../../shared/form/form-grid/form-grid.component";
-import { FormSectionComponent } from "../../../shared/form/form-section/form-section.component";
-import { TextInputComponent } from "../../../shared/form/inputs/text-input/text-input.component";
+import { AuthApiService } from "@core/services/auth-api.service";
+import { NotificationService } from "@core/services/notification.service";
+import { FormActionsComponent } from "@shared/form/form-actions/form-actions.component";
+import { FormContainerComponent } from "@shared/form/form-container/form-container.component";
+import { FormFieldComponent } from "@shared/form/form-field/form-field.component";
+import { FormGridComponent } from "@shared/form/form-grid/form-grid.component";
+import { FormSectionComponent } from "@shared/form/form-section/form-section.component";
+import { TextInputComponent } from "@shared/form/inputs/text-input/text-input.component";
 import { environment } from "../../../../environments/environment";
-import { UploadUrlPipe } from "../../../core/pipes/upload-url.pipe";
+import { UploadUrlPipe } from "@core/pipes/upload-url.pipe";
 
 interface MeInfo {
   email: string;
@@ -20,7 +20,7 @@ interface MeInfo {
 
 @Component({
   selector: "app-change-password",
-  standalone: true,
+  standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     RouterLink,
@@ -35,9 +35,9 @@ interface MeInfo {
   templateUrl: "./change-password.component.html",
   styleUrl: "./change-password.component.scss",
 })
-export class ChangePasswordComponent {
+export class ChangePasswordComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private api = inject(ApiService);
+  private authApi = inject(AuthApiService);
   private router = inject(Router);
   private notification = inject(NotificationService);
 
@@ -79,7 +79,7 @@ export class ChangePasswordComponent {
   errorMessage = "";
 
   ngOnInit(): void {
-    this.api.getMe().subscribe((me) => {
+    this.authApi.getMe().subscribe((me) => {
       this.me.set(me as MeInfo | null);
       this.photoUrl.set(me?.profile_photo_url ?? null);
     });
@@ -91,7 +91,7 @@ export class ChangePasswordComponent {
     if (!file) return;
     this.photoError.set(null);
     this.photoLoading.set(true);
-    this.api.uploadProfilePhoto(file).subscribe((res) => {
+    this.authApi.uploadProfilePhoto(file).subscribe((res) => {
       this.photoLoading.set(false);
       if ("error" in res) {
         this.photoError.set(res.error);
@@ -111,7 +111,7 @@ export class ChangePasswordComponent {
     if (this.form.invalid) return;
     this.errorMessage = "";
     this.submitting = true;
-    this.api.changePassword(v.current_password, v.new_password).subscribe({
+    this.authApi.changePassword(v.current_password, v.new_password).subscribe({
       next: (result) => {
         this.submitting = false;
         if ("error" in result) {
@@ -127,3 +127,5 @@ export class ChangePasswordComponent {
     });
   }
 }
+
+

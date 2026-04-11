@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-import { UserRole } from '../models/user.model';
+import { AuthService } from '@core/services/auth.service';
+import { UserRole } from '@core/models/user.model';
 
 /** Crea un guard que restringe la ruta a un rol concreto (JOVEN o PROFESIONAL). */
 export function createRoleGuard(allowedRole: UserRole): CanActivateFn {

@@ -1,8 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { UploadUrlPipe } from '../../../core/pipes/upload-url.pipe';
+import { UploadUrlPipe } from '@core/pipes/upload-url.pipe';
 import { RouterLink } from '@angular/router';
-import { ApiService } from '../../../core/services/api.service';
-import { NotificationService } from '../../../core/services/notification.service'; 
+import { AdminApiService } from '@core/services/admin-api.service';
+import { ProfessionalApiService } from '@core/services/professional-api.service';
+import { NotificationService } from '@core/services/notification.service'; 
  /** Lista de profesionales (Admin). */
 @Component({ 
  selector: 'app-profesionales-list',
@@ -12,7 +13,8 @@ import { NotificationService } from '../../../core/services/notification.service
  styleUrl: './profesionales-list.component.scss',
 })
 export class ProfesionalesListComponent implements OnInit { 
- private api = inject(ApiService); 
+ private professionalsApi = inject(ProfessionalApiService); 
+ private adminApi = inject(AdminApiService);
  private notification = inject(NotificationService); 
  professionals: { id: string; display_name: string; specialty?: string; institution?: string; is_active: boolean; profile_photo_url?: string }[] = []; 
  loading = true; 
@@ -24,7 +26,7 @@ export class ProfesionalesListComponent implements OnInit {
  } 
  loadPage(page: number): void { 
  this.loading = true; 
- this.api.getProfessionalsPaged({ page, page_size: this.pageSize }).subscribe({ 
+ this.professionalsApi.getProfessionalsPaged({ page, page_size: this.pageSize }).subscribe({ 
  next: (list) => { 
  this.professionals = list.items; 
  this.total = list.total; 
@@ -49,7 +51,7 @@ export class ProfesionalesListComponent implements OnInit {
  } 
  onDeactivate(professional: { id: string; display_name: string; specialty?: string; institution?: string }): void { 
  if (!confirm(`¿Desactivar a ${professional.display_name}?`)) return; 
- this.api   .updateProfessional(professional.id, { 
+ this.professionalsApi   .updateProfessional(professional.id, { 
  display_name: professional.display_name,   specialty: professional.specialty,   institution: professional.institution,   is_active: false,   })   .subscribe({ 
  next: (res) => { 
  if ('error' in res) { 
@@ -62,7 +64,7 @@ export class ProfesionalesListComponent implements OnInit {
  } 
  onActivate(professional: { id: string; display_name: string; specialty?: string; institution?: string }): void { 
  if (!confirm(`¿Reactivar a ${professional.display_name}?`)) return; 
- this.api   .updateProfessional(professional.id, { 
+ this.professionalsApi   .updateProfessional(professional.id, { 
  display_name: professional.display_name,   specialty: professional.specialty,   institution: professional.institution,   is_active: true,   })   .subscribe({ 
  next: (res) => { 
  if ('error' in res) { 
@@ -75,7 +77,7 @@ export class ProfesionalesListComponent implements OnInit {
  } 
  onDelete(professional: { id: string; display_name: string }): void { 
  if (!confirm(`¿Eliminar a ${professional.display_name}? Esta acción no se puede deshacer.`)) return; 
- this.api.deleteProfessionalAsAdmin(professional.id).subscribe({ 
+ this.adminApi.deleteProfessionalAsAdmin(professional.id).subscribe({ 
  next: (res) => { 
  if ('error' in res) { 
  this.notification.error(res.error); 
@@ -93,3 +95,5 @@ export class ProfesionalesListComponent implements OnInit {
  return (parts[0][0] + parts[1][0]).toUpperCase(); 
  }
 }
+
+

@@ -1,5 +1,7 @@
-import { SimulacionRuntimeService } from './simulacion-runtime.service'; 
- describe('SimulacionRuntimeService', () => { 
+import { SimulacionRuntimeService } from './simulacion-runtime.service';
+import type { Session } from '@core/models/session.model';
+
+describe('SimulacionRuntimeService', () => { 
  let service: SimulacionRuntimeService; 
  beforeEach(() => { 
  jasmine.clock().install(); 
@@ -20,7 +22,7 @@ import { SimulacionRuntimeService } from './simulacion-runtime.service';
  }); 
  it('builds session summary only when status is COMPLETADA and data exists', () => { 
  const withSummary = service.buildSessionEndData({ 
- status: 'COMPLETADA',   sessionId: '123',   session: { duration_seconds: 120 } as any,   context: { jobRoleName: 'Cajero', caseName: 'Caso 1' },   youthId: '10',   returnUrl: '/joven',   motivo: 'ok',   }); 
+ status: 'COMPLETADA',   sessionId: '123',   session: { duration_seconds: 120 } as unknown as Session,   context: { jobRoleName: 'Cajero', caseName: 'Caso 1' },   youthId: '10',   returnUrl: '/joven',   motivo: 'ok',   }); 
  const withoutSummary = service.buildSessionEndData({ 
  status: 'ERROR',   sessionId: '123',   session: null,   context: null,   }); 
  expect(withSummary.sessionSummary).toEqual({ 
@@ -28,3 +30,4 @@ import { SimulacionRuntimeService } from './simulacion-runtime.service';
  expect(withoutSummary.sessionSummary).toBeUndefined(); 
  });
 });
+

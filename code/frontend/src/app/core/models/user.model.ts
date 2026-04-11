@@ -1,4 +1,4 @@
-import type { Role } from './types.model'; 
+import type { Role } from '@core/models/types.model'; 
  export type UserRole = Role; 
  export interface User { 
  id: string; 

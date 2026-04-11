@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
-import { ApiService } from '../../../core/services/api.service';
-import { formatDate, formatStatusLabel } from '../../../shared/utils/date-format.util';
+import { SessionApiService } from '@core/services/session-api.service';
+import { formatDate, formatStatusLabel } from '@shared/utils/date-format.util';
 import { parseSummary } from './retroalimentacion.utils'; 
  interface FeedbackDetail { 
  sessionId: string; 
@@ -24,12 +24,12 @@ import { parseSummary } from './retroalimentacion.utils';
  selector: 'app-retroalimentacion-detail-joven',   standalone: true,   imports: [CommonModule, RouterLink],   templateUrl: './retroalimentacion-detail.component.html',   styleUrl: './retroalimentacion-detail.component.scss',
 })
 export class RetroalimentacionDetailJovenComponent { 
- private api = inject(ApiService); 
+ private sessionsApi = inject(SessionApiService); 
  private route = inject(ActivatedRoute); 
  vm$ = this.route.paramMap.pipe(   map((params) => params.get('sessionId')  ?? ''),   switchMap((sessionId) => { 
  if (!sessionId) return of<FeedbackVm>({ state: 'notfound' as const }); 
  return forkJoin({ 
- session: this.api.getSession(sessionId).pipe(catchError(() => of(null))),   context: this.api.getSessionContext(sessionId).pipe(catchError(() => of(null))),   summary: this.api.getSessionSummary(sessionId).pipe(catchError(() => of(null))),   }).pipe(   map(({ session, context, summary }) => { 
+ session: this.sessionsApi.getSession(sessionId).pipe(catchError(() => of(null))),   context: this.sessionsApi.getSessionContext(sessionId).pipe(catchError(() => of(null))),   summary: this.sessionsApi.getSessionSummary(sessionId).pipe(catchError(() => of(null))),   }).pipe(   map(({ session, context, summary }) => { 
  if (!session) return { state: 'notfound' as const } as FeedbackVm; 
  const parsed = parseSummary(summary?.summary_text); 
  const hasSummary = Boolean(parsed.general || parsed.strengths.length || parsed.suggestions.length); 
@@ -41,3 +41,5 @@ export class RetroalimentacionDetailJovenComponent {
  readonly formatDate = formatDate; 
  readonly formatStatusLabel = formatStatusLabel;
 }
+
+

@@ -1,4 +1,4 @@
-import type { SessionStatus, SessionMode } from './types.model'; 
+import type { SessionStatus, SessionMode } from '@core/models/types.model'; 
  export interface Session { 
  id: string; 
  youth_id: string; 

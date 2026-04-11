@@ -1,16 +1,16 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnDestroy, OnInit, signal, ViewChild, ElementRef, HostListener } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, ViewChild, ElementRef, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Room, RoomEvent, RemoteTrack } from 'livekit-client';
-import { ApiService } from '../../../core/services/api.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { SessionEndService } from '../../../core/services/session-end.service';
+import { AuthService } from '@core/services/auth.service';
+import { SessionEndService } from '@core/services/session-end.service';
 import { SimulacionRuntimeService } from './simulacion-runtime.service';
+import { SimulacionFacade } from '@features/joven/simulacion/simulacion.facade';
 import { environment } from '../../../../environments/environment';
-import type { InterviewSummary } from '../../../core/models/interview-summary.model';
-import { formatDate, formatDuration, formatStatusLabel } from '../../../shared/utils/date-format.util';
-import { extractErrorMessage } from '../../../core/utils/http-error.util';
+import type { InterviewSummary } from '@core/models/interview-summary.model';
+import { formatDate, formatDuration, formatStatusLabel } from '@shared/utils/date-format.util';
+import { extractErrorMessage } from '@core/utils/http-error.util';
 
 /** Texto ampliado cuando el API aún devuelve el mensaje corto antiguo o no envía detalle. */
 const LIVEAVATAR_EMBED_HELP =
@@ -24,13 +24,77 @@ function normalizeLiveavatarFallbackDetail(raw: string | undefined): string {
   return t || LIVEAVATAR_EMBED_HELP;
 }
 
+function isRecord(x: unknown): x is Record<string, unknown> {
+  return typeof x === 'object' && x !== null;
+}
+
+/** Lee el primer campo de texto no vacío entre raíz, payload y data (eventos LiveKit / transcript). */
+function extractTranscriptTextFromPayload(data: unknown): string | null {
+  if (!isRecord(data)) return null;
+  const keys = ['text', 'transcript', 'transcription', 'message', 'content'] as const;
+  for (const k of keys) {
+    const v = data[k];
+    if (typeof v === 'string') {
+      const t = v.trim();
+      if (t.length) return t;
+    }
+  }
+  for (const nest of [data['payload'], data['data']]) {
+    if (!isRecord(nest)) continue;
+    for (const k of keys) {
+      const v = nest[k];
+      if (typeof v === 'string') {
+        const t = v.trim();
+        if (t.length) return t;
+      }
+    }
+  }
+  return null;
+}
+
+function extractTranscriptRoleFromPayload(data: unknown, eventType: string): 'user' | 'avatar' | 'system' | null {
+  if (!isRecord(data)) {
+    if (eventType.startsWith('avatar')) return 'avatar';
+    if (eventType.startsWith('user')) return 'user';
+    return null;
+  }
+  const keys = ['role', 'speaker', 'source'] as const;
+  let raw = '';
+  for (const k of keys) {
+    const v = data[k];
+    if (typeof v === 'string' && v.trim()) {
+      raw = v;
+      break;
+    }
+  }
+  if (!raw) {
+    for (const nest of [data['payload'], data['data']]) {
+      if (!isRecord(nest)) continue;
+      for (const k of keys) {
+        const v = nest[k];
+        if (typeof v === 'string' && v.trim()) {
+          raw = v;
+          break;
+        }
+      }
+      if (raw) break;
+    }
+  }
+  const normalized = raw.toLowerCase();
+  if (normalized.includes('avatar') || normalized.includes('assistant') || normalized.includes('agent')) return 'avatar';
+  if (normalized.includes('user') || normalized.includes('joven') || normalized.includes('candidate')) return 'user';
+  if (eventType.startsWith('avatar')) return 'avatar';
+  if (eventType.startsWith('user')) return 'user';
+  return null;
+}
+
 /**   * Pantalla de simulación en curso. Muestra LiveKit (avatar video/audio) cuando está   * configurado, o iframe placeholder en caso contrario. Incluye contador, cargo/caso   * y botones para finalizar/cancelar.   */
 @Component({ 
- selector: 'app-simulacion-detail',   standalone: true,   imports: [RouterLink],   templateUrl: './simulacion-detail.component.html',   styleUrl: './simulacion-detail.component.scss',
+ selector: 'app-simulacion-detail',   standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,   imports: [RouterLink],   templateUrl: './simulacion-detail.component.html',   styleUrl: './simulacion-detail.component.scss',
 })
 export class SimulacionDetailComponent implements OnInit, OnDestroy { 
  private route = inject(ActivatedRoute); 
- private api = inject(ApiService); 
+ private facade = inject(SimulacionFacade); 
  private router = inject(Router); 
  private sanitizer = inject(DomSanitizer); 
  private auth = inject(AuthService); 
@@ -95,7 +159,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  const returnUrl = history.state?.['returnUrl'] as string | undefined; 
  this.returnUrl.set(returnUrl && returnUrl.startsWith('/') ? returnUrl : null); 
  if (!this.sessionId) return; 
- this.api.getSession(this.sessionId).subscribe({ 
+ this.facade.getSession(this.sessionId).subscribe({ 
  next: (s) => { 
  this.sessionMode.set(s.mode); 
  this.youthId.set(s.youth_id); 
@@ -120,19 +184,19 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  },   }); 
  } 
  private loadSessionContextForCompleted(): void { 
- this.api.getSessionContext(this.sessionId).subscribe({ 
+ this.facade.getSessionContext(this.sessionId).subscribe({ 
  next: (ctx) => { 
  if (ctx) { 
  this.completedSessionData.update((d) =>   d ?  { ...d, jobRoleName: ctx.jobRoleName, caseName: ctx.caseName } : d   ); 
  } 
  },   }); 
  if (this.isProfessionalView()) { 
- this.api.getSessionSummary(this.sessionId).subscribe({ 
+ this.facade.getSessionSummary(this.sessionId).subscribe({ 
  next: (summary) => summary && this.completedSessionSummary.set(summary),   }); 
  } 
  } 
  doStartSession(): void { 
- this.api.startSession(this.sessionId).subscribe({ 
+ this.facade.startSession(this.sessionId).subscribe({ 
  next: async (result) => { 
  this.loading.set(false); 
  this.retrying.set(false); 
@@ -150,13 +214,14 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  this.audioHintVisible.set(true); 
  this.embedUrl.set(null); 
  setTimeout(() => this.connectToLiveKit(result.livekit_url!, result.access_token!), 150); 
- } else if (result.embed?.url) {
+} else if (result.embed?.url) {
  this.useLiveKit.set(false);
  this.audioHintVisible.set(false);
+ // Seguridad: solo confiar en URLs provistas por el backend (LiveAvatar). Nunca aceptar URLs arbitrarias del usuario.
  this.embedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(result.embed.url));
  this.connectionErrorBanner.set(true);
  this.error.set(normalizeLiveavatarFallbackDetail(result.fallback_detail));
- } else { 
+} else { 
  this.connectionErrorBanner.set(true); 
  this.error.set('Respuesta inválida del servidor'); 
  } 
@@ -305,7 +370,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  } 
  } 
  loadSessionContext(): void { 
- this.api.getSessionContext(this.sessionId).subscribe({ 
+ this.facade.getSessionContext(this.sessionId).subscribe({ 
  next: (ctx) => ctx && this.sessionContext.set(ctx),   }); 
  } 
  onReintentar(): void { 
@@ -336,7 +401,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  this.stopAudioRecording(false); 
  this.stopHeartbeat(); 
  const youthId = this.youthId(); 
- this.api.closeSession(this.sessionId, { status: 'ERROR', motivo: 'LIVEAVATAR_CONNECTION' }).subscribe({ 
+ this.facade.closeSession(this.sessionId, { status: 'ERROR', motivo: 'LIVEAVATAR_CONNECTION' }).subscribe({ 
  next: () => { 
  const returnUrl = history.state?.['returnUrl'] as string | undefined; 
  this.sessionEndService.set({ 
@@ -352,10 +417,10 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  } 
  private startHeartbeat(): void { 
  if (this.heartbeatTimer) return; 
- this.api.heartbeatSession(this.sessionId).subscribe(); 
+ this.facade.heartbeatSession(this.sessionId).subscribe(); 
  this.heartbeatTimer = setInterval(() => { 
  if (!this.isSessionActive()) return; 
- this.api.heartbeatSession(this.sessionId).subscribe(); 
+ this.facade.heartbeatSession(this.sessionId).subscribe(); 
  }, 15000); 
  } 
  private stopHeartbeat(): void { 
@@ -481,7 +546,7 @@ onPageHide(): void {
  this.stopHeartbeat(); 
  const youthId = this.youthId(); 
  const ctx = this.sessionContext(); 
- this.api.closeSession(this.sessionId, { status, metrics, motivo }).subscribe({ 
+ this.facade.closeSession(this.sessionId, { status, metrics, motivo }).subscribe({ 
  next: (session) => { 
  if (status === 'COMPLETADA') { 
  this.closeCompleted = true; 
@@ -556,7 +621,7 @@ onPageHide(): void {
  private uploadSessionAudio(file: File, durationSeconds?: number, attempt = 0): void { 
  if (!this.sessionId || this.audioUploaded) return; 
  this.audioUploaded = true; 
- this.api.uploadSessionAudio(this.sessionId, file, durationSeconds).subscribe({ 
+ this.facade.uploadSessionAudio(this.sessionId, file, durationSeconds).subscribe({ 
  next: (res) => { 
  if ('error' in res) { 
  this.audioUploaded = false; 
@@ -622,10 +687,10 @@ onPageHide(): void {
  const match = document.cookie.match(new RegExp(`(?:^|; )${escaped}=([^;]*)`)); 
  return match ?  decodeURIComponent(match[1]) : null; 
  } 
- private handleTranscriptEvent(data: any, eventType: string): void { 
- const text = this.extractTranscriptText(data); 
+ private handleTranscriptEvent(data: unknown, eventType: string): void { 
+ const text = extractTranscriptTextFromPayload(data); 
  if (!text) return; 
- const role = this.extractTranscriptRole(data, eventType); 
+ const role = extractTranscriptRoleFromPayload(data, eventType); 
  const previous = this.captionLines(); 
  const next = [...previous]; 
  if (next.length && this.isTranscriptOverlap(next[next.length - 1], text)) { 
@@ -643,14 +708,6 @@ onPageHide(): void {
  if (!this.captionsEnabled()) { 
  this.captionsEnabled.set(true); 
  } 
- } 
- private extractTranscriptText(data: any): string | null { 
- const direct =   data?.text  ??  data?.transcript  ??  data?.transcription  ??  data?.message  ??  data?.content  ??  data?.payload?.text  ??  data?.payload?.transcript  ??  data?.payload?.message  ??  data?.data?.text  ??  data?.data?.transcript  ??  data?.data?.message; 
- if (typeof direct === 'string') { 
- const trimmed = direct.trim(); 
- return trimmed.length ? trimmed : null; 
- } 
- return null; 
  } 
  private upsertChatMessage(text: string): void { 
  const now = Date.now(); 
@@ -675,15 +732,6 @@ onPageHide(): void {
  if (!a || !b) return false; 
  return a === b || a.includes(b) || b.includes(a); 
  } 
- private extractTranscriptRole(data: any, eventType: string): 'user' | 'avatar' | 'system' | null { 
- const raw =   data?.role  ??  data?.speaker  ??  data?.source  ??  data?.payload?.role  ??  data?.payload?.speaker  ??  data?.data?.role  ??  data?.data?.speaker; 
- const normalized = typeof raw === 'string' ?  raw.toLowerCase() : ''; 
- if (normalized.includes('avatar') || normalized.includes('assistant') || normalized.includes('agent')) return 'avatar'; 
- if (normalized.includes('user') || normalized.includes('joven') || normalized.includes('candidate')) return 'user'; 
- if (eventType.startsWith('avatar')) return 'avatar'; 
- if (eventType.startsWith('user')) return 'user'; 
- return null; 
- } 
  private pickAudioMimeType(): string | null { 
  const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/ogg']; 
  for (const type of candidates) { 
@@ -700,4 +748,7 @@ onPageHide(): void {
  return 'webm'; 
  }
 }
+
+
+
 

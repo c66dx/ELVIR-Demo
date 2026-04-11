@@ -307,15 +307,29 @@
 
 @if (logsOpen) {
 
-  <div class="modal-overlay" (click)="closeLogs()">
+  <div
+    class="modal-overlay"
+    role="presentation"
+    (click)="closeLogs()"
+    (keydown)="onLogsOverlayKeydown($event)"
+  >
 
-    <div class="modal-content modal-content--logs" (click)="$event.stopPropagation()">
+    <div
+      class="modal-content modal-content--logs"
+      appModalDialog
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="logs-dialog-title"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+      (keydown)="onLogsModalPanelKeydown($event)"
+    >
 
       <div class="modal-header">
 
         <div>
 
-          <h3>Logs históricos</h3>
+          <h3 id="logs-dialog-title">Logs históricos</h3>
 
           <p class="modal-subtitle">{{ selectedYouthName }}</p>
 

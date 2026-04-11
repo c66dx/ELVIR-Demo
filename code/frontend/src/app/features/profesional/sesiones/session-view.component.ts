@@ -1,38 +1,29 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core'; 
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core'; 
  import { ActivatedRoute, RouterLink } from '@angular/router'; 
  import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'; 
- import { catchError, forkJoin, of } from 'rxjs'; 
- import { ApiService } from '../../../core/services/api.service'; 
- import { NotificationService } from '../../../core/services/notification.service'; 
- import { StatusBadgeComponent } from '../../../shared/status-badge/status-badge.component';
-import { FormGridComponent } from '../../../shared/form/form-grid/form-grid.component';
-import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
-import { FormActionsComponent } from '../../../shared/form/form-actions/form-actions.component';
-import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component';
-import { TextareaInputComponent } from '../../../shared/form/inputs/textarea-input/textarea-input.component';
-import type { Session } from '../../../core/models/session.model'; 
- import type { Youth } from '../../../core/models/youth.model'; 
- import type { TranscriptEntry, TranscriptResponse } from '../../../core/models/transcript.model'; 
- import type { InterviewSummary } from '../../../core/models/interview-summary.model'; 
- import type { SessionEvent } from '../../../core/models/session-event.model'; 
- import type { SessionAudio } from '../../../core/models/session-audio.model'; 
- import { durationBetween, formatDate, formatDuration } from '../../../shared/utils/date-format.util';
- import { UploadUrlPipe } from '../../../core/pipes/upload-url.pipe';
-import { extractErrorMessage } from '../../../core/utils/http-error.util';
+ import { NotificationService } from '@core/services/notification.service'; 
+ import { StatusBadgeComponent } from '@shared/status-badge/status-badge.component';
+import { FormGridComponent } from '@shared/form/form-grid/form-grid.component';
+import { FormFieldComponent } from '@shared/form/form-field/form-field.component';
+import { FormActionsComponent } from '@shared/form/form-actions/form-actions.component';
+import { TextInputComponent } from '@shared/form/inputs/text-input/text-input.component';
+import { TextareaInputComponent } from '@shared/form/inputs/textarea-input/textarea-input.component';
+import { SessionDetailFacade } from '@features/profesional/sesiones/session-detail.facade';
+import type { Session } from '@core/models/session.model'; 
+ import type { Youth } from '@core/models/youth.model'; 
+ import type { TranscriptEntry, TranscriptResponse } from '@core/models/transcript.model'; 
+ import type { InterviewSummary } from '@core/models/interview-summary.model'; 
+ import type { SessionEvent } from '@core/models/session-event.model'; 
+ import type { SessionAudio } from '@core/models/session-audio.model'; 
+ import { durationBetween, formatDate, formatDuration } from '@shared/utils/date-format.util';
+ import { UploadUrlPipe } from '@core/pipes/upload-url.pipe';
+import { extractErrorMessage } from '@core/utils/http-error.util';
 
  type SideTab = 'resumen' | 'competencias' | 'eventos'; 
- type SessionCompetencyResponse = { 
- session_id: number; 
- items: { 
- competency: { slug: string; name: string }; 
- level: { slug: string; label: string }; 
- comment: string | null; 
- }[]; 
- }; 
  @Component({
  selector: 'app-session-view',
- standalone: true,
+ standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,
  imports: [
  RouterLink,
  ReactiveFormsModule,
@@ -49,7 +40,7 @@ import { extractErrorMessage } from '../../../core/utils/http-error.util';
  })
  export class SessionViewComponent implements OnInit { 
  private route = inject(ActivatedRoute); 
- private api = inject(ApiService); 
+ private facade = inject(SessionDetailFacade); 
  private fb = inject(FormBuilder); 
  private notification = inject(NotificationService); 
  sessionId = ''; 
@@ -89,7 +80,7 @@ import { extractErrorMessage } from '../../../core/utils/http-error.util';
  } 
  this.summaryForm = this.fb.nonNullable.group({ 
  summary_text: ['', Validators.required],   competency_tags: [''],   }); 
- this.api.getSession(this.sessionId).subscribe({ 
+ this.facade.getSession(this.sessionId).subscribe({ 
  next: (session) => { 
  this.session.set(session); 
  this.setAiEvaluation(session); 
@@ -103,10 +94,9 @@ import { extractErrorMessage } from '../../../core/utils/http-error.util';
  },   }); 
  } 
  private loadSessionExtras(session: Session): void { 
- this.api.getYouth(session.youth_id).subscribe({ 
+ this.facade.getYouth(session.youth_id).subscribe({ 
  next: (y) => this.youth.set(y),   error: () => this.youth.set(null),   }); 
- forkJoin({ 
- context: this.api.getSessionContext(this.sessionId).pipe(catchError(() => of(null))),   transcript: this.api.getSessionTranscript(this.sessionId).pipe(catchError(() => of(null))),   summary: this.api.getSessionSummary(this.sessionId).pipe(catchError(() => of(null))),   audio: this.api.getSessionAudio(this.sessionId).pipe(catchError(() => of(null))),   events: this.api.getSessionEvents(this.sessionId).pipe(catchError(() => of([]))),   competencies: this.api.getSessionCompetencies(this.sessionId).pipe(   catchError(() => of({ session_id: 0, items: [] } as SessionCompetencyResponse))   ),   }).subscribe({ 
+ this.facade.getSessionExtras(this.sessionId).subscribe({ 
  next: ({ context, transcript, summary, audio, events, competencies }) => { 
  this.context.set(context); 
  this.transcript.set(transcript); 
@@ -118,9 +108,7 @@ import { extractErrorMessage } from '../../../core/utils/http-error.util';
  this.editingSummary.set(true); 
  } 
  this.events.set(events  ?? []); 
- const mapped = (competencies?.items  ?? []).map((item) => ({ 
- competency: item.competency.name || item.competency.slug,   level: item.level.label || item.level.slug,   comment: item.comment  ??  null,   })); 
- this.competencies.set(mapped); 
+ this.competencies.set(competencies); 
  this.loading.set(false); 
  },   error: () => this.loading.set(false),   }); 
  } 
@@ -210,7 +198,7 @@ import { extractErrorMessage } from '../../../core/utils/http-error.util';
  const value = this.summaryForm.getRawValue(); 
  const tags = value.competency_tags   ?  value.competency_tags.split(',').map((t: string) => t.trim()).filter(Boolean)   : undefined; 
  this.submittingSummary.set(true); 
- this.api.createSessionSummary(this.sessionId, { summary_text: value.summary_text, competency_tags: tags }).subscribe({ 
+ this.facade.saveSummary(this.sessionId, { summary_text: value.summary_text, competency_tags: tags }).subscribe({ 
  next: (summary) => { 
  if (summary) { 
  this.summary.set(summary); 
@@ -242,5 +230,7 @@ import { extractErrorMessage } from '../../../core/utils/http-error.util';
  readonly formatDate = formatDate; 
  readonly formatDuration = formatDuration; 
  }
+
+
 
 

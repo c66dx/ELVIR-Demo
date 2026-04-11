@@ -782,7 +782,8 @@
 .field {
   margin-bottom: var(--space-4);
 
-  label {
+  label,
+  .field-label {
     display: block;
     margin-bottom: 0.35rem;
     font-size: 0.75rem;

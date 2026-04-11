@@ -2,11 +2,11 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
-import { ApiService } from '../../../core/services/api.service';
-import { ThemeService } from '../../../core/services/theme.service';
-import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
-import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component';
+import { AuthService } from '@core/services/auth.service';
+import { AuthApiService } from '@core/services/auth-api.service';
+import { ThemeService } from '@core/services/theme.service';
+import { FormFieldComponent } from '@shared/form/form-field/form-field.component';
+import { TextInputComponent } from '@shared/form/inputs/text-input/text-input.component';
 import { environment } from '../../../../environments/environment';
 
 export type LoginRole = 'joven' | 'profesional' | 'admin' | null;
@@ -18,7 +18,7 @@ export type LoginRole = 'joven' | 'profesional' | 'admin' | null;
 export class LoginComponent { 
  private fb = inject(FormBuilder); 
  private auth = inject(AuthService); 
- private api = inject(ApiService); 
+ private authApi = inject(AuthApiService); 
  private router = inject(Router); 
  private themeService = inject(ThemeService); 
  theme = this.themeService.theme;
@@ -41,7 +41,7 @@ export class LoginComponent {
  this.errorMessage = ''; 
  this.loading = true; 
  const { email, password } = this.form.getRawValue(); 
- this.api.login(email, password).subscribe({ 
+ this.authApi.login(email, password).subscribe({ 
  next: (result) => { 
  this.loading = false; 
  if ('error' in result) { 
@@ -59,4 +59,6 @@ export class LoginComponent {
  this.themeService.toggle(); 
  }
 }
+
+
 

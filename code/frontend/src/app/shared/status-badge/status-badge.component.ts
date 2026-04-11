@@ -1,10 +1,10 @@
-import { Component, input, computed } from '@angular/core';
-import type { SessionStatus } from '../../core/models/types.model'; 
+import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
+import type { SessionStatus } from '@core/models/types.model'; 
  const STATUS_LABELS: Record<string, string> = { 
  EN_CURSO: 'En curso',   COMPLETADA: 'Completada',   CANCELADA: 'Cancelada',   ERROR: 'Error',
 }; 
  @Component({ 
- selector: 'app-status-badge',   standalone: true,   template: `@if (status(); as s) {<span class="status-badge status-badge--{{ s }}">{{ label() }}</span>} @else {<span>-</span>}`,   styles: [`   .status-badge { 
+ selector: 'app-status-badge',   standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,   template: `@if (status(); as s) {<span class="status-badge status-badge--{{ s }}">{{ label() }}</span>} @else {<span>-</span>}`,   styles: [`   .status-badge { 
  display: inline-block; 
  padding: 0.2rem 0.65rem; 
  font-size: 0.72rem; 

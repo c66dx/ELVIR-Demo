@@ -1,4 +1,4 @@
-import { UserRole } from '../core/models/user.model'; 
+import { UserRole } from '@core/models/user.model'; 
  export interface NavItem { 
  label: string; 
  route: string; 
@@ -18,3 +18,4 @@ import { UserRole } from '../core/models/user.model';
  if (role === 'ADMIN') return ADMIN_NAV; 
  return [];
 }
+

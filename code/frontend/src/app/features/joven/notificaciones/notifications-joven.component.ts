@@ -1,14 +1,15 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BehaviorSubject, combineLatest, of } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
-import { YouthService } from '../../../core/services/youth.service';
+import { YouthService } from '@core/services/youth.service';
 import { 
  YouthNotificationsService,   type YouthNotification,
-} from '../../../core/services/youth-notifications.service'; 
+} from '@core/services/youth-notifications.service'; 
  @Component({ 
  selector: 'app-notifications-joven',   standalone: true,   imports: [AsyncPipe, RouterLink],   templateUrl: './notifications-joven.component.html',   styleUrl: './notifications-joven.component.scss',
+ changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationsJovenComponent { 
  private youthService = inject(YouthService); 
@@ -45,3 +46,4 @@ export class NotificationsJovenComponent {
  this.refresh$.next(this.refresh$.value + 1); 
  }
 }
+

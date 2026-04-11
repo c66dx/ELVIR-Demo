@@ -7,11 +7,13 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:ci": "ng test --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage"
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage",
+    "lint": "ng lint",
+    "format": "prettier --write \"src/**/*.{ts,html,scss,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss,css,md}\""
   },
   "private": true,
   "dependencies": {
-    "livekit-client": "^2.9.0",
     "@angular/animations": "^19.0.0",
     "@angular/common": "^19.0.0",
     "@angular/compiler": "^19.0.0",
@@ -20,6 +22,7 @@
     "@angular/platform-browser": "^19.0.0",
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@angular/router": "^19.0.0",
+    "livekit-client": "^2.9.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -28,14 +31,19 @@
     "@angular-devkit/build-angular": "^19.0.0",
     "@angular/cli": "^19.0.0",
     "@angular/compiler-cli": "^19.0.0",
-    "@types/node": "^22.0.0",
     "@types/jasmine": "^5.1.5",
-    "typescript": "~5.6.0",
+    "@types/node": "^22.0.0",
+    "angular-eslint": "21.0.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
     "jasmine-core": "~5.4.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0"
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.6.0",
+    "typescript-eslint": "8.46.4"
   }
 }

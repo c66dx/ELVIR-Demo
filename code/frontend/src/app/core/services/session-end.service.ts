@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import type { SessionStatus } from '../models/types.model'; 
+import type { SessionStatus } from '@core/models/types.model'; 
  /**   * Servicio para pasar datos de la sesión finalizada a la pantalla session-end.   * Se usa porque la navegación a /session-end no permite pasar estado por URL.   */
 export interface SessionEndData { 
  status: SessionStatus; 

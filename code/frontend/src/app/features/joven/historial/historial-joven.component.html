@@ -31,7 +31,7 @@
     </div>
 
     <div class="historial-timeline-wrap">
-      @for (g of groupedSessions(data.items); track $index; let gi = $index) {
+      @for (g of data.groups; track g.label; let gi = $index) {
         <section class="timeline-group" [attr.aria-labelledby]="'tg-' + gi">
           <h3 class="timeline-group__title" [id]="'tg-' + gi">{{ g.label }}</h3>
           <ul class="timeline-list" role="list">
@@ -49,7 +49,7 @@
                     {{ formatDate(s.started_at) }}
                     <span class="timeline-row__sep">·</span>
                     {{ modeLabel(s.mode) }}
-                    @if (s.duration_seconds != null && s.duration_seconds > 0) {
+                    @if ((s.duration_seconds ?? 0) > 0) {
                       <span class="timeline-row__sep">·</span>
                       {{ formatDuration(s.duration_seconds) }}
                     }

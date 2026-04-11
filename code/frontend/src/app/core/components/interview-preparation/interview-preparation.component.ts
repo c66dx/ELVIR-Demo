@@ -1,22 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApiService } from '../../services/api.service'; 
- type PrepState = { 
+import { SessionApiService } from '@core/services/session-api.service'; 
+ interface PrepState {
  companyName?: string; 
  companySector?: string; 
  companyDescription?: string; 
  jobRoleName?: string; 
  caseName?: string; 
  returnUrl?: string;
-}; 
+} 
  @Component({ 
  selector: 'app-interview-preparation',   standalone: true,   imports: [CommonModule],   templateUrl: './interview-preparation.component.html',   styleUrl: './interview-preparation.component.scss',
 })
 export class InterviewPreparationComponent implements OnInit { 
  private route = inject(ActivatedRoute); 
  private router = inject(Router); 
- private api = inject(ApiService); 
+ private sessionsApi = inject(SessionApiService); 
  sessionId = ''; 
  companyName = 'Empresa colaboradora'; 
  companySector = 'Servicios empresariales'; 
@@ -54,7 +54,7 @@ export class InterviewPreparationComponent implements OnInit {
  } 
  } 
  private loadContextFromApi(): void { 
- this.api.getSessionContext(this.sessionId).subscribe({ 
+ this.sessionsApi.getSessionContext(this.sessionId).subscribe({ 
  next: (ctx) => { 
  if (!ctx) return; 
  this.jobRoleName = ctx.jobRoleName  ??  this.jobRoleName; 

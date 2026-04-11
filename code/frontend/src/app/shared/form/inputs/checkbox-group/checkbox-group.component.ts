@@ -12,8 +12,8 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
  @Input() descriptionKey?: string; 
  value: string[] = []; 
  disabled = false; 
- private onChange: (value: string[]) => void = () => {}; 
- private onTouched: () => void = () => {}; 
+ private onChange: (value: string[]) => void = () => undefined; 
+ private onTouched: () => void = () => undefined; 
  writeValue(value: string[] | null): void { 
  this.value = Array.isArray(value) ? value : []; 
  } 

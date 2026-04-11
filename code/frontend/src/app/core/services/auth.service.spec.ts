@@ -1,4 +1,4 @@
-import { AuthService } from './auth.service'; 
+import { AuthService } from '@core/services/auth.service'; 
  describe('AuthService', () => { 
  let service: AuthService; 
  beforeEach(() => { 

@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthService } from '@core/services/auth.service';
 import { 
  SessionEndService,   type SessionEndData,
-} from '../../../../core/services/session-end.service';
-import type { SessionStatus } from '../../../../core/models/types.model';
-import { formatDuration } from '../../../../shared/utils/date-format.util'; 
+} from '@core/services/session-end.service';
+import type { SessionStatus } from '@core/models/types.model';
+import { formatDuration } from '@shared/utils/date-format.util'; 
  type SessionSummary = NonNullable<SessionEndData['sessionSummary']>; 
  /** Pantalla post-simulación: muestra estado (COMPLETADA/CANCELADA/ERROR), resumen y enlaces. */
 @Component({ 
@@ -99,5 +99,7 @@ export class SessionEndComponent implements OnInit {
  } 
  readonly formatDuration = formatDuration;
 }
+
+
 
 

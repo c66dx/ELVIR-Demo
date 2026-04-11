@@ -31,6 +31,14 @@ module.exports = function (config) {
       dir: require('path').join(__dirname, './coverage/elvir-frontend'),
       subdir: '.',
       reporters: [{ type: 'html' }, { type: 'text-summary' }, { type: 'json-summary' }],
+      // Colores del informe HTML: Istanbul marca verde si la métrica ≥ watermarks[X][1] (por defecto 80%).
+      // Las ramas suelen quedar amarillas ~50% aunque `check.global.branches` (45) pase; [45,50] alinea verde con ≥50%.
+      watermarks: {
+        statements: [50, 80],
+        branches: [45, 50],
+        functions: [50, 80],
+        lines: [50, 80],
+      },
       check: {
         global: {
           // Umbrales alineados con la suite actual (CI); subir con nuevos tests.

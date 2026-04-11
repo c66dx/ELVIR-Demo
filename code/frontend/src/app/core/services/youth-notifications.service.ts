@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiService, type YouthNotificationDto } from './api.service';
+import { MaterialApiService } from '@core/services/material-api.service';
+import type { YouthNotificationDto } from '@core/services/api-types';
 
 export type YouthNotificationType = 'material' | 'feedback' | 'session' | 'general';
 
@@ -26,13 +27,13 @@ export interface YouthNotificationsResult {
 
 @Injectable({ providedIn: 'root' })
 export class YouthNotificationsService {
-  private api = inject(ApiService);
+  private materialApi = inject(MaterialApiService);
 
   getYouthNotifications(
     youthId: string,
     params?: { page?: number; page_size?: number; unread_only?: boolean }
   ): Observable<YouthNotificationsResult> {
-    return this.api.getYouthNotificationsPaged(youthId, params).pipe(
+    return this.materialApi.getYouthNotificationsPaged(youthId, params).pipe(
       map((paged) => ({
         ...paged,
         items: paged.items.map((item) => this.mapNotification(item)),
@@ -41,11 +42,11 @@ export class YouthNotificationsService {
   }
 
   markAsRead(youthId: string, id: string): Observable<{ updated: number }> {
-    return this.api.markYouthNotificationsRead(youthId, [id]);
+    return this.materialApi.markYouthNotificationsRead(youthId, [id]);
   }
 
   markAllRead(youthId: string): Observable<{ updated: number }> {
-    return this.api.markAllYouthNotificationsRead(youthId);
+    return this.materialApi.markAllYouthNotificationsRead(youthId);
   }
 
   private mapNotification(item: YouthNotificationDto): YouthNotification {

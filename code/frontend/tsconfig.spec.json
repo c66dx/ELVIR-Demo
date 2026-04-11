@@ -2,7 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": ["jasmine"]
+    "types": ["jasmine"],
+    "paths": {
+      "@core/*": ["src/app/core/*"],
+      "@layout/*": ["src/app/layout/*"],
+      "@features/*": ["src/app/features/*"],
+      "@shared/*": ["src/app/shared/*"]
+    }
   },
   "include": [
     "src/**/*.spec.ts",

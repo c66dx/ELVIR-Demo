@@ -43,8 +43,8 @@ export class TextareaInputComponent implements ControlValueAccessor {
  @Input() readonly = false; 
  value = ''; 
  disabled = false; 
- private onChange: (value: string) => void = () => {}; 
- private onTouched: () => void = () => {}; 
+ private onChange: (value: string) => void = () => undefined; 
+ private onTouched: () => void = () => undefined; 
  writeValue(value: string | null): void { 
  this.value = value  ?? ''; 
  } 

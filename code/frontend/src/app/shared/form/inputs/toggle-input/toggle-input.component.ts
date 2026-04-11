@@ -8,8 +8,8 @@ export class ToggleInputComponent implements ControlValueAccessor {
  @Input() ariaLabel?: string; 
  value = false; 
  disabled = false; 
- private onChange: (value: boolean) => void = () => {}; 
- private onTouched: () => void = () => {}; 
+ private onChange: (value: boolean) => void = () => undefined; 
+ private onTouched: () => void = () => undefined; 
  writeValue(value: boolean | null): void { 
  this.value = !!value; 
  } 

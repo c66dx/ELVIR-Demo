@@ -1,4 +1,4 @@
-import type { MaterialType } from './types.model'; 
+import type { MaterialType } from '@core/models/types.model'; 
  export interface SupportMaterial { 
  id: string; 
  title: string; 

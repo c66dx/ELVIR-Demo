@@ -1,24 +1,24 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
-import { ApiService } from '../../../core/services/api.service';
-import { NotificationService } from '../../../core/services/notification.service';
-import { StatusBadgeComponent } from '../../../shared/status-badge/status-badge.component';
-import { FormActionsComponent } from '../../../shared/form/form-actions/form-actions.component';
-import { FormFieldComponent } from '../../../shared/form/form-field/form-field.component';
-import { FormGridComponent } from '../../../shared/form/form-grid/form-grid.component';
-import { SelectInputComponent } from '../../../shared/form/inputs/select-input/select-input.component';
-import { TextInputComponent } from '../../../shared/form/inputs/text-input/text-input.component';
-import { TextareaInputComponent } from '../../../shared/form/inputs/textarea-input/textarea-input.component';
-import type { Youth } from '../../../core/models/youth.model';
-import { PROFILE_CHECKLIST_ITEMS } from '../../../core/models/youth.model';
-import type { SupportMaterial } from '../../../core/models/support-material.model';
-import type { InterviewSummary } from '../../../core/models/interview-summary.model';
-import type { TranscriptResponse } from '../../../core/models/transcript.model';
-import { formatDate, formatDuration, durationBetween } from '../../../shared/utils/date-format.util';
-import { UploadUrlPipe } from '../../../core/pipes/upload-url.pipe';
-import type { SessionWithTemplateLabel, PlatformSessionItem } from '../../../core/services/api.service'; 
+import { NotificationService } from '@core/services/notification.service';
+import { StatusBadgeComponent } from '@shared/status-badge/status-badge.component';
+import { FormActionsComponent } from '@shared/form/form-actions/form-actions.component';
+import { FormFieldComponent } from '@shared/form/form-field/form-field.component';
+import { FormGridComponent } from '@shared/form/form-grid/form-grid.component';
+import { SelectInputComponent } from '@shared/form/inputs/select-input/select-input.component';
+import { TextInputComponent } from '@shared/form/inputs/text-input/text-input.component';
+import { TextareaInputComponent } from '@shared/form/inputs/textarea-input/textarea-input.component';
+import type { Youth } from '@core/models/youth.model';
+import { PROFILE_CHECKLIST_ITEMS } from '@core/models/youth.model';
+import type { SupportMaterial } from '@core/models/support-material.model';
+import type { InterviewSummary } from '@core/models/interview-summary.model';
+import type { TranscriptResponse } from '@core/models/transcript.model';
+import { formatDate, formatDuration, durationBetween } from '@shared/utils/date-format.util';
+import { UploadUrlPipe } from '@core/pipes/upload-url.pipe';
+import type { SessionWithTemplateLabel, PlatformSessionItem } from '@core/services/api-types'; 
+import { PerfilJovenFacade } from '@features/profesional/jovenes/perfil-joven.facade';
  type ProfileTab = 'perfil' | 'accesos' | 'desempeno' | 'sesiones'; 
  interface ChartSeries { 
  name: string; 
@@ -40,7 +40,7 @@ import type { SessionWithTemplateLabel, PlatformSessionItem } from '../../../cor
  /** Perfil del joven: datos, historial de sesiones, resúmenes, sugerir material. El profesional puede registrar resúmenes cualitativos e iniciar simulación supervisada. */
 @Component({ 
  selector: 'app-perfil-joven',
- standalone: true,
+ standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,
  imports: [
  ReactiveFormsModule,
  RouterLink,
@@ -58,7 +58,7 @@ import type { SessionWithTemplateLabel, PlatformSessionItem } from '../../../cor
 })
 export class PerfilJovenComponent implements OnInit { 
  private route = inject(ActivatedRoute); 
- private api = inject(ApiService); 
+ private facade = inject(PerfilJovenFacade); 
  private fb = inject(FormBuilder); 
  private notification = inject(NotificationService); 
  youthId = ''; 
@@ -107,8 +107,7 @@ export class PerfilJovenComponent implements OnInit {
  this.activeTab.set(tab); 
  } 
  }); 
- forkJoin({ 
- youth: this.api.getYouth(this.youthId),   competencies: this.api.getCompetencies(),   competencyLevels: this.api.getCompetencyLevels(),   stats: this.api.getSessionStats({ youth_id: this.youthId, months: 6 }),   }).subscribe({ 
+ this.facade.loadProfileBase(this.youthId).subscribe({ 
  next: ({ youth, competencies, competencyLevels, stats }) => { 
  this.youth.set(youth); 
  this.photoError.set(null); 
@@ -128,7 +127,7 @@ export class PerfilJovenComponent implements OnInit {
  this.setTab('sesiones'); 
  this.showSuggestMaterialPanel.set(true); 
  this.suggestMaterialForm.reset({ material_id: '', reason: '', session_id: '' }); 
- this.api.getSupportMaterial().subscribe({ 
+ this.facade.getSupportMaterial().subscribe({ 
  next: (materials) => this.supportMaterials.set(materials),   }); 
 // Scroll a la sección después de que Angular la renderice: setTimeout(() => this.scrollToSuggestMaterial(), 100);
  } 
@@ -145,7 +144,7 @@ export class PerfilJovenComponent implements OnInit {
  if (!file || !this.youthId) return; 
  this.photoError.set(null); 
  this.photoUploading.set(true); 
- this.api.uploadYouthPhoto(this.youthId, file).subscribe({ 
+ this.facade.uploadYouthPhoto(this.youthId, file).subscribe({ 
  next: (res) => { 
  this.photoUploading.set(false); 
  if ('error' in res) { 
@@ -179,7 +178,7 @@ export class PerfilJovenComponent implements OnInit {
  if (this.suggestMaterialForm.invalid) return; 
  const value = this.suggestMaterialForm.getRawValue(); 
  this.submittingSuggest.set(true); 
- this.api   .suggestMaterial({ 
+ this.facade.suggestMaterial({ 
  youth_id: this.youthId,   material_id: value.material_id,   reason: value.reason || undefined,   session_id: value.session_id || undefined,   })   .subscribe({ 
  next: () => { 
  this.submittingSuggest.set(false); 
@@ -206,8 +205,7 @@ export class PerfilJovenComponent implements OnInit {
  this.metricsSummary.set(this.buildMetricsSummaryFromStats(stats)); 
  } 
  private loadSessionsPage(): void { 
- this.api.getSessionsWithTemplateLabelPaged({ 
- youth_id: this.youthId,   page: this.sessionsPage(),   page_size: this.sessionsPageSize,   }).subscribe({ 
+ this.facade.getSessionsPage(this.youthId, this.sessionsPage(), this.sessionsPageSize).subscribe({ 
  next: (paged) => { 
  this.sessions.set(paged.items); 
  this.sessionsTotal.set(paged.total); 
@@ -215,8 +213,7 @@ export class PerfilJovenComponent implements OnInit {
  },   }); 
  } 
  private loadPlatformPage(): void { 
- this.api.getPlatformSessionsPaged(this.youthId, { 
- page: this.platformPage(),   page_size: this.platformPageSize,   }).subscribe({ 
+ this.facade.getPlatformPage(this.youthId, this.platformPage(), this.platformPageSize).subscribe({ 
  next: (paged) => { 
  this.platformSessions.set(paged.items); 
  this.platformTotal.set(paged.total); 
@@ -227,12 +224,8 @@ export class PerfilJovenComponent implements OnInit {
  this.summariesBySession.set(new Map()); 
  return; 
  } 
- forkJoin(sessions.map((s) => this.api.getSessionSummary(s.id))).subscribe({ 
- next: (summaries) => { 
- const map = new Map<string, InterviewSummary>(); 
- summaries.forEach((s) => { 
- if (s) map.set(s.session_id, s); 
- }); 
+ this.facade.getSessionSummariesMap(sessions).subscribe({ 
+ next: (map) => { 
  this.summariesBySession.set(map); 
  },   }); 
  } 
@@ -318,7 +311,7 @@ export class PerfilJovenComponent implements OnInit {
     this.summaryForm.reset({ 
  summary_text: existing?.summary_text ?? '',   competency_tags: existing?.competency_tags?.join(', ')  ??  '',   }); 
  this.loadingTranscript.set(true); 
- this.api.getSessionTranscript(sessionId).subscribe({ 
+ this.facade.getSessionTranscript(sessionId).subscribe({ 
  next: (t) => { 
  this.sessionTranscript.set(t); 
  this.loadingTranscript.set(false); 
@@ -333,7 +326,7 @@ export class PerfilJovenComponent implements OnInit {
  return; 
  } 
  this.loadingSessionCompetencies.set(true); 
- this.api.getSessionCompetencies(sessionId).subscribe({ 
+ this.facade.getSessionCompetencies(sessionId).subscribe({ 
  next: (res) => { 
  const levelBySlug = new Map<string, string>(); 
  res.items.forEach((item) => { 
@@ -372,7 +365,7 @@ export class PerfilJovenComponent implements OnInit {
  const evalItems = this.sessionCompetencies()   .filter((row) => row.level_slug)   .map((row) => ({ 
  competency_slug: row.competency_slug,   level_slug: row.level_slug as string,   comment: undefined,   })); 
  this.submittingSummary.set(true); 
- forkJoin([   this.api.createSessionSummary(sessionId, { summary_text: value.summary_text, competency_tags: tags }),   this.api.createSessionCompetencies(sessionId, evalItems),   ]).subscribe({ 
+ forkJoin([   this.facade.saveSummary(sessionId, { summary_text: value.summary_text, competency_tags: tags }),   this.facade.saveCompetencies(sessionId, evalItems),   ]).subscribe({ 
  next: () => { 
  this.submittingSummary.set(false); 
  this.cancelSummaryForm(); 
@@ -380,4 +373,7 @@ export class PerfilJovenComponent implements OnInit {
  },   error: () => this.submittingSummary.set(false),   }); 
  }
 }
+
+
+
 

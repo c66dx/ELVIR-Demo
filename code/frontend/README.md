@@ -8,7 +8,7 @@ Contrato del backend (rutas, códigos de error): [`../../docs/api/endpoints.md`]
 
 ## Visión general
 
-El frontend es una **SPA (Single Page Application)** construida con **Angular** (versión 19+). Usa componentes **standalone**, routing con guards por rol, y se conecta al backend FastAPI vía `ApiService`. La arquitectura sigue un patrón por **features** (funcionalidades) y separa claramente core, layout, features y shared.
+El frontend es una **SPA (Single Page Application)** construida con **Angular** (versión 19+). Usa componentes **standalone**, routing con guards por rol, y se conecta al backend FastAPI vía servicios HTTP de dominio (`auth-api`, `session-api`, `material-api`, etc.). La arquitectura sigue un patrón por **features** (funcionalidades) y separa claramente core, layout, features y shared.
 
 ---
 
@@ -42,11 +42,10 @@ Componente raíz. Solo define un `<router-outlet>` donde se renderizan las rutas
 Configuración de la aplicación: providers (router, zone, etc.). Aquí se registran servicios globales y la configuración del router.
 
 ### `app.routes.ts`
-Define todas las rutas de la aplicación. Incluye:
-- Rutas públicas (login)
-- Rutas protegidas con `authGuard` (requieren login)
-- Rutas por rol (`jovenGuard`, `profesionalGuard`)
-- Rutas hijas dentro del layout (AppShell)
+Define el esqueleto de rutas (login, `AppShell`, `session-end`, cambio de contraseña). Las áreas **joven**, **profesional** y **admin** se cargan con `loadChildren` desde:
+- `features/joven/joven.routes.ts`
+- `features/profesional/profesional.routes.ts`
+- `features/admin/admin.routes.ts`
 
 ---
 
@@ -79,7 +78,16 @@ Servicios inyectables usados en toda la app:
 | Servicio | Función |
 |----------|---------|
 | `auth.service.ts` | Autenticación frontend: sesión principal vía cookie `HttpOnly`; en cliente se persiste solo rol en `sessionStorage` para UI/rutas |
-| `api.service.ts` | Cliente HTTP para el backend FastAPI: login, catálogos, sesiones, material, jóvenes, etc. |
+| `auth-api.service.ts` | Endpoints `/auth/*`: login, logout, sesión actual, cambio de contraseña/email, foto, activación |
+| `api.service.ts` | Fachada HTTP: delega auth, jóvenes, profesionales, catálogos, sesiones, material y admin en servicios de dominio |
+| `admin-api.service.ts` | Endpoints bajo `/admin/*` (usuarios/logs, auditoría, borrados administrativos) |
+| `admin-api.types.ts` | Tipos de administración (usuarios/logs/auditoría) |
+| `catalog-api.service.ts` | Catálogos de simulación: cargos (`/job-roles`), casos (`/cases`), plantillas (`/simulation-templates`) |
+| `session-api.service.ts` | Sesiones de entrevista, contexto, plataforma (login/logout joven), transcripción, resúmenes y competencias por sesión |
+| `material-api.service.ts` | Material de apoyo (`/support-material`, `/upload`), sugerencias y vistas por joven, notificaciones joven |
+| `youth-api.service.ts` | Jóvenes (`/youths/*`), foto de perfil |
+| `professional-api.service.ts` | Tutores (`/professionals/*`) y asignaciones (`/assignments`) |
+| `api-types.ts` | Tipos compartidos (`PagedResult`, jóvenes, sesión con etiqueta, notificaciones, etc.) para evitar ciclos entre servicios |
 | `youth.service.ts` | Obtiene el `youthId` del usuario JOVEN actual a partir de `getMe()` y la lista de jóvenes |
 | `session-end.service.ts` | Guarda el resultado de una sesión finalizada (COMPLETADA, CANCELADA, ERROR) para mostrarlo en `SessionEndComponent` |
 
@@ -123,7 +131,7 @@ Cada feature agrupa los componentes de una funcionalidad. Cada componente suele 
 Autenticación.
 
 #### `login/`
-- **`login.component.ts`** — Formulario de login, llama a `ApiService.login()`, guarda sesión con `AuthService.setSession()` y redirige según rol
+- **`login.component.ts`** — Formulario de login, llama a `AuthApiService.login()`, guarda sesión con `AuthService.setSession()` y redirige según rol
 - **`login.component.html`** — Formulario email/password
 - **`login.component.scss`** — Estilos del login
 
@@ -217,6 +225,15 @@ Ejecución recomendada (cuando entorno tenga dependencias de Karma/Jasmine insta
 npx ng test --watch=false --browsers=ChromeHeadless
 ```
 
+## Formato (Prettier)
+
+Para mantener estilo consistente en TS/HTML/SCSS:
+
+```bash
+npm run format
+npm run format:check
+```
+
 ---
 
 ## Flujo de rutas (resumen)
@@ -265,14 +282,13 @@ npx ng test --watch=false --browsers=ChromeHeadless
 4. **Rutas** — Registrar rutas en `app.routes.ts` con los guards adecuados
 5. **Navegación** — Añadir enlaces en `sidebar` si corresponde
 
+Para detalles de contribución, ver `CONTRIBUTING.md`.
+
 ---
 
 ## Notas técnicas
 
 - **Standalone components**: No hay módulos NgModule; cada componente se declara como standalone
-- **API**: `ApiService` llama al backend FastAPI (`environment.apiUrl`). Requiere backend en ejecución para funcionar.
-- **Auth**: Token JWT y rol en `localStorage`. El login se hace contra el backend vía `ApiService.login()`.
+- **API**: servicios HTTP de dominio llaman al backend FastAPI (`environment.apiUrl`). Requiere backend en ejecución para funcionar.
+- **Auth**: Token JWT y rol en `localStorage`. El login se hace contra el backend vía `AuthApiService.login()`.
 - **RBAC**: Tres roles: `JOVEN`, `PROFESIONAL` y `ADMIN`. Los guards y el sidebar filtran por rol
-
-
-

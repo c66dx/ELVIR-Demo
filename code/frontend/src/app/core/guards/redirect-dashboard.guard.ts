@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '@core/services/auth.service';
 
 /**
  * Redirige la ruta raíz al inicio según el rol del usuario.
