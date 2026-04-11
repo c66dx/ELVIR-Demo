@@ -1,31 +1,9 @@
 #!/usr/bin/env python3
 """Script para poblar la base de datos con datos iniciales (carga inicial)."""
-import json
-import sys
-from pathlib import Path
-
-# Asegurar que el directorio backend esta en la ruta
+import jsonimport sysfrom pathlib import Path# Asegurar que el directorio backend esta en la ruta
 sys.path.insert(0, str(Path(__file__).parent))
 
-from sqlalchemy.orm import Session
-
-from app.core.security import get_password_hash
-from app.database import Base, SessionLocal, engine
-from app.models.assignment import Assignment
-from app.models.case import Case
-from app.models.competency import Competency
-from app.models.competency_level import CompetencyLevel
-from app.models.job_role import JobRole
-from app.models.platform_session import PlatformSession  # noqa: F401 - asegurar tabla creada por create_all
-from app.models.professional import Professional
-from app.models.session_transcript import SessionTranscript  # noqa: F401
-from app.models.simulation_template import SimulationTemplate
-from app.models.support_material import SupportMaterial
-from app.models.user import User
-from app.models.youth import Youth
-
-
-def _fix_mojibake(text: str | None) -> str | None:
+from sqlalchemy.orm import Sessionfrom app.core.security import get_password_hashfrom app.database import Base, SessionLocal, enginefrom app.models.assignment import Assignmentfrom app.models.case import Casefrom app.models.competency import Competencyfrom app.models.competency_level import CompetencyLevelfrom app.models.job_role import JobRolefrom app.models.platform_session import PlatformSession  # noqa: F401 - asegurar tabla creada por create_allfrom app.models.professional import Professionalfrom app.models.session_transcript import SessionTranscript  # noqa: F401from app.models.simulation_template import SimulationTemplatefrom app.models.support_material import SupportMaterialfrom app.models.user import Userfrom app.models.youth import Youthdef _fix_mojibake(text: str | None) -> str | None:
     if not text:
         return text
     if "Ã" in text or "Â" in text:
