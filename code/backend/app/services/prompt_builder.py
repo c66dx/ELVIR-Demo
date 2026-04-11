@@ -9,8 +9,7 @@ PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 ROL_PATH = PROMPTS_DIR / "rol.txt"
 ESTRUCTURA_PATH = PROMPTS_DIR / "estructura.txt"
 INDICACIONES_BASE = (
-    "Toda la interacción debe centrarse en capacidades, competencias y formas de desempeño "
-    "en el puesto de trabajo."
+    "Toda la interacción debe centrarse en capacidades, competencias y formas de desempeño " "en el puesto de trabajo."
 )
 
 
@@ -44,9 +43,7 @@ def build_prompt(job_role: JobRole, case: Case) -> str:
     estructura = load_estructura()
     cargo = _cargo_text(job_role)
     indicaciones = _indicaciones_text(case)
-    indicaciones_block = (
-        f"{INDICACIONES_BASE}\n{indicaciones}" if indicaciones else INDICACIONES_BASE
-    )
+    indicaciones_block = f"{INDICACIONES_BASE}\n{indicaciones}" if indicaciones else INDICACIONES_BASE
 
     sections = [
         "# ROL DEL AVATAR\n" + rol,
