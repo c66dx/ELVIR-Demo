@@ -4,13 +4,14 @@ import logging
 
 import httpx
 
-logger = logging.getLogger("elvir.api")
-
 from app.config import settings
 from app.models.case import Case
 from app.models.job_role import JobRole
 from app.models.simulation_template import SimulationTemplate
 from app.schemas.prompt import PromptInput
+
+logger = logging.getLogger("elvir.api")
+
 INVALID_LIVEAVATAR_IDS = {"", "default", "avatar-default", "voice-default", "ctx-elvir-dinamico"}
 
 
@@ -60,12 +61,24 @@ def _is_valid_id(value: str | None) -> bool:
     return bool(v) and v not in INVALID_LIVEAVATAR_IDS
 
 
+def _pick_id(template_value: str | None, env_value: str | None, *, env_first: bool) -> str | None:
+    template_norm = _normalize_id(template_value)
+    env_norm = _normalize_id(env_value)
+    if env_first and _is_valid_id(env_norm):
+        return env_norm
+    if _is_valid_id(template_norm):
+        return template_norm
+    if _is_valid_id(env_norm):
+        return env_norm
+    return template_norm or env_norm or None
+
+
 def resolve_liveavatar_ids(template: SimulationTemplate) -> tuple[str | None, str | None, str | None]:
     """Resuelve IDs finales considerando overrides en .env."""
     return (
-        template.liveavatar_context_id or settings.LIVEAVATAR_CONTEXT_ID,
-        settings.LIVEAVATAR_AVATAR_ID or template.liveavatar_avatar_id,
-        settings.LIVEAVATAR_VOICE_ID or template.liveavatar_voice_id,
+        _pick_id(template.liveavatar_context_id, settings.LIVEAVATAR_CONTEXT_ID, env_first=False),
+        _pick_id(template.liveavatar_avatar_id, settings.LIVEAVATAR_AVATAR_ID, env_first=True),
+        _pick_id(template.liveavatar_voice_id, settings.LIVEAVATAR_VOICE_ID, env_first=True),
     )
 
 

@@ -14,7 +14,6 @@ from typing import Any
 
 import httpx
 
-
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "app" / "data"
 ROLES_PATH = DATA_DIR / "teleton_roles.json"

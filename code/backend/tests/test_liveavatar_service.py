@@ -37,12 +37,13 @@ class LiveAvatarServiceTestCase(unittest.TestCase):
 
     def _base_entities(self):
         job_role = SimpleNamespace(
+            slug="operario",
             name="Operario",
             description="Desc",
             objetivo="Obj",
             competencias='["Puntualidad"]',
         )
-        case = SimpleNamespace(prompt_instructions="Instrucciones", opening_text="Hola")
+        case = SimpleNamespace(slug="normal", prompt_instructions="Instrucciones", opening_text="Hola")
         template = SimpleNamespace(
             liveavatar_context_id="ctx-1",
             liveavatar_avatar_id="avatar-1",
@@ -76,13 +77,15 @@ class LiveAvatarServiceTestCase(unittest.TestCase):
             mock_httpx_cm.__enter__.return_value = mock_client
             mock_httpx_cm.__exit__.return_value = False
 
-            with patch("app.services.liveavatar.get_prompt", return_value=SimpleNamespace(prompt="PROMPT", opening_text=None, name=None)),                 patch("app.services.liveavatar._patch_context", return_value=patch_resp),                 patch("app.services.liveavatar.httpx.Client", return_value=mock_httpx_cm):
+            mock_client.post.return_value = patch_resp
+
+            with patch("app.services.liveavatar.httpx.Client", return_value=mock_httpx_cm):
                 with self.assertRaises(LiveAvatarError) as ctx:
                     start_liveavatar_session(job_role, case, template)
 
             self.assertEqual(ctx.exception.status_code, 422)
             self.assertIn("prompt inválido", ctx.exception.message)
-            mock_client.post.assert_not_called()
+            mock_client.post.assert_called_once()
         finally:
             (
                 settings.LIVEAVATAR_API_KEY,
