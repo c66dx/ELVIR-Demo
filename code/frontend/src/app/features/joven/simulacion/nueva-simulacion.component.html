@@ -22,7 +22,7 @@
       <span class="step-index">2</span>
       <div>
         <span class="step-title">Escenario</span>
-        <span class="step-desc">Nivel de dificultad</span>
+        <span class="step-desc">Selecciona el caso</span>
       </div>
     </div>
     <div class="step-item" [class.is-active]="currentStep() === 3 && !form.valid" [class.is-done]="form.valid">
@@ -36,7 +36,7 @@
       <span class="step-index">4</span>
       <div>
         <span class="step-title">Ingreso</span>
-        <span class="step-desc">Conectaráse</span>
+        <span class="step-desc">Conectarse</span>
       </div>
     </div>
   </div>
@@ -121,7 +121,7 @@
           <div>
             <span class="section-kicker">Paso 2</span>
             <h3>Selecciona el escenario de entrevista</h3>
-            <p>Elige el nivel de exigencia y el tono con el que se desarrollar la entrevista.</p>
+              <p>Elige el caso según la descripción del escenario.</p>
           </div>
         </div>
         <div class="case-grid">
@@ -139,18 +139,23 @@
                 <div>
                   <div class="case-card-title">{{ c.name }}</div>
                   <div class="case-card-sub">{{ caseDescription(c) }}</div>
-                  <div class="case-card-time">Duración estimada: {{ estimatedDuration(c.difficulty) }}</div>
+                  @if (!isDynamicCase(c)) {
+                    <div class="case-card-time">Duración estimada: {{ estimatedDuration(c.difficulty) }}</div>
+                  }
                 </div>
-                <span
-                  class="difficulty-pill"
-                  [class.difficulty-pill--baja]="c.difficulty === 'BAJA'"
-                  [class.difficulty-pill--media]="c.difficulty === 'MEDIA'"
-                  [class.difficulty-pill--alta]="c.difficulty === 'ALTA'"
-                  [class.difficulty-pill--normal]="c.difficulty === 'NORMAL'"
-                >
-                  {{ difficultyLabel(c.difficulty) }}
-                </span>
+                @if (!isDynamicCase(c)) {
+                  <span
+                    class="difficulty-pill"
+                    [class.difficulty-pill--baja]="c.difficulty === 'BAJA'"
+                    [class.difficulty-pill--media]="c.difficulty === 'MEDIA'"
+                    [class.difficulty-pill--alta]="c.difficulty === 'ALTA'"
+                    [class.difficulty-pill--normal]="c.difficulty === 'NORMAL'"
+                  >
+                    {{ difficultyLabel(c.difficulty) }}
+                  </span>
+                }
               </div>
+
             </button>
           }
         </div>
@@ -201,7 +206,9 @@
             </div>
             <div class="briefing-footer">
               <span>Modalidad: Videollamada</span>
-              <span>Duración estimada: {{ selectedCase() ?  estimatedDuration(selectedCase()!.difficulty) : '8-12 min' }}</span>
+              @if (selectedCase() && !isDynamicCase(selectedCase()!)) {
+                <span>Duración estimada: {{ estimatedDuration(selectedCase()!.difficulty) }}</span>
+              }
             </div>
           } @else {
             <p class="briefing-empty">Selecciona un rol y un escenario para generar el briefing.</p>
