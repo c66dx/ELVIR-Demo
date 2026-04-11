@@ -1,4 +1,4 @@
-"""Inicio de sesión LiveAvatar: contexto, token, embed de respaldo."""
+"""Inicio de sesión LiveAvatar: contextos fijos, token, embed de respaldo."""
 
 from __future__ import annotations
 

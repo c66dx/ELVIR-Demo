@@ -148,7 +148,7 @@ def start_session(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Inicia la experiencia con LiveAvatar: PATCH contexto, token, start. Devuelve livekit_url+access_token o embed de respaldo."""
+    """Inicia la experiencia con LiveAvatar: token, start. Devuelve livekit_url+access_token o embed de respaldo."""
     request_id = getattr(request.state, "request_id", "unknown")
 
     expire_stale_sessions(db)

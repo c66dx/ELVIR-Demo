@@ -150,7 +150,10 @@ def get_prompt(
     if provider == "local":
         # Fallback local si no hay endpoint
         prompt = build_prompt(job_role, case)
-        return PromptResult(prompt=prompt, provider="local")
+        name = None
+        if job_role and case:
+            name = f"{job_role.name} - {case.name}"
+        return PromptResult(prompt=prompt, provider="local", name=name)
 
     raise PromptProviderError(f"Proveedor no soportado: {provider}")
 

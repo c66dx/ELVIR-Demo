@@ -35,7 +35,7 @@ def list_cases(
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Lista casos/dificultades activos (Normal, Baja, Media, Alta)."""
+    """Lista casos activos para la simulación (Contexto Dinámico)."""
     return list_cases_for_catalog(db)
 
 
@@ -56,7 +56,7 @@ def resolve_simulation_template(
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Resuelve plantilla cuando el usuario elige solo cargo: usa caso NORMAL por defecto."""
+    """Resuelve plantilla cuando el usuario elige solo cargo: usa caso por defecto."""
     return resolve_simulation_template_default_case(db, job_role_id)
 
 

@@ -1,0 +1,77 @@
+{
+  "operario": {
+    "nombre": "Operario",
+    "area": "Operaciones",
+    "objetivo_del_rol": "Ejecutar tareas operativas conforme a procedimientos establecidos, asegurando eficiencia, seguridad y calidad en los procesos productivos o de servicio.",
+    "nivel_experiencia": "Inicial–Intermedio (0–3 años)",
+    "competencias_clave": [
+      "Responsabilidad",
+      "Trabajo en equipo",
+      "Cumplimiento de normas y procedimientos",
+      "Gestión del tiempo",
+      "Atención al detalle"
+    ],
+    "tecnologias": [
+      "Maquinaria y equipos operativos",
+      "Herramientas manuales y eléctricas",
+      "Sistemas básicos de registro y control"
+    ]
+  },
+  "atencion_publico": {
+    "nombre": "Atención de Público",
+    "area": "Servicio al Cliente",
+    "objetivo_del_rol": "Atender y orientar a clientes o usuarios, gestionando consultas, reclamos y solicitudes de manera eficiente y cordial, contribuyendo a una experiencia de servicio de calidad.",
+    "nivel_experiencia": "Inicial–Intermedio (0–3 años)",
+    "competencias_clave": [
+      "Comunicación efectiva",
+      "Empatía",
+      "Orientación al cliente",
+      "Resolución de conflictos",
+      "Manejo del estrés"
+    ],
+    "tecnologias": [
+      "Sistemas de atención al cliente (CRM)",
+      "Herramientas de ticketing",
+      "Office / Google Workspace",
+      "Canales digitales de atención"
+    ]
+  },
+  "administrativo": {
+    "nombre": "Administrativo",
+    "area": "Administración",
+    "objetivo_del_rol": "Gestionar y ejecutar procesos administrativos y documentales, brindando soporte operativo a las distintas áreas de la organización.",
+    "nivel_experiencia": "Intermedio (1–4 años)",
+    "competencias_clave": [
+      "Organización",
+      "Gestión documental",
+      "Comunicación formal",
+      "Planificación",
+      "Atención al detalle"
+    ],
+    "tecnologias": [
+      "Excel / Hojas de cálculo",
+      "ERP institucional",
+      "Sistemas de gestión documental",
+      "Office / Google Workspace"
+    ]
+  },
+  "tecnico_profesional": {
+    "nombre": "Técnico-Profesional",
+    "area": "Área Técnica / Especializada",
+    "objetivo_del_rol": "Desarrollar funciones técnicas especializadas, aplicando conocimientos profesionales para resolver problemas operativos y asegurar el cumplimiento de estándares técnicos y normativos.",
+    "nivel_experiencia": "Intermedio–Avanzado (2–5 años)",
+    "competencias_clave": [
+      "Pensamiento analítico",
+      "Resolución de problemas técnicos",
+      "Autonomía",
+      "Responsabilidad profesional",
+      "Mejora continua"
+    ],
+    "tecnologias": [
+      "Herramientas técnicas propias del área",
+      "Software especializado",
+      "Sistemas de monitoreo y control",
+      "Instrumentos técnicos"
+    ]
+  }
+}

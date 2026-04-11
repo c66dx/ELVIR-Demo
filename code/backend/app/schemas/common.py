@@ -11,7 +11,10 @@ class JobRoleResponse(BaseModel):
     name: str
     description: str | None = None
     objetivo: str | None = None
+    area: str | None = None
+    nivel_experiencia: str | None = None
     competencias: Any | None = None  # arreglo JSON o texto
+    tecnologias: Any | None = None  # arreglo JSON o texto
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
@@ -23,6 +26,10 @@ class CaseResponse(BaseModel):
     name: str
     difficulty: str
     prompt_instructions: str | None = None
+    description: str | None = None
+    intervencion_regulacion_emocional: str | None = None
+    intervencion_presentacion_personal: str | None = None
+    intervencion_expectativas_empresa: str | None = None
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)

@@ -83,6 +83,27 @@ Copiar `.env.example` a `.env` y ajustar si es necesario. Variables de entorno (
 - `RATE_LIMIT_TRUST_X_FORWARDED_FOR`: Ver sección [Observabilidad](#observabilidad) (default `false`).
 - **Almacenamiento de ficheros** (`STORAGE_BACKEND`): por defecto `local` (carpeta `uploads/` montada en `/uploads`). Para escalar con varias réplicas del API o mucho volumen, usar `s3` con un bucket compatible (AWS S3, MinIO, Cloudflare R2, etc.): definir `S3_BUCKET`, `S3_PUBLIC_BASE_URL` (URL base pública de los objetos), credenciales y opcionalmente `S3_ENDPOINT_URL` (MinIO) y `S3_KEY_PREFIX` (prefijo de clave en el bucket).
 
+### Sync de contexts LiveAvatar (por nombre)
+
+Cuando los contexts se crean y mantienen en LiveAvatar, se puede sincronizar el `context_id` por cargo/caso usando el script:
+
+```bash
+python scripts/sync_liveavatar_contexts.py --apply-db
+```
+
+Requisitos:
+- `LIVEAVATAR_API_KEY` configurada en `code/backend/.env`.
+- Los contexts en LiveAvatar deben seguir el formato **`"{Cargo} - {Caso}"`** (ej. `Operario - Normal`).
+
+El script:
+- Actualiza `app/data/liveavatar_contexts.json`.
+- (Opcional con `--apply-db`) escribe los IDs en `SIMULATION_TEMPLATES`.
+
+Opciones útiles:
+- `--dry-run`: no escribe archivo ni BD.
+- `--reset`: recrea el mapa desde cero.
+- `--fail-missing`: retorna error si faltan combinaciones esperadas.
+
 ### Migración local → S3 y ciclo de vida del bucket
 
 - **Migración de ficheros ya guardados en disco**: desde la raíz del repositorio, con las mismas variables `S3_*` que usará el backend, ejecutar `scripts/migrate_uploads_to_s3.py` (`--dry-run` para simular, `--skip-existing` para no sobrescribir objetos que ya existen). Después, poner `STORAGE_BACKEND=s3` y **actualizar las URLs en PostgreSQL** si antes apuntaban a `/uploads/...`: plantilla comentada en `scripts/rewrite_upload_urls_after_s3.sql` (tablas `users`, `youths`, `session_audios`; `support_material` solo filas cuya URL empiece por el prefijo antiguo, para no tocar enlaces externos).
@@ -90,7 +111,7 @@ Copiar `.env.example` a `.env` y ajustar si es necesario. Variables de entorno (
 
 ## Conectar el frontend
 
-El frontend usa `ApiService` y se conecta a `http://localhost:8000/api/v1` por defecto. La URL se configura en `code/frontend/src/environments/environment.ts`.
+El frontend usa servicios HTTP de dominio y se conecta a `http://localhost:8000/api/v1` por defecto. La URL se configura en `code/frontend/src/environments/environment.ts`.
 
 ## Webhook de evaluación (LiveAvatar u otro servicio)
 

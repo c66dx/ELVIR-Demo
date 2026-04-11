@@ -1,20 +1,16 @@
-"""Integración con LiveAvatar (Context Dinámico)."""
+"""Integración con LiveAvatar (contextos fijos por cargo/caso)."""
 
 import logging
 
 import httpx
 
 logger = logging.getLogger("elvir.api")
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from app.config import settings
 from app.models.case import Case
 from app.models.job_role import JobRole
 from app.models.simulation_template import SimulationTemplate
 from app.schemas.prompt import PromptInput
-from app.services.prompt_engine import PromptProviderError, get_prompt
-
-DEFAULT_OPENING_TEXT = "Hola, soy Javiera y estaré a cargo de esta entrevista."
 INVALID_LIVEAVATAR_IDS = {"", "default", "avatar-default", "voice-default", "ctx-elvir-dinamico"}
 
 
@@ -67,7 +63,7 @@ def _is_valid_id(value: str | None) -> bool:
 def resolve_liveavatar_ids(template: SimulationTemplate) -> tuple[str | None, str | None, str | None]:
     """Resuelve IDs finales considerando overrides en .env."""
     return (
-        settings.LIVEAVATAR_CONTEXT_ID or template.liveavatar_context_id,
+        template.liveavatar_context_id or settings.LIVEAVATAR_CONTEXT_ID,
         settings.LIVEAVATAR_AVATAR_ID or template.liveavatar_avatar_id,
         settings.LIVEAVATAR_VOICE_ID or template.liveavatar_voice_id,
     )
@@ -108,7 +104,10 @@ def describe_liveavatar_config_gaps(template: SimulationTemplate) -> str:
         if ok:
             return
         if not value:
-            gaps.append(f"falta {field} válido: define {env_name} en .env o el ID en la plantilla de simulación (BD).")
+            gaps.append(
+                f"falta {field} válido: define el ID en la plantilla de simulación (BD) "
+                f"o usa {env_name} en .env como fallback."
+            )
         elif value in INVALID_LIVEAVATAR_IDS:
             gaps.append(
                 f"{field} sigue siendo marcador de demo ({value}); sustitúyelo por un ID real del panel LiveAvatar."
@@ -143,24 +142,11 @@ def log_startup_env_hint() -> None:
         logger.warning(
             "LiveAvatar: con el seed por defecto los IDs en BD son marcadores "
             "(ctx-elvir-dinamico, avatar-default, voice-default) y se rechazan. "
-            "Define LIVEAVATAR_API_KEY, LIVEAVATAR_CONTEXT_ID, LIVEAVATAR_AVATAR_ID y "
-            "LIVEAVATAR_VOICE_ID en code/backend/.env con valores reales del panel de LiveAvatar, "
-            "luego reinicia el API. El archivo .env debe estar en code/backend/ (misma carpeta que app/)."
+            "Define LIVEAVATAR_API_KEY, LIVEAVATAR_AVATAR_ID y LIVEAVATAR_VOICE_ID en code/backend/.env "
+            "con valores reales del panel de LiveAvatar y asigna context_id por plantilla en BD "
+            "(o usa LIVEAVATAR_CONTEXT_ID como fallback). Luego reinicia el API. "
+            "El archivo .env debe estar en code/backend/ (misma carpeta que app/)."
         )
-
-
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=2, max=10),
-    retry=retry_if_exception_type((httpx.TimeoutException, httpx.HTTPStatusError)),
-    reraise=True,
-)
-def _patch_context(client: httpx.Client, url: str, body: dict, request_id: str | None = None) -> httpx.Response:
-    """PATCH al contexto con reintentos en errores 5xx y tiempo de espera."""
-    resp = client.patch(url, headers=_headers(request_id), json=body)
-    if resp.status_code >= 500:
-        resp.raise_for_status()
-    return resp
 
 
 def start_liveavatar_session(
@@ -171,7 +157,7 @@ def start_liveavatar_session(
     prompt_input: PromptInput | None = None,
 ) -> dict:
     """
-    Arma el prompt, actualiza el contexto en LiveAvatar y crea la sesión.
+    Usa el context_id fijo en LiveAvatar y crea la sesión.
     Usa IDs de la plantilla con fallback a .env.
     Retorna: { session_id, livekit_url, access_token, max_session_duration }
     """
@@ -187,50 +173,21 @@ def start_liveavatar_session(
     if not _is_valid_id(voice_id):
         raise LiveAvatarError("LIVEAVATAR_VOICE_ID no configurado o invalido", 503)
 
-    try:
-        prompt_result = get_prompt(job_role, case, prompt_input=prompt_input, request_id=request_id)
-    except PromptProviderError as e:
-        raise LiveAvatarError(f"Prompt provider: {e}", 502)
+    logger.info(
+        "liveavatar start: job_role=%s case=%s context_id=%s avatar_id=%s voice_id=%s request_id=%s",
+        job_role.slug,
+        case.slug,
+        context_id,
+        avatar_id,
+        voice_id,
+        request_id,
+    )
 
-    prompt = prompt_result.prompt
-    opening_text = prompt_result.opening_text or getattr(case, "opening_text", None) or DEFAULT_OPENING_TEXT
-    context_name = prompt_result.name or "elvir_context_dinamico"
     base_url = settings.LIVEAVATAR_API_BASE.rstrip("/")
 
     try:
         with httpx.Client(timeout=30.0) as client:
-            # 1. PATCH contexto (con reintentos en 5xx/tiempo de espera)
-            patch_url = f"{base_url}/contexts/{context_id}"
-            patch_body = {
-                "name": context_name,
-                "prompt": prompt,
-                "opening_text": opening_text,
-            }
-            try:
-                patch_resp = _patch_context(client, patch_url, patch_body, request_id=request_id)
-            except httpx.HTTPStatusError as e:
-                detail = _extract_error_detail(e.response)
-                if e.response.status_code == 401:
-                    raise LiveAvatarError("Credenciales LiveAvatar inválidas", 401)
-                if e.response.status_code == 404:
-                    raise LiveAvatarError("Contexto no encontrado en LiveAvatar", 404)
-                if e.response.status_code == 422:
-                    raise LiveAvatarError(f"LiveAvatar validación: {detail}", 422)
-                if e.response.status_code >= 400:
-                    raise LiveAvatarError(
-                        f"Error LiveAvatar PATCH: {detail or str(e.response.status_code)}",
-                        e.response.status_code,
-                    )
-                raise
-
-            if patch_resp.status_code >= 400:
-                detail = _extract_error_detail(patch_resp)
-                raise LiveAvatarError(
-                    f"Error al actualizar contexto: {detail or patch_resp.status_code}",
-                    patch_resp.status_code,
-                )
-
-            # 2. POST a sessions/token
+            # 1. POST a sessions/token
             token_resp = client.post(
                 f"{base_url}/sessions/token",
                 headers=_headers(request_id),
@@ -262,7 +219,7 @@ def start_liveavatar_session(
             if not session_token:
                 raise LiveAvatarError("LiveAvatar no retornó session_token", 502)
 
-            # 3. POST a sessions/start
+            # 2. POST a sessions/start
             start_resp = client.post(
                 f"{base_url}/sessions/start",
                 headers={

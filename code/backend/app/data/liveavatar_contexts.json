@@ -1,0 +1,26 @@
+{
+  "operario": {
+    "normal": "d36ea148-0e7e-4fe0-a849-eadecd0eed9f",
+    "exigencia_alta_presentacion_discapacidad": "164610cd-201b-47f1-860b-86d47edbd29a",
+    "apoyo_regulacion_emocional": "6599ee79-247a-4360-8f50-15d0e951bb17",
+    "alta_estructuracion_respuesta": "f959be9c-1e39-4897-98ae-777119803b1e"
+  },
+  "administrativo": {
+    "normal": "7b42a491-587c-441f-8f1e-0d89e152218c",
+    "exigencia_alta_presentacion_discapacidad": "92b33aa0-05bc-4a7f-ad69-54a4d5a57824",
+    "apoyo_regulacion_emocional": "910ac5fa-b5fc-4764-9e73-82da7cfd3a60",
+    "alta_estructuracion_respuesta": "c492e734-e600-4a01-bc0a-447a01e7df4c"
+  },
+  "atencion_publico": {
+    "normal": "7a0e1055-2ffb-4d27-a467-b002017a3107",
+    "exigencia_alta_presentacion_discapacidad": "123a7e1f-6c68-4461-8153-182ec30016bc",
+    "apoyo_regulacion_emocional": "fc1e2b9d-42ac-4db2-a4d4-68c96482f6b4",
+    "alta_estructuracion_respuesta": "f4878bef-4cc4-4d53-8fa2-9c7fdef0cb45"
+  },
+  "tecnico_profesional": {
+    "normal": "5cb1d42e-281d-47af-9c46-8d0dd648b03e",
+    "exigencia_alta_presentacion_discapacidad": "d57d8346-d8fd-4cb6-9575-06247444018f",
+    "apoyo_regulacion_emocional": "49dcae66-d00f-4465-a760-b9ffc503f3b9",
+    "alta_estructuracion_respuesta": "40ff03d1-b863-404f-99af-ab1dc67cb117"
+  }
+}

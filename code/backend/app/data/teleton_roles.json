@@ -1,0 +1,18 @@
+{
+  "operario": {
+    "nombre": "Operario",
+    "descripcion": "El cargo de Operario está orientado a la realización de tareas operativas básicas dentro de la organización, siguiendo instrucciones y procedimientos definidos. El rol requiere responsabilidad, cumplimiento de normas y capacidad para trabajar de manera organizada y colaborativa."
+  },
+  "atencion_publico": {
+    "nombre": "Atención de Público",
+    "descripcion": "El cargo de Atención de Público tiene como objetivo atender y orientar a personas usuarias o clientes, brindando respuestas claras y oportunas según los lineamientos establecidos. El rol demanda habilidades de comunicación, trato cordial y adecuada gestión de situaciones diversas."
+  },
+  "administrativo": {
+    "nombre": "Administrativo",
+    "descripcion": "El cargo Administrativo se enfoca en apoyar la gestión interna de la organización mediante la ejecución de tareas administrativas y de apoyo documental. El rol requiere organización, orden, cumplimiento de procedimientos y manejo básico de herramientas de oficina."
+  },
+  "tecnico_profesional": {
+    "nombre": "Técnico Profesional",
+    "descripcion": "El cargo Técnico Profesional está orientado al desarrollo de funciones técnicas o especializadas dentro de un área específica. El rol implica aplicar conocimientos profesionales, cumplir estándares definidos y aportar al correcto funcionamiento de los procesos del área."
+  }
+}

@@ -55,7 +55,7 @@ def simulation_template_to_response(
 
 
 def list_job_roles_for_catalog(db: OrmSession) -> list[JobRoleResponse]:
-    roles = db.query(JobRole).filter(JobRole.is_active == True).all()
+    roles = db.query(JobRole).filter(JobRole.is_active == True).order_by(JobRole.name.asc()).all()
     return [
         JobRoleResponse(
             id=r.id,
@@ -63,7 +63,10 @@ def list_job_roles_for_catalog(db: OrmSession) -> list[JobRoleResponse]:
             name=r.name,
             description=r.description,
             objetivo=r.objetivo,
+            area=r.area,
+            nivel_experiencia=r.nivel_experiencia,
             competencias=parse_competencias(r.competencias),
+            tecnologias=parse_competencias(r.tecnologias),
             is_active=r.is_active,
         )
         for r in roles
@@ -71,7 +74,7 @@ def list_job_roles_for_catalog(db: OrmSession) -> list[JobRoleResponse]:
 
 
 def list_cases_for_catalog(db: OrmSession) -> list[CaseResponse]:
-    cases = db.query(Case).filter(Case.is_active == True).all()
+    cases = db.query(Case).filter(Case.is_active == True).order_by(Case.slug.asc()).all()
     return [CaseResponse.model_validate(c) for c in cases]
 
 
@@ -108,6 +111,7 @@ def resolve_simulation_template_default_case(
             Case.difficulty == "NORMAL",
             Case.is_active == True,
         )
+        .order_by(Case.slug.asc())
         .first()
     )
     if not row:

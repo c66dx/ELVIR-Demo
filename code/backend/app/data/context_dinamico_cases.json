@@ -1,0 +1,137 @@
+[
+  {
+    "id": "caso_001",
+    "descripcion": "Desregulación emocional alta, comunicación desorganizada y expectativas poco claras.",
+    "intervencion": {
+      "regulacion_emocional": "Formular preguntas concretas y guiadas, acotando el marco temporal y situacional del relato. Usar repreguntas que ayuden a identificar qué ocurrió y cómo reaccionó emocionalmente, manteniendo un ritmo pausado y contenedor. Evitar preguntas abiertas extensas.",
+      "presentacion_personal": "Guiar la presentación mediante preguntas secuenciales y explícitas. Acotar el contenido solicitado y reconducir cuando el relato sea confuso o disperso. Priorizar claridad básica por sobre profundidad.",
+      "expectativas_empresa": "Formular preguntas cerradas o semiabiertas que ayuden a delimitar expectativas básicas. Anclar las preguntas al cargo y al contexto organizacional, evitando abstracciones amplias."
+    }
+  },
+  {
+    "id": "caso_002",
+    "descripcion": "Desregulación emocional alta, comunicación comprensible pero poco estructurada, expectativas generales.",
+    "intervencion": {
+      "regulacion_emocional": "Formular preguntas concretas y guiadas, acotando el marco temporal y situacional del relato. Usar repreguntas que ayuden a identificar qué ocurrió y cómo reaccionó emocionalmente, manteniendo un ritmo pausado y contenedor. Evitar preguntas abiertas extensas.",
+      "presentacion_personal": "Permitir una presentación relativamente libre, interviniendo con repreguntas para ordenar el relato y reforzar inicio, desarrollo y cierre. Solicitar precisiones cuando falten conexiones o ejemplos.",
+      "expectativas_empresa": "Explorar expectativas mediante preguntas situacionales y comparativas. Profundizar en el grado de ajuste entre intereses personales y el contexto de la empresa, solicitando ejemplos concretos."
+    }
+  },
+  {
+    "id": "caso_003",
+    "descripcion": "Desregulación emocional alta, comunicación clara, expectativas bien alineadas.",
+    "intervencion": {
+      "regulacion_emocional": "Formular preguntas concretas y guiadas, acotando el marco temporal y situacional del relato. Usar repreguntas que ayuden a identificar qué ocurrió y cómo reaccionó emocionalmente, manteniendo un ritmo pausado y contenedor. Evitar preguntas abiertas extensas.",
+      "presentacion_personal": "Invitar a una presentación abierta y contextualizada al rol. Profundizar mediante preguntas que exploren criterios de selección de la información y capacidad de síntesis, sin imponer estructura externa.",
+      "expectativas_empresa": "Plantear preguntas abiertas orientadas al análisis del encaje entre valores personales, rol y cultura organizacional. Explorar criterios, prioridades y reflexiones del candidato."
+    }
+  },
+  {
+    "id": "caso_004",
+    "descripcion": "Regulación emocional parcial, comunicación desorganizada, expectativas poco claras.",
+    "intervencion": {
+      "regulacion_emocional": "Solicitar ejemplos específicos de situaciones emocionalmente desafiantes y profundizar mediante repreguntas estructuradas. Explorar cómo intentó regular sus emociones y qué resultados obtuvo, ayudando a ordenar el relato sin sobreintervenir.",
+      "presentacion_personal": "Guiar la presentación mediante preguntas secuenciales y explícitas. Acotar el contenido solicitado y reconducir cuando el relato sea confuso o disperso. Priorizar claridad básica por sobre profundidad.",
+      "expectativas_empresa": "Formular preguntas cerradas o semiabiertas que ayuden a delimitar expectativas básicas. Anclar las preguntas al cargo y al contexto organizacional, evitando abstracciones amplias."
+    }
+  },
+  {
+    "id": "caso_005",
+    "descripcion": "Regulación emocional parcial, comunicación comprensible, expectativas generales.",
+    "intervencion": {
+      "regulacion_emocional": "Solicitar ejemplos específicos de situaciones emocionalmente desafiantes y profundizar mediante repreguntas estructuradas. Explorar cómo intentó regular sus emociones y qué resultados obtuvo, ayudando a ordenar el relato sin sobreintervenir.",
+      "presentacion_personal": "Permitir una presentación relativamente libre, interviniendo con repreguntas para ordenar el relato y reforzar inicio, desarrollo y cierre. Solicitar precisiones cuando falten conexiones o ejemplos.",
+      "expectativas_empresa": "Explorar expectativas mediante preguntas situacionales y comparativas. Profundizar en el grado de ajuste entre intereses personales y el contexto de la empresa, solicitando ejemplos concretos."
+    }
+  },
+  {
+    "id": "caso_006",
+    "descripcion": "Regulación emocional parcial, comunicación clara, expectativas alineadas.",
+    "intervencion": {
+      "regulacion_emocional": "Solicitar ejemplos específicos de situaciones emocionalmente desafiantes y profundizar mediante repreguntas estructuradas. Explorar cómo intentó regular sus emociones y qué resultados obtuvo, ayudando a ordenar el relato sin sobreintervenir.",
+      "presentacion_personal": "Invitar a una presentación abierta y contextualizada al rol. Profundizar mediante preguntas que exploren criterios de selección de la información y capacidad de síntesis, sin imponer estructura externa.",
+      "expectativas_empresa": "Plantear preguntas abiertas orientadas al análisis del encaje entre valores personales, rol y cultura organizacional. Explorar criterios, prioridades y reflexiones del candidato."
+    }
+  },
+  {
+    "id": "caso_007",
+    "descripcion": "Buena regulación emocional, comunicación desorganizada, expectativas poco claras.",
+    "intervencion": {
+      "regulacion_emocional": "Plantear preguntas abiertas que inviten a reflexionar sobre situaciones de presión o conflicto. Explorar decisiones, aprendizajes y estrategias de autorregulación utilizadas, permitiendo un relato autónomo y reflexivo.",
+      "presentacion_personal": "Guiar la presentación mediante preguntas secuenciales y explícitas. Acotar el contenido solicitado y reconducir cuando el relato sea confuso o disperso. Priorizar claridad básica por sobre profundidad.",
+      "expectativas_empresa": "Formular preguntas cerradas o semiabiertas que ayuden a delimitar expectativas básicas. Anclar las preguntas al cargo y al contexto organizacional, evitando abstracciones amplias."
+    }
+  },
+  {
+    "id": "caso_008",
+    "descripcion": "Buena regulación emocional, comunicación desorganizada, expectativas generales.",
+    "intervencion": {
+      "regulacion_emocional": "Plantear preguntas abiertas que inviten a reflexionar sobre situaciones de presión o conflicto. Explorar decisiones, aprendizajes y estrategias de autorregulación utilizadas, permitiendo un relato autónomo y reflexivo.",
+      "presentacion_personal": "Guiar la presentación mediante preguntas secuenciales y explícitas. Acotar el contenido solicitado y reconducir cuando el relato sea confuso o disperso. Priorizar claridad básica por sobre profundidad.",
+      "expectativas_empresa": "Explorar expectativas mediante preguntas situacionales y comparativas. Profundizar en el grado de ajuste entre intereses personales y el contexto de la empresa, solicitando ejemplos concretos."
+    }
+  },
+  {
+    "id": "caso_009",
+    "descripcion": "Buena regulación emocional, comunicación desorganizada, expectativas alineadas.",
+    "intervencion": {
+      "regulacion_emocional": "Plantear preguntas abiertas que inviten a reflexionar sobre situaciones de presión o conflicto. Explorar decisiones, aprendizajes y estrategias de autorregulación utilizadas, permitiendo un relato autónomo y reflexivo.",
+      "presentacion_personal": "Guiar la presentación mediante preguntas secuenciales y explícitas. Acotar el contenido solicitado y reconducir cuando el relato sea confuso o disperso. Priorizar claridad básica por sobre profundidad.",
+      "expectativas_empresa": "Plantear preguntas abiertas orientadas al análisis del encaje entre valores personales, rol y cultura organizacional. Explorar criterios, prioridades y reflexiones del candidato."
+    }
+  },
+  {
+    "id": "caso_010",
+    "descripcion": "Buena regulación emocional, comunicación comprensible, expectativas poco claras.",
+    "intervencion": {
+      "regulacion_emocional": "Plantear preguntas abiertas que inviten a reflexionar sobre situaciones de presión o conflicto. Explorar decisiones, aprendizajes y estrategias de autorregulación utilizadas, permitiendo un relato autónomo y reflexivo.",
+      "presentacion_personal": "Permitir una presentación relativamente libre, interviniendo con repreguntas para ordenar el relato y reforzar inicio, desarrollo y cierre. Solicitar precisiones cuando falten conexiones o ejemplos.",
+      "expectativas_empresa": "Formular preguntas cerradas o semiabiertas que ayuden a delimitar expectativas básicas. Anclar las preguntas al cargo y al contexto organizacional, evitando abstracciones amplias."
+    }
+  },
+  {
+    "id": "caso_011",
+    "descripcion": "Buena regulación emocional, comunicación comprensible, expectativas generales.",
+    "intervencion": {
+      "regulacion_emocional": "Plantear preguntas abiertas que inviten a reflexionar sobre situaciones de presión o conflicto. Explorar decisiones, aprendizajes y estrategias de autorregulación utilizadas, permitiendo un relato autónomo y reflexivo.",
+      "presentacion_personal": "Permitir una presentación relativamente libre, interviniendo con repreguntas para ordenar el relato y reforzar inicio, desarrollo y cierre. Solicitar precisiones cuando falten conexiones o ejemplos.",
+      "expectativas_empresa": "Explorar expectativas mediante preguntas situacionales y comparativas. Profundizar en el grado de ajuste entre intereses personales y el contexto de la empresa, solicitando ejemplos concretos."
+    }
+  },
+  {
+    "id": "caso_012",
+    "descripcion": "Buena regulación emocional, comunicación comprensible, expectativas alineadas.",
+    "intervencion": {
+      "regulacion_emocional": "Plantear preguntas abiertas que inviten a reflexionar sobre situaciones de presión o conflicto. Explorar decisiones, aprendizajes y estrategias de autorregulación utilizadas, permitiendo un relato autónomo y reflexivo.",
+      "presentacion_personal": "Permitir una presentación relativamente libre, interviniendo con repreguntas para ordenar el relato y reforzar inicio, desarrollo y cierre. Solicitar precisiones cuando falten conexiones o ejemplos.",
+      "expectativas_empresa": "Plantear preguntas abiertas orientadas al análisis del encaje entre valores personales, rol y cultura organizacional. Explorar criterios, prioridades y reflexiones del candidato."
+    }
+  },
+  {
+    "id": "caso_013",
+    "descripcion": "Regulación emocional parcial, comunicación clara, expectativas poco claras.",
+    "intervencion": {
+      "regulacion_emocional": "Solicitar ejemplos específicos de situaciones emocionalmente desafiantes y profundizar mediante repreguntas estructuradas. Explorar cómo intentó regular sus emociones y qué resultados obtuvo, ayudando a ordenar el relato sin sobreintervenir.",
+      "presentacion_personal": "Invitar a una presentación abierta y contextualizada al rol. Profundizar mediante preguntas que exploren criterios de selección de la información y capacidad de síntesis, sin imponer estructura externa.",
+      "expectativas_empresa": "Formular preguntas cerradas o semiabiertas que ayuden a delimitar expectativas básicas. Anclar las preguntas al cargo y al contexto organizacional, evitando abstracciones amplias."
+    }
+  },
+  {
+    "id": "caso_014",
+    "descripcion": "Regulación emocional parcial, comunicación clara, expectativas generales.",
+    "intervencion": {
+      "regulacion_emocional": "Solicitar ejemplos específicos de situaciones emocionalmente desafiantes y profundizar mediante repreguntas estructuradas. Explorar cómo intentó regular sus emociones y qué resultados obtuvo, ayudando a ordenar el relato sin sobreintervenir.",
+      "presentacion_personal": "Invitar a una presentación abierta y contextualizada al rol. Profundizar mediante preguntas que exploren criterios de selección de la información y capacidad de síntesis, sin imponer estructura externa.",
+      "expectativas_empresa": "Explorar expectativas mediante preguntas situacionales y comparativas. Profundizar en el grado de ajuste entre intereses personales y el contexto de la empresa, solicitando ejemplos concretos."
+    }
+  },
+  {
+    "id": "caso_015",
+    "descripcion": "Regulación emocional parcial, comunicación clara, expectativas bien alineadas.",
+    "intervencion": {
+      "regulacion_emocional": "Solicitar ejemplos específicos de situaciones emocionalmente desafiantes y profundizar mediante repreguntas estructuradas. Explorar cómo intentó regular sus emociones y qué resultados obtuvo, ayudando a ordenar el relato sin sobreintervenir.",
+      "presentacion_personal": "Invitar a una presentación abierta y contextualizada al rol. Profundizar mediante preguntas que exploren criterios de selección de la información y capacidad de síntesis, sin imponer estructura externa.",
+      "expectativas_empresa": "Plantear preguntas abiertas orientadas al análisis del encaje entre valores personales, rol y cultura organizacional. Explorar criterios, prioridades y reflexiones del candidato."
+    }
+  }
+]
