@@ -144,7 +144,7 @@ En enfoque Context Dinámico, todas las plantillas pueden compartir el mismo `li
 
 | Componente | Ubicación |
 |------------|-----------|
-| Prompt base | `app/prompts/prompt_base.txt` |
+| Prompt base | `app/prompts/rol.txt` + `app/prompts/estructura.txt` |
 | Ensamblaje | `app/services/prompt_builder.py` |
 | Integración LiveAvatar | `app/services/liveavatar.py` |
 | Endpoint start | `app/routers/sessions.py` → `POST /sessions/{id}/start` |

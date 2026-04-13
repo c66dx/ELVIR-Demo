@@ -83,6 +83,19 @@ def _build_case_map(cases: list[dict]) -> dict[str, str]:
     return mapping
 
 
+# Algunos entornos tienen slugs cortos en la tabla cases (baja/media/alta).
+# Este mapa permite actualizar la BD aunque los slugs "largos" no existan.
+CASE_DB_ALIASES: dict[str, list[str]] = {
+    "normal": ["normal"],
+    "apoyo_regulacion_emocional": ["apoyo_regulacion_emocional", "baja"],
+    "alta_estructuracion_respuesta": ["alta_estructuracion_respuesta", "media"],
+    "exigencia_alta_presentacion_discapacidad": [
+        "exigencia_alta_presentacion_discapacidad",
+        "alta",
+    ],
+}
+
+
 def _fetch_contexts(api_key: str, base_url: str, timeout_s: int = 20) -> list[dict]:
     url = base_url.rstrip("/") + "/contexts"
     headers = {
@@ -240,6 +253,14 @@ def main() -> int:
                 for case_slug, ctx_id in cases_map.items():
                     case = session.query(Case).filter(Case.slug == case_slug).first()
                     if not case:
+                        for alt_slug in CASE_DB_ALIASES.get(case_slug, []):
+                            if alt_slug == case_slug:
+                                continue
+                            case = session.query(Case).filter(Case.slug == alt_slug).first()
+                            if case:
+                                break
+                    if not case:
+                        missing_tpl.append((role_slug, case_slug))
                         continue
                     tpl = (
                         session.query(SimulationTemplate)

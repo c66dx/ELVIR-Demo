@@ -4,8 +4,8 @@
     "descripcion": "El cargo de Operario está orientado a la realización de tareas operativas básicas dentro de la organización, siguiendo instrucciones y procedimientos definidos. El rol requiere responsabilidad, cumplimiento de normas y capacidad para trabajar de manera organizada y colaborativa."
   },
   "atencion_publico": {
-    "nombre": "Atención de Público",
-    "descripcion": "El cargo de Atención de Público tiene como objetivo atender y orientar a personas usuarias o clientes, brindando respuestas claras y oportunas según los lineamientos establecidos. El rol demanda habilidades de comunicación, trato cordial y adecuada gestión de situaciones diversas."
+    "nombre": "Atención Público",
+    "descripcion": "El cargo de Atención Público tiene como objetivo atender y orientar a personas usuarias o clientes, brindando respuestas claras y oportunas según los lineamientos establecidos. El rol demanda habilidades de comunicación, trato cordial y adecuada gestión de situaciones diversas."
   },
   "administrativo": {
     "nombre": "Administrativo",

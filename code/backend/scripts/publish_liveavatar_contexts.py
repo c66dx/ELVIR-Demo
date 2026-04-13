@@ -68,18 +68,28 @@ def _resolve_context_id(item: dict) -> str | None:
     return item.get("id") or item.get("context_id") or item.get("_id")
 
 
-def _load_prompt_files(source_dir: Path) -> dict[tuple[str, str], Path]:
-    pattern = re.compile(r"^prompt_(?P<role>.+)_(?P<case>.+)\\.txt$", re.IGNORECASE)
+def _load_prompt_files(source_dir: Path, cases: list[dict]) -> dict[tuple[str, str], Path]:
+    case_slugs = [item["slug"] for item in cases if item.get("slug")]
+    case_slugs.sort(key=len, reverse=True)
     mapping: dict[tuple[str, str], Path] = {}
     for path in source_dir.iterdir():
         if not path.is_file():
             continue
-        match = pattern.match(path.name)
-        if not match:
+        name = path.name
+        if not name.lower().startswith("prompt_") or not name.lower().endswith(".txt"):
             continue
-        role = match.group("role").strip().lower()
-        case = match.group("case").strip().lower()
-        mapping[(role, case)] = path
+        stem = name[len("prompt_") : -len(".txt")]
+        matched = False
+        for case_slug in case_slugs:
+            suffix = f"_{case_slug}"
+            if stem.endswith(suffix):
+                role = stem[: -len(suffix)]
+                if role:
+                    mapping[(role, case_slug)] = path
+                matched = True
+                break
+        if not matched:
+            continue
     return mapping
 
 
@@ -121,7 +131,7 @@ def main() -> int:
     roles = _load_json(ROLES_PATH)
     cases = _load_json(CASES_PATH)
     name_map = _build_name_map(roles, cases)
-    prompt_files = _load_prompt_files(source_dir)
+    prompt_files = _load_prompt_files(source_dir, cases)
 
     opening_text = opening_file.read_text(encoding="utf-8").strip()
     base_url = settings.LIVEAVATAR_API_BASE.rstrip("/")

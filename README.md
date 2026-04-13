@@ -226,7 +226,7 @@ El código está en `code/`:
 - **`code/frontend/`** — Aplicación web Angular 19 (MVP funcional, conectada al backend)
 - **`code/backend/`** — API REST FastAPI con PostgreSQL (MVP)
 
-El frontend usa `ApiService` que llama al backend. La URL base se configura en `code/frontend/src/environments/environment.ts` (desarrollo: `http://localhost:8000/api/v1`).
+El frontend usa servicios HTTP de dominio (`auth-api`, `session-api`, `material-api`, etc.) para llamar al backend. La URL base se configura en `code/frontend/src/environments/environment.ts` (desarrollo: `http://localhost:8000/api/v1`).
 
 ## Webhook de evaluación (LiveAvatar u otro servicio)
 
