@@ -24,7 +24,7 @@
       </div>
       <div class="kpi-card">
         <span class="kpi-value">{{ formatStatus(data.lastSession?.status) }}</span>
-        <span class="kpi-label">ltima entrevista</span>
+        <span class="kpi-label">Última entrevista</span>
       </div>
       @if (data.materialSuggestionsCount > 0) {
         <div class="kpi-card kpi-card--highlight">
@@ -36,7 +36,7 @@
 
     @if (data.recentSessions.length > 0) {
       <section class="dashboard-section">
-        <h3>ltimas entrevistas</h3>
+        <h3>Últimas entrevistas</h3>
         <div class="recent-list">
           @for (s of data.recentSessions; track s.id) {
             <a [routerLink]="['/joven/simulacion', s.id]" class="recent-item">

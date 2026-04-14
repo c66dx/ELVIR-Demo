@@ -1,16 +1,9 @@
 <main class="login-page" [class.login-page--light]="theme() === 'light'">
-
   <div class="login-bg">
-
     <div class="login-bg-shape login-bg-shape-1"></div>
-
     <div class="login-bg-shape login-bg-shape-2"></div>
-
     <div class="login-bg-shape login-bg-shape-3"></div>
-
   </div>
-
-
 
   <div class="login-card" [class.login-card--form]="selectedRole">
     <button
@@ -36,135 +29,70 @@
         <img src="assets/logo-teleton.png" alt="Teletón Chile" class="login-brand__teleton-logo" width="120" height="40" />
         <p class="login-brand__teleton-line">Por más inclusión laboral</p>
       </div>
-
       <h1 class="login-title">ELVIR</h1>
-
       <p class="login-tagline">Entrenador Laboral Virtual</p>
-
     </div>
 
-
-
     @if (!selectedRole) {
-
       <div class="role-select">
-
         <p class="role-select-label">¿Cómo ingresas?</p>
-
         <div class="role-cards">
-
           <button type="button" class="role-card role-card--joven" (click)="selectRole('joven')">
-
             <span class="role-card-icon">
-
               <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">
-
                 <circle cx="24" cy="16" r="6"/>
-
                 <path d="M12 38c0-8 6-12 12-12s12 4 12 12"/>
-
               </svg>
-
             </span>
-
             <span class="role-card-title">Soy joven</span>
-
             <span class="role-card-desc">Practico entrevistas laborales con IA</span>
-
           </button>
-
           <button type="button" class="role-card role-card--profesional" (click)="selectRole('profesional')">
-
             <span class="role-card-icon">
-
               <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">
-
                 <circle cx="18" cy="20" r="4"/>
-
                 <circle cx="30" cy="20" r="4"/>
-
                 <path d="M12 34c0-4 4-8 6-8h16c2 0 6 4 6 8"/>
-
               </svg>
-
             </span>
-
             <span class="role-card-title">Soy tutor</span>
-
             <span class="role-card-desc">Acompaño a jóvenes en su proceso</span>
-
           </button>
-
         </div>
-
         <div class="role-admin">
-
           <button type="button" class="role-admin-btn" (click)="selectRole('admin')">
-
             <span class="role-admin-icon" aria-hidden="true">
-
               <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">
-
                 <path d="M12 20h24M12 28h16M8 8h32v32H8z"/>
-
               </svg>
-
             </span>
-
             <span class="role-admin-text">
-
               <span class="role-admin-title">Soy administrador</span>
-
               <span class="role-admin-desc">Crear tutores y material</span>
-
             </span>
-
           </button>
-
         </div>
-
       </div>
-
     } @else {
-
       <div class="login-form-wrap">
-
         <button type="button" class="btn-back" (click)="goBack()" aria-label=" Volver a elegir">
-
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-
             <path d="M19 12H5M12 19l-7-7 7-7"/>
-
           </svg>
-
           Cambiar
-
         </button>
 
-
-
         <div class="form-context">
-
           @if (selectedRole === 'joven') {
-
             <p class="form-context-msg">Ingresa tus datos para acceder a tus entrevistas.</p>
-
           } @else if (selectedRole === 'admin') {
-
             <p class="form-context-msg">Ingresa tus credenciales de administrador.</p>
-
           } @else {
-
             <p class="form-context-msg">Ingresa tus credenciales para acceder al panel.</p>
-
           }
-
         </div>
 
-
-
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
-
           <div class="field">
             <app-form-field label="Correo electrónico" forId="email">
               <div class="input-wrap">
@@ -206,41 +134,24 @@
           </div>
 
           @if (errorMessage) {
-
             <div class="error" role="alert">
-
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-
               {{ errorMessage }}
-
             </div>
-
           }
 
           <button type="submit" [disabled]="form.invalid || loading" class="btn-submit">
-
             @if (loading) {
-
               <span class="spinner" aria-hidden="true"></span>
-
               <span>Entrando...</span>
-
             } @else {
-
               Entrar
-
             }
-
           </button>
-
         </form>
 
-
-
         <details class="demo-credentials">
-
           <summary>Credenciales de prueba</summary>
-
           <div class="demo-content">
             <p><strong>Joven:</strong> {{ demoCredentials.joven }}</p>
             <p><strong>Tutor:</strong> {{ demoCredentials.tutor }}</p>
@@ -253,33 +164,16 @@
               <p class="demo-note">{{ demoCredentials.more }}</p>
             }
           </div>
-
         </details>
-
       </div>
-
     }
 
-
-
     <div class="login-partners" aria-label="Instituciones asociadas">
-
       <span class="login-partners-label">Instituciones aliadas</span>
-
       <div class="partner-group">
-
         <img src="assets/logo-unab-md.png" alt="UNAB" class="partner-logo" />
-
         <img src="assets/logo-teleton.png" alt="Teletón Chile" class="partner-logo partner-logo--teleton" />
-
       </div>
-
     </div>
-
   </div>
-
 </main>
-
-
-
-
