@@ -1,16 +1,8 @@
 <div class="app-shell">
-  <aside class="sidebar" [class.sidebar--collapsed]="isSidebarCollapsed" aria-label="Navegación principal">
-    <button class="sidebar-toggle" type="button" (click)="toggleSidebar()" [attr.aria-label]="isSidebarCollapsed ? 'Expandir menú' : 'Contraer menú'">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="15 18 9 12 15 6"></polyline>
-      </svg>
-    </button>
-    <app-sidebar></app-sidebar>
+  <aside class="sidebar" [class.sidebar--collapsed]="isSidebarCollapsed" aria-label="Navegacion principal">
+    <app-sidebar [collapsed]="isSidebarCollapsed" (toggleCollapsed)="toggleSidebar()"></app-sidebar>
   </aside>
   <div class="app-main">
-    <header class="app-main__header">
-      <app-topbar></app-topbar>
-    </header>
     <main id="main-content" class="content" tabindex="-1" aria-label="Contenido principal">
       <div class="content-inner">
         <router-outlet></router-outlet>

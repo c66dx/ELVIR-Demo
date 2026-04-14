@@ -1,505 +1,181 @@
-<div class="page-header">
-
-
-  <h2>Jóvenes</h2>
-
-
-  <a routerLink="/profesional/jovenes/nuevo" class="btn-primary">Crear Joven</a>
-
-
-</div>
-
-
-
-
-
-<div class="filters-bar">
-
-
-  <div class="filter-group">
-
-
-    <label for="filter-search">Buscar</label>
-
-
-    <input id="filter-search" type="text" [ngModel]="filterSearch" (ngModelChange)="filterSearch=$event; onSearchInput()" placeholder="Nombre o RUT" />
-
-
-  </div>
-
-
-  <div class="filter-group">
-
-
-    <label for="filter-login">Login</label>
-
-
-    <select id="filter-login" [ngModel]="filterLogin" (ngModelChange)="filterLogin=$event; onFilterChange()">
-
-
-      <option value="">Todos</option>
-
-
-      <option value="yes">Con login</option>
-
-
-      <option value="no">Sin login</option>
-
-
-    </select>
-
-
-  </div>
-
-
-  @if (filterSearch || filterLogin) {
-
-
-    <button type="button" class="btn-secondary btn-sm" (click)="clearFilters()">Limpiar filtros</button>
-
-
-  }
-
-
-</div>
-
-
-
-
-
-@if (loading) {
-
-
-  <div class="loading-state">
-  <div class="loading-state__card">
-    <span class="loading-state__spinner" aria-hidden="true"></span>
+<div class="youths-page">
+  <header class="youths-hero">
     <div>
-      <div class="loading-state__title">Cargando...</div>
-      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+      <span class="hero-kicker">Tutor</span>
+      <h1>Jóvenes</h1>
+      <p class="page-subtitle">Administra perfiles, estado y retroalimentación pendiente.</p>
+    </div>
+    <div class="hero-actions">
+      <a routerLink="/profesional/jovenes/nuevo" class="btn-primary">Crear joven</a>
+    </div>
+  </header>
+
+  <div class="filters-panel">
+    <div class="filters-title">Filtros rápidos</div>
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="filter-search">Buscar</label>
+        <input id="filter-search" type="text" [ngModel]="filterSearch" (ngModelChange)="filterSearch=$event; onSearchInput()" placeholder="Nombre o RUT" />
+      </div>
+      <div class="filter-group">
+        <label for="filter-login">Login</label>
+        <select id="filter-login" [ngModel]="filterLogin" (ngModelChange)="filterLogin=$event; onFilterChange()">
+          <option value="">Todos</option>
+          <option value="yes">Con login</option>
+          <option value="no">Sin login</option>
+        </select>
+      </div>
+      @if (filterSearch || filterLogin) {
+        <button type="button" class="btn-secondary btn-sm" (click)="clearFilters()">Limpiar filtros</button>
+      }
     </div>
   </div>
-  <div class="loading-state__skeleton">
-    <span class="loading-state__line loading-state__line--lg"></span>
-    <span class="loading-state__line"></span>
-    <span class="loading-state__line loading-state__line--sm"></span>
-  </div>
-</div>
 
-
-} @else {
-
-
-  <div class="table-wrap">
-
-
-    <table class="data-table">
-
-
-      <thead>
-
-
-        <tr>
-
-
-          <th>Foto</th>
-
-
-          <th>Nombre</th>
-
-
-          <th>RUT</th>
-
-
-          <th>último intento</th>
-
-
-          <th>Desempeño actual</th>
-
-
-          <th>Actividad (último mes)</th>
-
-
-          <th>Entrevistas (último mes)</th>
-
-
-          <th>Retroalimentación</th>
-
-
-          <th>Login</th>
-
-
-          <th class="col-actions">Acciones</th>
-
-
-        </tr>
-
-
-      </thead>
-
-
-      <tbody>
-
-
-        @for (y of youths; track y.id) {
-
-
-          <tr [class.inactive]="!y.is_active">
-
-
-            <td>
-
-
-              <div class="avatar" [class.avatar--image]="y.profile_photo_url">
-
-
-                @if (y.profile_photo_url) {
-
-
-                  <img [src]="y.profile_photo_url | uploadUrl" alt="" />
-
-
-                } @else {
-
-
-                  <span>{{ initials(y.display_name) }}</span>
-
-
-                }
-
-
-              </div>
-
-
-            </td>
-
-
-            <td>{{ y.display_name }}</td>
-
-
-            <td>{{ y.rut  ?? '-' }}</td>
-
-
-            <td>
-
-
-              @if (y.last_session?.started_at) {
-
-
-                <div class="last-attempt">
-
-
-                  <span class="last-date">{{ formatDate(y.last_session?.started_at) }}</span>
-
-
-                  @if (y.last_session?.status) {
-
-
-                    <span class="status-pill">{{ formatStatusLabel(y.last_session?.status  ?? '') }}</span>
-
-
-                  }
-
-
-                </div>
-
-
-              } @else {
-
-
-                <span class="muted">Sin entrevistas</span>
-
-
-              }
-
-
-            </td>
-
-
-            <td>
-
-
-              <div class="metric">
-
-
-                <span class="metric-value">{{ y.performanceLabel }}</span>
-
-
-                @if (y.performanceNote) {
-
-
-                  <span class="metric-note">{{ y.performanceNote }}</span>
-
-
-                }
-
-
-              </div>
-
-
-            </td>
-
-
-            <td>
-
-
-              <span
-
-
-                class="progress-chip"
-
-
-                [class.progress-chip--up]="y.progressTrend === 'up'"
-
-
-                [class.progress-chip--down]="y.progressTrend === 'down'"
-
-
-                [class.progress-chip--flat]="y.progressTrend === 'flat'"
-
-
-                [class.progress-chip--none]="y.progressTrend === 'none'"
-
-
-              >
-
-
-                {{ y.progressLabel }}
-
-
-              </span>
-
-
-            </td>
-
-
-            <td class="count-cell">{{ y.interviewsLastMonth }}</td>
-
-
-            <td>
-
-
-              <div class="action-cell">
-
-
-                <span
-
-
-                  class="pending-badge"
-
-
-                  [class.pending-badge--warn]="y.pendingFeedback"
-
-
-                  [class.pending-badge--ok]="!y.pendingFeedback"
-
-
-                >
-
-
-                  @if (y.pendingFeedback) {
-
-
-                    {{ y.pendingFeedbackCount > 1 ?  'Pendientes (' + y.pendingFeedbackCount + ')' : 'Pendiente' }}
-
-
-                  } @else {
-
-
-                    Al día
-
-
-                  }
-
-
-                </span>
-
-
-                @if (y.pendingFeedback) {
-
-
-                  @if (y.pendingSessionId) {
-
-
-                    <a
-
-
-                      [routerLink]="['/profesional/sesiones', y.pendingSessionId]"
-
-
-                      [queryParams]="{ returnUrl: '/profesional/jovenes' }"
-
-
-                      class="btn-secondary btn-sm"
-
-
-                    >
-
-
-                      Registrar
-
-
-                    </a>
-
-
-                  } @else {
-
-
-                    <a
-
-
-                      [routerLink]="['/profesional/jovenes', y.id]"
-
-
-                      [queryParams]="{ tab: 'sesiones' }"
-
-
-                      class="btn-secondary btn-sm"
-
-
-                    >
-
-
-                      Ver pendientes
-
-
-                    </a>
-
-
-                  }
-
-
-                } @else {
-
-
-                  <a [routerLink]="['/profesional/jovenes', y.id]" class="link-more">Ver perfil</a>
-
-
-                }
-
-
-              </div>
-
-
-            </td>
-
-
-            <td>{{ y.login_enabled ? 'Sí' : 'No' }}</td>
-
-
-            <td class="actions">
-
-
-              <div class="actions-wrap">
-
-
-                <a [routerLink]="['/profesional/jovenes', y.id]" [attr.aria-label]="'Ver ' + y.display_name" class="btn-icon" title="Ver">
-
-
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-
-
-                </a>
-
-
-                <a [routerLink]="['/profesional/jovenes', y.id, 'editar']" [attr.aria-label]="'Editar ' + y.display_name" class="btn-icon" title="Editar">
-
-
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-
-
-                </a>
-
-
-                @if (y.is_active) {
-
-
-                  <button type="button" (click)="onDeactivate(y)" [attr.aria-label]="'Desactivar ' + y.display_name" class="btn-icon btn-icon-danger" title="Desactivar">
-
-
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-
-
-                  </button>
-
-
-                } @else {
-
-
-                  <button type="button" (click)="onActivate(y)" [attr.aria-label]="'Reactivar ' + y.display_name" class="btn-icon btn-icon-success" title="Reactivar">
-
-
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-
-
-                  </button>
-
-
-                }
-
-
-              </div>
-
-
-            </td>
-
-
+  @if (loading) {
+    <div class="loading-state">
+      <div class="loading-state__card">
+        <span class="loading-state__spinner" aria-hidden="true"></span>
+        <div>
+          <div class="loading-state__title">Cargando...</div>
+          <div class="loading-state__subtitle">Estamos preparando la información.</div>
+        </div>
+      </div>
+      <div class="loading-state__skeleton">
+        <span class="loading-state__line loading-state__line--lg"></span>
+        <span class="loading-state__line"></span>
+        <span class="loading-state__line loading-state__line--sm"></span>
+      </div>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Foto</th>
+            <th>Nombre</th>
+            <th>RUT</th>
+            <th>Úúltimo intento</th>
+            <th>Desempeño actual</th>
+            <th>Actividad (úúltimo mes)</th>
+            <th>Entrevistas (úúltimo mes)</th>
+            <th>Retroalimentación</th>
+            <th>Login</th>
+            <th class="col-actions">Acciones</th>
           </tr>
-
-
-        }
-
-
-      </tbody>
-
-
-    </table>
-
-
-  </div>
-
-
-  <div class="pager">
-
-
-    <span>Página {{ page }} de {{ totalPages() }}  Total {{ total }}</span>
-
-
-    <div class="pager-actions">
-
-
-      <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="page <= 1">Anterior</button>
-
-
-      <button
-
-
-        type="button"
-
-
-        class="pager-btn"
-
-
-        (click)="nextPage()"
-
-
-        [disabled]="page >= totalPages()"
-
-
-      >
-
-
-        Siguiente
-
-
-      </button>
-
-
+        </thead>
+        <tbody>
+          @for (y of youths; track y.id) {
+            <tr [class.inactive]="!y.is_active">
+              <td>
+                <div class="avatar" [class.avatar--image]="y.profile_photo_url">
+                  @if (y.profile_photo_url) {
+                    <img [src]="y.profile_photo_url | uploadUrl" alt="" />
+                  } @else {
+                    <span>{{ initials(y.display_name) }}</span>
+                  }
+                </div>
+              </td>
+              <td>{{ y.display_name }}</td>
+              <td>{{ y.rut ?? '-' }}</td>
+              <td>
+                @if (y.last_session?.started_at) {
+                  <div class="last-attempt">
+                    <span class="last-date">{{ formatDate(y.last_session?.started_at) }}</span>
+                    @if (y.last_session?.status) {
+                      <span class="status-pill">{{ formatStatusLabel(y.last_session?.status ?? '') }}</span>
+                    }
+                  </div>
+                } @else {
+                  <span class="muted">Sin entrevistas</span>
+                }
+              </td>
+              <td>
+                <div class="metric">
+                  <span class="metric-value">{{ y.performanceLabel }}</span>
+                  @if (y.performanceNote) {
+                    <span class="metric-note">{{ y.performanceNote }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <span
+                  class="progress-chip"
+                  [class.progress-chip--up]="y.progressTrend === 'up'"
+                  [class.progress-chip--down]="y.progressTrend === 'down'"
+                  [class.progress-chip--flat]="y.progressTrend === 'flat'"
+                  [class.progress-chip--none]="y.progressTrend === 'none'"
+                >
+                  {{ y.progressLabel }}
+                </span>
+              </td>
+              <td class="count-cell">{{ y.interviewsLastMonth }}</td>
+              <td>
+                <div class="action-cell">
+                  <span
+                    class="pending-badge"
+                    [class.pending-badge--warn]="y.pendingFeedback"
+                    [class.pending-badge--ok]="!y.pendingFeedback"
+                  >
+                    @if (y.pendingFeedback) {
+                      {{ y.pendingFeedbackCount > 1 ? 'Pendientes (' + y.pendingFeedbackCount + ')' : 'Pendiente' }}
+                    } @else {
+                      Al día
+                    }
+                  </span>
+                  @if (y.pendingFeedback) {
+                    @if (y.pendingSessionId) {
+                      <a
+                        [routerLink]="['/profesional/sesiones', y.pendingSessionId]"
+                        [queryParams]="{ returnUrl: '/profesional/jovenes' }"
+                        class="btn-secondary btn-sm"
+                      >
+                        Registrar
+                      </a>
+                    } @else {
+                      <a
+                        [routerLink]="['/profesional/jovenes', y.id]"
+                        [queryParams]="{ tab: 'sesiones' }"
+                        class="btn-secondary btn-sm"
+                      >
+                        Ver pendientes
+                      </a>
+                    }
+                  } @else {
+                    <a [routerLink]="['/profesional/jovenes', y.id]" class="link-more">Ver perfil</a>
+                  }
+                </div>
+              </td>
+              <td>{{ y.login_enabled ? 'Sí' : 'No' }}</td>
+              <td class="actions">
+                <div class="actions-wrap">
+                  <a [routerLink]="['/profesional/jovenes', y.id]" [attr.aria-label]="'Ver ' + y.display_name" class="btn-icon" title="Ver">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </a>
+                  <a [routerLink]="['/profesional/jovenes', y.id, 'editar']" [attr.aria-label]="'Editar ' + y.display_name" class="btn-icon" title="Editar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </a>
+                  @if (y.is_active) {
+                    <button type="button" (click)="onDeactivate(y)" [attr.aria-label]="'Desactivar ' + y.display_name" class="btn-icon btn-icon-danger" title="Desactivar">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
+                  } @else {
+                    <button type="button" (click)="onActivate(y)" [attr.aria-label]="'Reactivar ' + y.display_name" class="btn-icon btn-icon-success" title="Reactivar">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
-
-
-  </div>
-
-
-}
-
-
+    <div class="pager">
+      <span>Página {{ page }} de {{ totalPages() }}  Total {{ total }}</span>
+      <div class="pager-actions">
+        <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="page <= 1">Anterior</button>
+        <button type="button" class="pager-btn" (click)="nextPage()" [disabled]="page >= totalPages()">Siguiente</button>
+      </div>
+    </div>
+  }
+</div>

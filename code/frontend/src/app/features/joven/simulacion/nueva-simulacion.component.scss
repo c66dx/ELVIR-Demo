@@ -1,9 +1,9 @@
 .lobby-page {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: var(--space-6);
+  padding: var(--space-5) var(--space-4) var(--space-6);
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-5);
 }
 
 .lobby-header {
@@ -12,6 +12,20 @@
   justify-content: space-between;
   gap: var(--space-4);
   flex-wrap: wrap;
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.12);
+  background:
+    radial-gradient(100% 100% at 0% 0%, rgba(var(--color-primary-rgb), 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.84) 100%);
+  box-shadow: var(--shadow-md);
+}
+
+:host-context(.theme-dark) .lobby-header {
+  background:
+    radial-gradient(100% 100% at 0% 0%, rgba(251, 113, 133, 0.18), transparent 55%),
+    linear-gradient(180deg, rgba(21, 22, 26, 0.95) 0%, rgba(21, 22, 26, 0.82) 100%);
+  border-color: rgba(251, 113, 133, 0.18);
 }
 
 .lobby-title h2 {
@@ -36,7 +50,7 @@
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
   border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background: var(--color-surface-alt);
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-text-muted);
@@ -47,16 +61,19 @@
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: var(--space-3);
   padding: var(--space-3);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background: var(--color-card);
+  box-shadow: var(--shadow-sm);
 }
 
 .step-item {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  transition: opacity var(--motion-med) var(--ease-smooth);
+  padding: var(--space-2);
+  border-radius: 14px;
+  transition: opacity var(--motion-med) var(--ease-smooth), background var(--motion-med) var(--ease-smooth);
 }
 
 .step-index {
@@ -85,6 +102,10 @@
   color: var(--color-text-muted);
 }
 
+.step-item.is-active {
+  background: var(--color-primary-soft-06);
+}
+
 .step-item.is-active .step-index {
   background: var(--color-primary);
   border-color: var(--color-primary);
@@ -101,7 +122,7 @@
   display: grid;
   gap: var(--space-3);
   padding: var(--space-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
@@ -109,13 +130,8 @@
 }
 
 .lobby-section.is-active {
-  border-color: rgba(27, 127, 121, 0.4);
+  border-color: rgba(var(--color-primary-rgb), 0.4);
   box-shadow: var(--shadow-md);
-}
-
-:host-context(.theme-dark) .lobby-section.is-active {
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: var(--shadow-sm);
 }
 
 .section-header h3 {
@@ -133,7 +149,7 @@
   display: inline-block;
   margin-bottom: var(--space-2);
   font-size: 0.7rem;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
@@ -147,6 +163,10 @@
 
 .role-scroll {
   padding: 0.35rem 0.4rem 0.4rem;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: var(--space-2);
+  scrollbar-width: thin;
 }
 
 .role-toolbar {
@@ -208,13 +228,6 @@
   background: var(--color-primary-light);
 }
 
-.role-scroll {
-  max-height: 340px;
-  overflow-y: auto;
-  padding-right: var(--space-2);
-  scrollbar-width: thin;
-}
-
 .role-empty {
   margin-top: var(--space-3);
   font-size: 0.9rem;
@@ -227,12 +240,26 @@
   padding: var(--space-4);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: var(--color-surface-alt);
+  background: var(--color-card);
   cursor: pointer;
   transition: border-color var(--motion-med) var(--ease-smooth),
     box-shadow var(--motion-med) var(--ease-smooth),
     transform var(--motion-med) var(--ease-smooth),
     background var(--motion-med) var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.role-card::before,
+.case-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 16px;
+  width: 4px;
+  height: calc(100% - 32px);
+  border-radius: 999px;
+  background: var(--color-primary-soft-20);
 }
 
 .role-card:hover,
@@ -245,7 +272,7 @@
 .role-card.is-selected,
 .case-card.is-selected {
   border-color: var(--color-primary);
-  background: var(--color-primary-light);
+  background: var(--color-primary-soft-04);
   box-shadow: var(--shadow-md);
 }
 
@@ -433,10 +460,6 @@
 }
 
 @media (max-width: 900px) {
-  .lobby-page {
-    padding: var(--space-5);
-  }
-
   .lobby-actions {
     justify-content: flex-start;
   }

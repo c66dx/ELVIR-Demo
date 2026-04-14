@@ -57,3 +57,6 @@ code/backend/uploads/
 docs/material
 docs/informes
 docs/liveavatar
+
+# Material local (no versionar)
+material/

@@ -68,7 +68,7 @@
       <div class="loading-state__card">
         <span class="loading-state__spinner" aria-hidden="true"></span>
         <div>
-          <div class="loading-state__title">Cargando sugerencias…</div>
+          <div class="loading-state__title">Cargando sugerencias</div>
         </div>
       </div>
     </div>
@@ -90,7 +90,7 @@
             <span class="material-shelf__title">{{ m.title }}</span>
             <span class="material-shelf__meta">{{ typeLabel(m.type) }} · ~{{ estimateDuration(m.type) }}</span>
           </div>
-          <span class="material-shelf__seen" [class.is-viewed]="isViewed(m.id)">{{ isViewed(m.id) ? '✓' : '○' }}</span>
+          <span class="material-shelf__seen" [class.is-viewed]="isViewed(m.id)">{{ isViewed(m.id) ? '' : '' }}</span>
           <button type="button" class="btn-secondary material-shelf__open" (click)="openMaterial(m.id, m.url)">Abrir</button>
         </li>
       }
@@ -115,9 +115,10 @@
       <div class="loading-state__card">
         <span class="loading-state__spinner" aria-hidden="true"></span>
         <div>
-          <div class="loading-state__title">Cargando catálogo…</div>
+          <div class="loading-state__title">Cargando catálogo</div>
         </div>
       </div>
     </div>
   }
 </section>
+

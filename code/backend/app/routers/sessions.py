@@ -14,6 +14,7 @@ from app.schemas.session import (
     SessionCloseRequest,
     SessionCompetenciesRequest,
     SessionCreate,
+    SessionCvResponse,
     SessionEvaluationRequest,
     SessionEventCreate,
     SessionEventResponse,
@@ -30,6 +31,7 @@ from app.services.session_access import (
     touch_session_heartbeat,
 )
 from app.services.session_audio import get_session_audio_record, upload_session_audio_for_user
+from app.services.session_cv import upload_session_cv_for_user
 from app.services.session_close import apply_close_session
 from app.services.session_competencies import (
     build_session_competencies_payload,
@@ -215,6 +217,20 @@ def upload_session_audio(
     base = f"{request.url.scheme}://{request.url.netloc}".rstrip("/")
     row = upload_session_audio_for_user(db, session_id, user, file, duration_seconds, base)
     return SessionAudioResponse.model_validate(row)
+
+
+@router.post("/{session_id}/cv", response_model=SessionCvResponse)
+def upload_session_cv(
+    session_id: Annotated[int, Path(ge=1)],
+    request: Request,
+    file: UploadFile = File(..., description="CV en PDF; máximo 10 MB"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Sube el CV asociado a la sesión. Joven o profesional asignado."""
+    base = f"{request.url.scheme}://{request.url.netloc}".rstrip("/")
+    payload = upload_session_cv_for_user(db, session_id, user, file, base)
+    return SessionCvResponse(**payload)
 
 
 @router.get("/{session_id}/audio", response_model=SessionAudioResponse | None)

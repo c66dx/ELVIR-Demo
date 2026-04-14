@@ -102,14 +102,13 @@ export class NuevaSimulacionComponent implements OnInit {
     if (!this.form) return;
     this.form.get('job_role_id')?.setValue(String(role.id));
     this.form.get('case_id')?.setValue('');
-    if (this.step > 1) {
-      this.step = 2;
-    }
+    this.step = 2;
   }
 
   selectCase(item: Case): void {
     if (!this.form || !this.hasRole()) return;
     this.form.get('case_id')?.setValue(String(item.id));
+    this.step = 3;
   }
 
   onSearchChange(event: Event): void {

@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+﻿import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -6,14 +6,14 @@ import type { Role } from '@core/models/types.model';
 import { API_BASE, str, withRequestId } from '@core/services/api-http-helpers';
 
 /**
- * Auth (`/auth/*`): login, logout, sesiÃ³n actual, cambio de contraseÃ±a/email, foto y activaciÃ³n.
+ * Auth (`/auth/*`): login, logout, sesión actual, cambio de contraseña/email, foto y activación.
  * Uso directo en pantallas (inyectar AuthApiService).
  */
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
   private http = inject(HttpClient);
 
-  /** El AuthInterceptor aÃ±ade el token Bearer automÃ¡ticamente a las peticiones autenticadas. */
+  /** El AuthInterceptor añade el token Bearer automáticamente a las peticiones autenticadas. */
   login(email: string, password: string): Observable<{ access_token: string; role: Role; user_id: string } | { error: string }> {
     return this.http
       .post<{ access_token: string; role: string; user_id: number }>(`${API_BASE}/auth/login`, { email, password })
@@ -21,13 +21,13 @@ export class AuthApiService {
         map((r) => ({ access_token: r.access_token, role: r.role as Role, user_id: str(r.user_id) })),
         catchError((err) => {
           const d = err.error?.detail;
-          const msg = typeof d === 'string' ? d : Array.isArray(d) ? d[0]?.msg ?? 'Credenciales invÃ¡lidas' : 'Credenciales invÃ¡lidas';
+          const msg = typeof d === 'string' ? d : Array.isArray(d) ? d[0]?.msg ?? 'Credenciales inválidas' : 'Credenciales inválidas';
           return of({ error: withRequestId(msg, err) });
         })
       );
   }
 
-  /** Registra cierre de sesiÃ³n en backend (para mÃ©tricas de plataforma). */
+  /** Registra cierre de sesión en backend (para métricas de plataforma). */
   logout(): Observable<void> {
     return this.http.post<void>(`${API_BASE}/auth/logout`, {}).pipe(catchError(() => of(undefined)));
   }
@@ -67,7 +67,7 @@ export class AuthApiService {
         map(() => ({ success: true as const })),
         catchError((err) => {
           const d = err.error?.detail;
-          const msg = typeof d === 'string' ? d : 'Error al cambiar contraseÃ±a';
+          const msg = typeof d === 'string' ? d : 'Error al cambiar contraseña';
           return of({ error: withRequestId(msg, err) });
         })
       );

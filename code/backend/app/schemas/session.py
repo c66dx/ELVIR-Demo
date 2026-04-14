@@ -45,6 +45,14 @@ class SessionStartResponse(BaseModel):
     fallback_detail: str | None = None
 
 
+class SessionCvResponse(BaseModel):
+    url: str
+    filename: str
+    original_name: str | None = None
+    file_size_bytes: int | None = None
+    uploaded_at: datetime | None = None
+
+
 class SessionEventResponse(BaseModel):
     id: int
     session_id: int

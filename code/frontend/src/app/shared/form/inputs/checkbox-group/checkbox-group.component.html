@@ -1,4 +1,4 @@
-<div class="form-checklist">
+﻿<div class="form-checklist">
   @for (item of items; track getItemValue(item)) {
     <label class="form-checklist-item" [class.is-selected]="isSelected(getItemValue(item))">
       <input
@@ -16,3 +16,4 @@
     </label>
   }
 </div>
+

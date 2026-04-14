@@ -2,7 +2,7 @@
   [title]="isAdmin ? 'Crear material general' : 'Crear material propio'"
   subtitle="Define el contenido y a quién aplica este material."
 >
-  <a form-header-actions [routerLink]="backRoute" class="btn-link">← Volver</a>
+  <a form-header-actions [routerLink]="backRoute" class="btn-link"> Volver</a>
 
   <form class="form-layout" [formGroup]="form" (ngSubmit)="onSubmit()">
     <app-form-section
@@ -99,9 +99,9 @@
           <div class="material-upload-progress-track">
             <div class="material-upload-progress-fill" [style.width.%]="uploadProgress"></div>
           </div>
-          <span class="material-upload-progress-label">Subiendo… {{ uploadProgress }}%</span>
+          <span class="material-upload-progress-label">Subiendo {{ uploadProgress }}%</span>
         } @else {
-          <span class="material-upload-progress-label">Subiendo archivo…</span>
+          <span class="material-upload-progress-label">Subiendo archivo</span>
         }
       </div>
     }
@@ -114,3 +114,4 @@
     </app-form-actions>
   </form>
 </app-form-container>
+

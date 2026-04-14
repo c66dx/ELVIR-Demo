@@ -1,22 +1,28 @@
 @if (data$ | async; as data) {
-  <div class="page-header notif-header">
-    <div class="notif-header__text">
-      <h2>Avisos</h2>
-      <p class="notif-hero__lede">
-        Novedades sobre material, entrevistas y mensajes. Las que no has abierto llevan una franja al costado.
-      </p>
-      <span class="notif-count">{{ data.unread }} sin leer · {{ data.total }} en total</span>
+  <section class="notif-hero">
+    <span class="hero-kicker">JOVEN</span>
+    <div class="hero-row">
+      <div class="hero-copy">
+        <h1>Avisos</h1>
+        <p class="notif-hero__lede">
+          Novedades sobre material, entrevistas y mensajes. Las que no has abierto llevan una franja al costado.
+        </p>
+      </div>
+      <div class="hero-actions">
+        <button type="button" class="btn-secondary" (click)="markAllRead()" [disabled]="data.unread === 0">
+          Marcar todo leído
+        </button>
+      </div>
     </div>
-    <div class="page-header-actions">
-      <button type="button" class="btn-secondary" (click)="markAllRead()" [disabled]="data.unread === 0">
-        Marcar todo leído
-      </button>
+    <div class="hero-meta">
+      <span class="notif-pill">{{ data.unread }} sin leer</span>
+      <span class="notif-pill notif-pill--muted">{{ data.total }} en total</span>
     </div>
-  </div>
+  </section>
 
   @if (data.items.length === 0) {
     <div class="notif-empty">
-      <p class="notif-empty__title">Todo tranquilo por aquí</p>
+      <p class="notif-empty__title">Todo tranquilo por aqu?</p>
       <p class="notif-empty__text">Cuando haya novedades, aparecerán en esta bandeja.</p>
     </div>
   } @else {
@@ -130,7 +136,7 @@
     <div class="loading-state__card">
       <span class="loading-state__spinner" aria-hidden="true"></span>
       <div>
-        <div class="loading-state__title">Cargando avisos…</div>
+        <div class="loading-state__title">Cargando avisos</div>
         <div class="loading-state__subtitle">Un momento.</div>
       </div>
     </div>

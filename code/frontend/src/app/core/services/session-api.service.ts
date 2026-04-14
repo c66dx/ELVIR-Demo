@@ -408,6 +408,27 @@ export class SessionApiService {
     );
   }
 
+  uploadSessionCv(
+    sessionId: string,
+    file: File
+  ): Observable<
+    | { url: string; filename: string; original_name?: string; file_size_bytes?: number; uploaded_at?: string }
+    | { error: string }
+  > {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<Record<string, unknown>>(`${API_BASE}/sessions/${sessionId}/cv`, form).pipe(
+      map((r) => ({
+        url: r.url as string,
+        filename: r.filename as string,
+        original_name: r.original_name as string | undefined,
+        file_size_bytes: r.file_size_bytes as number | undefined,
+        uploaded_at: r.uploaded_at as string | undefined,
+      })),
+      catchError((err) => of({ error: withRequestId('Error al subir CV', err) }))
+    );
+  }
+
   getSessionAudio(sessionId: string): Observable<SessionAudio | null> {
     return this.http.get<Record<string, unknown>>(`${API_BASE}/sessions/${sessionId}/audio`).pipe(
       map((a) =>

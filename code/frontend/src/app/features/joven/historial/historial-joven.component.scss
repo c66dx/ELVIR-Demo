@@ -1,5 +1,46 @@
 .historial-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.12);
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(var(--color-primary-rgb), 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.84) 100%);
+  box-shadow: var(--shadow-md);
   margin-bottom: var(--space-5);
+}
+
+:host-context(.theme-dark) .historial-hero {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(251, 113, 133, 0.18), transparent 55%),
+    linear-gradient(180deg, rgba(21, 22, 26, 0.95) 0%, rgba(21, 22, 26, 0.82) 100%);
+  border-color: rgba(251, 113, 133, 0.2);
+}
+
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.hero-kicker::before {
+  content: '';
+  width: 10px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--color-primary);
+}
+
+.historial-hero h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: var(--color-text);
 }
 
 .historial__lede {
@@ -10,7 +51,6 @@
   line-height: 1.55;
 }
 
-/* Frase motivadora + contador (rompe monotonía de la lista) */
 .historial-strip {
   margin-bottom: var(--space-6);
   padding: var(--space-4) var(--space-5);
@@ -23,11 +63,11 @@
   margin: 0;
   font-size: 1rem;
   color: var(--color-text);
+}
 
-  strong {
-    color: var(--color-primary);
-    font-weight: 800;
-  }
+.historial-strip__line strong {
+  color: var(--color-primary);
+  font-weight: 800;
 }
 
 .historial-strip__cheer {
@@ -60,7 +100,6 @@
   line-height: 1.55;
 }
 
-/* Línea del tiempo: menos “bloque” repetido, más escaneo vertical */
 .historial-timeline-wrap {
   display: flex;
   flex-direction: column;
@@ -86,10 +125,10 @@
   display: flex;
   gap: 0;
   min-height: 3.25rem;
+}
 
-  &:last-child .timeline-row__rail::before {
-    display: none;
-  }
+.timeline-row:last-child .timeline-row__rail::before {
+  display: none;
 }
 
 .timeline-row__rail {
@@ -98,17 +137,16 @@
   flex-shrink: 0;
   display: flex;
   justify-content: center;
+}
 
-  /* Hilo vertical entre puntos */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 1.1rem;
-    bottom: -0.25rem;
-    width: 2px;
-    background: linear-gradient(180deg, var(--color-border), transparent);
-    border-radius: 2px;
-  }
+.timeline-row__rail::before {
+  content: '';
+  position: absolute;
+  top: 1.1rem;
+  bottom: -0.25rem;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-border), transparent);
+  border-radius: 2px;
 }
 
 .timeline-dot {
@@ -154,19 +192,17 @@
   color: inherit;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
-  transition:
-    background var(--motion-fast) ease,
-    border-color var(--motion-fast) ease;
+  transition: background var(--motion-fast) ease, border-color var(--motion-fast) ease;
+}
 
-  &:hover {
-    background: var(--color-primary-soft-04);
-    border-color: var(--color-primary-soft-18);
-  }
+.timeline-row__body:hover {
+  background: var(--color-primary-soft-04);
+  border-color: var(--color-primary-soft-18);
+}
 
-  &:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
+.timeline-row__body:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .timeline-row__head {
@@ -226,21 +262,18 @@
   font-weight: 600;
   color: var(--color-text);
   cursor: pointer;
-  transition:
-    background 0.2s,
-    border-color 0.2s,
-    color 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
 
-  &:hover:not(:disabled) {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    background: var(--color-primary-light);
-  }
+.pager-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+.pager-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 640px) {

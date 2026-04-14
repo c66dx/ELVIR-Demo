@@ -1,8 +1,10 @@
-<header class="historial-hero page-header">
+<header class="historial-hero">
   <div>
-    <h2>Mis prácticas</h2>
+    <span class="hero-kicker">Joven</span>
+    <h1>Mis prácticas</h1>
     <p class="historial__lede">
-      Tu recorrido en una sola vista: fechas agrupadas para que no tengas que leer el mismo bloque una y otra vez. Toca una línea para volver a esa práctica.
+      Tu recorrido en una sola vista: fechas agrupadas para que no tengas que leer el mismo bloque una y otra vez.
+      Toca una línea para volver a esa práctica.
     </p>
   </div>
 </header>
@@ -12,7 +14,7 @@
     <div class="historial-empty">
       <p class="historial-empty__title">¡Aquí empezará tu recorrido!</p>
       <p class="historial-empty__text">
-        Cada simulación que hagas se irá sumando en una línea del tiempo: verás el avance sin sensación de “lista interminable”.
+        Cada simulación que hagas se irá sumando en una línea del tiempo: verás el avance sin sensación de lista interminable.
       </p>
       <a routerLink="/joven/simulacion/nueva" class="btn-primary">Empezar una práctica</a>
     </div>
@@ -47,10 +49,10 @@
                   </div>
                   <div class="timeline-row__meta">
                     {{ formatDate(s.started_at) }}
-                    <span class="timeline-row__sep">·</span>
+                    <span class="timeline-row__sep"></span>
                     {{ modeLabel(s.mode) }}
                     @if ((s.duration_seconds ?? 0) > 0) {
-                      <span class="timeline-row__sep">·</span>
+                      <span class="timeline-row__sep"></span>
                       {{ formatDuration(s.duration_seconds) }}
                     }
                   </div>
@@ -66,7 +68,7 @@
     </div>
 
     <div class="pager">
-      <span>Página {{ data.page }} de {{ totalPages(data.total) }} · {{ data.total }} prácticas</span>
+      <span>Pgina {{ data.page }} de {{ totalPages(data.total) }}  {{ data.total }} prácticas</span>
       <div class="pager-actions">
         <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="data.page <= 1">Anterior</button>
         <button type="button" class="pager-btn" (click)="nextPage(data.total)" [disabled]="data.page >= totalPages(data.total)">
@@ -80,7 +82,7 @@
     <div class="loading-state__card">
       <span class="loading-state__spinner" aria-hidden="true"></span>
       <div>
-        <div class="loading-state__title">Cargando tu recorrido…</div>
+        <div class="loading-state__title">Cargando tu recorrido</div>
         <div class="loading-state__subtitle">Solo un momento.</div>
       </div>
     </div>
@@ -91,3 +93,4 @@
     </div>
   </div>
 }
+

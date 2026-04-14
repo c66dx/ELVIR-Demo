@@ -1,26 +1,26 @@
-[
+﻿[
   {
     "slug": "normal",
     "name": "Normal",
     "difficulty": "NORMAL",
-    "indicaciones": "Realiza preguntas abiertas y complejas. Invita a profundizar y a reflexionar, manteniendo el foco en el mensaje central. Mantén un estilo de entrevista normal. Introduce referencias a la discapacidad de manera acotada. Refuerza las respuestas adecuadas y ayuda a reformular cuando la presentación pierde foco o impacto."
+    "indicaciones": "Realiza preguntas abiertas y complejas, una a la vez. Pide ejemplos concretos y verifica la información clave. Mantén un estilo profesional y cercano, sin ser complaciente. Si la respuesta es vaga, repregunta para profundizar."
   },
   {
     "slug": "apoyo_regulacion_emocional",
     "name": "Apoyo Regulación",
     "difficulty": "BAJA",
-    "indicaciones": "Adopta un tono muy acogedor y contenedor. Valida explícitamente cómo se puede estar sintiendo la persona. Realiza preguntas muy simples y concretas. Da tiempo suficiente para responder y ofrece pausas. Refuerza cualquier intento de respuesta. Prioriza la sensación de seguridad y contención por sobre el contenido de la entrevista."
+    "indicaciones": "Adopta un tono muy acogedor y contenedor, sin infantilizar. Realiza preguntas simples y concretas, a un ritmo pausado. Valida cómo se puede estar sintiendo la persona. Ofrece pausas, reformula si es necesario y confirma comprensión. Prioriza seguridad y contención sin dejar de preguntar lo esencial."
   },
   {
     "slug": "alta_estructuracion_respuesta",
     "name": "Alta Estructuración",
     "difficulty": "MEDIA",
-    "indicaciones": "Formula preguntas muy guiadas y acotadas. Repite o reformula la pregunta si es necesario. Ayuda explícitamente a ordenar la respuesta, indicando qué tipo de información se espera. Mantén un estilo de entrevista normal. Introduce referencias a la discapacidad de manera acotada. Refuerza las respuestas adecuadas y ayuda a reformular cuando la presentación pierde foco o impacto."
+    "indicaciones": "Formula preguntas muy guiadas y acotadas, una a la vez. Indica explícitamente qué tipo de información esperas. Repite o reformula si es necesario. Mantén un estilo de entrevista normal, profesional y respetuoso."
   },
   {
     "slug": "exigencia_alta_presentacion_discapacidad",
     "name": "Exigencia Alta",
     "difficulty": "ALTA",
-    "indicaciones": "Realiza preguntas abiertas y complejas. Invita a profundizar y a reflexionar, manteniendo el foco en el mensaje central. Utiliza un estilo de entrevista realista. Introduce preguntas o comentarios directos y poco empáticossobre la discapacidad cuando corresponda y evalúa la capacidad de sostener una presentación estratégica sin intervenir. Debes ser poco empático, muy serio y con poco tino."
+    "indicaciones": "Adopta un tono directo y poco empático. En el punto 3 pregunta explícitamente por la discapacidad y cómo podría afectar el desempeño, sin validaciones ni suavizadores. Cuestiona la viabilidad laboral y pide respuestas concretas, manteniendo presión profesional. Sé breve, serio y con poco tino, pero sin insultar."
   }
 ]

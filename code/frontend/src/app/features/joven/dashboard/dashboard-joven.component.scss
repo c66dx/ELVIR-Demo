@@ -1,24 +1,77 @@
 .dashboard {
   width: 100%;
+  display: grid;
+  gap: var(--space-6);
 }
 
-.dashboard-header {
-  margin-bottom: var(--space-8);
+.dashboard-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.12);
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(var(--color-primary-rgb), 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.84) 100%);
+  box-shadow: var(--shadow-md);
+  flex-wrap: wrap;
+}
 
-  h2 {
-    font-size: var(--font-size-title);
-  }
+:host-context(.theme-dark) .dashboard-hero {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(251, 113, 133, 0.18), transparent 55%),
+    linear-gradient(180deg, rgba(21, 22, 26, 0.95) 0%, rgba(21, 22, 26, 0.82) 100%);
+  border-color: rgba(251, 113, 133, 0.2);
+}
+
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.hero-kicker::before {
+  content: '';
+  width: 10px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--color-primary);
+}
+
+.hero-copy h1 {
+  margin: var(--space-2) 0 0;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.hero-copy p {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  max-width: 520px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 .kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-5);
-  margin-bottom: var(--space-8);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
 }
 
 .kpi-card {
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-4) var(--space-5);
   background: var(--color-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
@@ -28,11 +81,11 @@
   flex-direction: column;
   gap: var(--space-2);
   transition: box-shadow 0.2s, transform 0.2s;
+}
 
-  &:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
-  }
+.kpi-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .kpi-value {
@@ -47,29 +100,25 @@
   font-weight: 500;
 }
 
-.loading {
-  color: var(--color-text-muted);
-}
-
 .kpi-card--highlight {
   border-left-width: 4px;
   background: linear-gradient(135deg, var(--color-card) 0%, var(--color-primary-light) 100%);
 }
 
 .dashboard-section {
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
   padding: var(--space-5);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   background: var(--color-card);
   box-shadow: var(--shadow-sm);
+}
 
-  h3 {
-    margin: 0 0 var(--space-4);
-    font-size: var(--font-size-section);
-    font-weight: 700;
-    color: var(--color-text);
-  }
+.dashboard-section h3 {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-section);
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .recent-list {
@@ -91,11 +140,11 @@
   color: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
   flex-wrap: wrap;
+}
 
-  &:hover {
-    border-color: var(--color-primary-soft-35);
-    box-shadow: var(--shadow-sm);
-  }
+.recent-item:hover {
+  border-color: var(--color-primary-soft-35);
+  box-shadow: var(--shadow-sm);
 }
 
 .recent-date {
@@ -110,25 +159,14 @@
   margin-left: auto;
 }
 
-@media (max-width: 720px) {
-  .recent-date {
-    min-width: 0;
-  }
-
-  .recent-meta {
-    margin-left: 0;
-    width: 100%;
-  }
-}
-
 .link-more {
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--color-primary);
+}
 
-  &:hover {
-    text-decoration: underline;
-  }
+.link-more:hover {
+  text-decoration: underline;
 }
 
 .dashboard-section--empty {
@@ -145,3 +183,13 @@
   color: var(--color-text-muted);
 }
 
+@media (max-width: 720px) {
+  .recent-date {
+    min-width: 0;
+  }
+
+  .recent-meta {
+    margin-left: 0;
+    width: 100%;
+  }
+}

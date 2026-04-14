@@ -1,4 +1,4 @@
-﻿<div class="lobby-page">
+<div class="lobby-page">
   <div class="lobby-header">
     <div class="lobby-title">
       <h2>Iniciar entrevista supervisada</h2>
@@ -47,7 +47,7 @@
         <span class="loading-state__spinner" aria-hidden="true"></span>
         <div>
           <div class="loading-state__title">Cargando...</div>
-          <div class="loading-state__subtitle">Estamos preparando la información.</div>
+          <div class="loading-state__subtitle">Estamos preparando la informacin.</div>
         </div>
       </div>
       <div class="loading-state__skeleton">
@@ -121,7 +121,7 @@
             <div>
               <span class="section-kicker">Paso 2</span>
               <h3>Selecciona el escenario de entrevista</h3>
-              <p>Elige el caso según la descripción del escenario.</p>
+              <p>Elige el caso segn la descripcin del escenario.</p>
             </div>
           </div>
           <div class="case-grid">
@@ -185,12 +185,12 @@
                 }
               </div>
               <p class="briefing-text">
-                Te conectarás con <strong>{{ company.name }}</strong>. El entrevistador evaluará tu experiencia,
-                tu motivación y tu ajuste al rol de <strong>{{ role.name }}</strong>.
+                Te conectars con <strong>{{ company.name }}</strong>. El entrevistador evaluar tu experiencia,
+                tu motivacin y tu ajuste al rol de <strong>{{ role.name }}</strong>.
               </p>
               <div class="briefing-grid">
                 <div>
-                  <span class="briefing-label">Situación</span>
+                  <span class="briefing-label">Situacin</span>
                   <p>
                     @if (selectedCase(); as caseItem) {
                       {{ caseNarrative(caseItem) }}
@@ -201,7 +201,7 @@
                 </div>
                 <div>
                   <span class="briefing-label">Expectativas del entrevistador</span>
-                  <p>Se valoran respuestas claras, ejemplos concretos y una comunicación profesional.</p>
+                  <p>Se valoran respuestas claras, ejemplos concretos y una comunicacin profesional.</p>
                 </div>
               </div>
               <div class="briefing-footer">
@@ -223,7 +223,7 @@
 
       <div class="lobby-actions">
         <button type="button" class="btn-secondary" (click)="goBack()" [disabled]="currentStep() === 1">
-          ← Volver
+           Volver
         </button>
         <div class="lobby-actions-right">
           @if (currentStep() < 3) {
@@ -236,10 +236,11 @@
             </button>
           }
           <div class="lobby-footnote">
-            Al iniciar, pasarás por la sala de espera y luego el entrevistador se conectará.
+            Al iniciar, pasars por la sala de espera y luego el entrevistador se conectar.
           </div>
         </div>
       </div>
     </form>
   }
 </div>
+

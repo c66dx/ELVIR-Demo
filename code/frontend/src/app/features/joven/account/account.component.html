@@ -1,28 +1,27 @@
 <div class="account-page">
-  <header class="account-header">
-    <div>
-      <h2>Mi Cuenta</h2>
-      <p>Administra tu perfil, correo y contraseña.</p>
-    </div>
-  </header>
+  <section class="account-hero">
+    <span class="hero-kicker">JOVEN</span>
+    <h1>Mi cuenta</h1>
+    <p>Administra tu perfil, correo y contraseña.</p>
+  </section>
 
   @if (loading()) {
     <div class="account-loading">
-<div class="loading-state">
-  <div class="loading-state__card">
-    <span class="loading-state__spinner" aria-hidden="true"></span>
-    <div>
-      <div class="loading-state__title">Cargando...</div>
-      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+      <div class="loading-state">
+        <div class="loading-state__card">
+          <span class="loading-state__spinner" aria-hidden="true"></span>
+          <div>
+            <div class="loading-state__title">Cargando...</div>
+            <div class="loading-state__subtitle">Estamos preparando la información.</div>
+          </div>
+        </div>
+        <div class="loading-state__skeleton">
+          <span class="loading-state__line loading-state__line--lg"></span>
+          <span class="loading-state__line"></span>
+          <span class="loading-state__line loading-state__line--sm"></span>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="loading-state__skeleton">
-    <span class="loading-state__line loading-state__line--lg"></span>
-    <span class="loading-state__line"></span>
-    <span class="loading-state__line loading-state__line--sm"></span>
-  </div>
-</div>
-</div>
   } @else {
     <div class="account-grid">
       <section class="account-card">
@@ -106,7 +105,7 @@
           <h3>Contraseña</h3>
           <span class="card-subtitle">Actualiza tu contraseña cuando lo necesites</span>
         </div>
-        <p class="card-text">Para mayor seguridad, cambia tu contraseña peródicamente.</p>
+        <p class="card-text">Para mayor seguridad, cambia tu contraseña periódicamente.</p>
         <a routerLink="/cambiar-contrasena" class="btn-secondary">Cambiar contraseña</a>
       </section>
     </div>

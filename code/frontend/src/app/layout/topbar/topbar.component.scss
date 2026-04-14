@@ -2,16 +2,16 @@
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: var(--space-6);
-  padding: var(--space-3) var(--space-6);
-  background: var(--color-card);
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+  box-shadow: var(--shadow-sm);
   flex-shrink: 0;
 }
 
 body.theme-dark .topbar {
-  background: var(--color-card);
+  background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   box-shadow: none;
 }
@@ -31,14 +31,15 @@ body.theme-dark .topbar {
 }
 
 .brand-title {
-  font-size: 1.05rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   color: var(--color-text);
 }
 
 .brand-subtitle {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--color-text-muted);
 }
 
@@ -46,10 +47,10 @@ body.theme-dark .topbar {
 .brand-logos {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
 
   img {
-    height: 24px;
+    height: 20px;
     width: auto;
     opacity: 0.95;
   }
@@ -73,7 +74,7 @@ body.theme-dark .topbar .brand-logos img {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0.5rem 0.9rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 999px;
   border: 1px solid var(--color-border);
   background: var(--color-surface-alt);
@@ -81,7 +82,7 @@ body.theme-dark .topbar .brand-logos img {
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   transition: all 0.2s ease;
 
   &:hover {
@@ -118,8 +119,8 @@ body.theme-dark .theme-switch {
 
 .notif-chip {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 12px;
   border: 1px solid var(--color-border);
   background: var(--color-surface-alt);
@@ -127,7 +128,7 @@ body.theme-dark .theme-switch {
   display: grid;
   place-items: center;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   transition: all 0.2s ease;
 
   &:hover {
@@ -345,9 +346,9 @@ body.theme-dark .notif-chip {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-4);
+  padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  background: var(--color-bg);
+  background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
   min-width: 0;
   max-width: min(100%, 340px);
@@ -364,8 +365,8 @@ body.theme-dark .user-chip {
 
 .user-avatar-wrap {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
 }
 
@@ -373,12 +374,12 @@ body.theme-dark .user-chip {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: var(--color-primary-light);
+  background: var(--color-primary-soft-12);
   color: var(--color-primary);
   display: grid;
   place-items: center;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   overflow: hidden;
 
   img {
@@ -397,7 +398,7 @@ body.theme-dark .user-chip {
   height: 10px;
   border-radius: 50%;
   background: var(--color-success);
-  border: 2px solid var(--color-bg);
+  border: 2px solid var(--color-surface-alt);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
@@ -418,7 +419,7 @@ body.theme-dark .online-dot {
 }
 
 .user-name {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--color-text);
   white-space: nowrap;
@@ -430,7 +431,7 @@ body.theme-dark .online-dot {
 
 
 .user-role {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;

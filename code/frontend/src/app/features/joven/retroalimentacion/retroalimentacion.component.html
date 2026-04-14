@@ -1,9 +1,10 @@
-<div class="retro-hero page-header">
-  <h2>Lo que dice tu tutor</h2>
+<section class="retro-hero">
+  <span class="hero-kicker">JOVEN</span>
+  <h1>Lo que dice tu tutor</h1>
   <p class="retro-hero__lede">
     Cada entrevista puede incluir un mensaje y consejos. Aquí se leen como cartas cortas, sin tablas ni formularios.
   </p>
-</div>
+</section>
 
 @if (feedback$ | async; as data) {
   @if (data.items.length === 0) {
@@ -98,7 +99,7 @@
     <div class="loading-state__card">
       <span class="loading-state__spinner" aria-hidden="true"></span>
       <div>
-        <div class="loading-state__title">Cargando mensajes…</div>
+        <div class="loading-state__title">Cargando mensajes</div>
         <div class="loading-state__subtitle">Un momento.</div>
       </div>
     </div>

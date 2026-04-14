@@ -2,7 +2,7 @@
   <div class="prep-card">
     <div class="prep-header">
       <div>
-        <span class="prep-kicker">Preparación</span>
+        <span class="prep-kicker">Preparacin</span>
         <h1 class="prep-title">Antes de comenzar la entrevista</h1>
         <p class="prep-subtitle">Revisa el contexto y los recordatorios clave para una entrevista efectiva.</p>
       </div>
@@ -18,13 +18,35 @@
       <div class="context-block">
         <span class="context-label">Cargo</span>
         <p class="context-value">{{ jobRoleName }}</p>
-        <p class="context-meta">Caso: {{ caseName || 'Entrevista estándar' }}</p>
+        <p class="context-meta">Caso: {{ caseName || 'Entrevista estndar' }}</p>
       </div>
     </div>
 
     <div class="prep-summary">
       <span class="context-label">Contexto laboral</span>
       <p>{{ contextSummary }}</p>
+    </div>
+
+    <div class="prep-upload">
+      <div>
+        <span class="context-label">CV</span>
+        <p class="prep-upload__hint">Adjunta tu CV en PDF (mx. 10 MB). Puedes reemplazarlo cuando quieras.</p>
+      </div>
+      <div class="prep-upload__controls">
+        <input #cvInput type="file" accept="application/pdf" (change)="onCvSelected($event)" hidden />
+        <button type="button" class="btn-secondary" (click)="cvInput.click()" [disabled]="cvUploading">
+          {{ cvUploaded ? 'Reemplazar CV' : 'Subir CV (PDF)' }}
+        </button>
+        @if (cvUploading) {
+          <span class="prep-upload__status">Subiendo</span>
+        }
+        @if (!cvUploading && cvUploaded) {
+          <span class="prep-upload__status">CV cargado: {{ cvFileName }}</span>
+        }
+      </div>
+      @if (cvUploadError) {
+        <div class="prep-upload__error">{{ cvUploadError }}</div>
+      }
     </div>
 
     <div class="prep-grid">
@@ -51,3 +73,4 @@
     </div>
   </div>
 </div>
+

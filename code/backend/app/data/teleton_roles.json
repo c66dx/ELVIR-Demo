@@ -1,18 +1,18 @@
-{
+﻿{
   "operario": {
     "nombre": "Operario",
-    "descripcion": "El cargo de Operario está orientado a la realización de tareas operativas básicas dentro de la organización, siguiendo instrucciones y procedimientos definidos. El rol requiere responsabilidad, cumplimiento de normas y capacidad para trabajar de manera organizada y colaborativa."
+    "descripcion": "El cargo de Operario General está orientado a la ejecución de tareas operativas básicas dentro de una organización, apoyando procesos productivos, logísticos o de mantenimiento según las necesidades del área. Su labor consiste en realizar actividades manuales o de apoyo siguiendo procedimientos establecidos, normas de seguridad y las instrucciones del supervisor. Este rol requiere responsabilidad, puntualidad y disposición para colaborar con el equipo de trabajo. Habitualmente se desempeña en bodegas, centros de distribución, plantas productivas o áreas de servicios, donde es fundamental mantener el orden, la eficiencia y el cumplimiento de los estándares operacionales. Jornada típica: 44 horas semanales, con opciones de lunes a viernes, lunes a sábado o turnos rotativos (mañana/tarde/noche). Renta referencial: $430.000–$520.000 CLP, con posibilidad de bonos o beneficios."
   },
   "atencion_publico": {
     "nombre": "Atención Público",
-    "descripcion": "El cargo de Atención Público tiene como objetivo atender y orientar a personas usuarias o clientes, brindando respuestas claras y oportunas según los lineamientos establecidos. El rol demanda habilidades de comunicación, trato cordial y adecuada gestión de situaciones diversas."
+    "descripcion": "El cargo de Atención de Público está orientado a brindar orientación, información y apoyo directo a personas usuarias o clientes de la organización. La persona que desempeña este rol es responsable de entregar respuestas claras, canalizar consultas y colaborar en la resolución de solicitudes o problemas. Este puesto requiere habilidades de comunicación efectiva, trato cordial y capacidad para manejar distintas situaciones de atención. Habitualmente se desempeña en áreas de recepción, servicios al cliente o atención institucional, contribuyendo a mantener una experiencia positiva. Jornada típica: 44 horas semanales en horario de oficina (aprox. 08:30–17:30). Renta referencial: $480.000–$650.000 CLP."
   },
   "administrativo": {
     "nombre": "Administrativo",
-    "descripcion": "El cargo Administrativo se enfoca en apoyar la gestión interna de la organización mediante la ejecución de tareas administrativas y de apoyo documental. El rol requiere organización, orden, cumplimiento de procedimientos y manejo básico de herramientas de oficina."
+    "descripcion": "El cargo Administrativo está orientado a apoyar la gestión interna de la organización mediante la ejecución de tareas administrativas y de apoyo documental. La persona en este rol colabora en la organización de información, registro de datos y seguimiento de procedimientos internos. Su trabajo permite facilitar el funcionamiento eficiente de las distintas áreas de la organización. Este puesto requiere orden, responsabilidad y manejo básico de herramientas de oficina, además de capacidad para cumplir procedimientos establecidos y trabajar de forma coordinada con otros equipos. Jornada típica: 44 horas semanales en horario de oficina (08:30–17:30 aprox.). Renta referencial: $550.000–$750.000 CLP."
   },
   "tecnico_profesional": {
     "nombre": "Técnico Profesional",
-    "descripcion": "El cargo Técnico Profesional está orientado al desarrollo de funciones técnicas o especializadas dentro de un área específica. El rol implica aplicar conocimientos profesionales, cumplir estándares definidos y aportar al correcto funcionamiento de los procesos del área."
+    "descripcion": "El cargo de Técnico Profesional está orientado al desarrollo de funciones técnicas especializadas dentro de un área determinada de la organización. La persona que desempeña este rol aplica conocimientos técnicos adquiridos durante su formación para apoyar la ejecución de procesos, resolver problemas operativos y contribuir al correcto funcionamiento del área. Este puesto requiere responsabilidad, capacidad de análisis y cumplimiento de procedimientos técnicos. Dependiendo del sector, puede implicar trabajo con equipos, herramientas tecnológicas o apoyo en procesos técnicos específicos. Jornada típica: 44 horas semanales, con posibilidad de horarios de oficina o turnos en áreas técnicas. Renta referencial: $700.000–$1.000.000 CLP (nivel técnico inicial)."
   }
 }

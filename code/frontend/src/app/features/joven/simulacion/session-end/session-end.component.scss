@@ -1,5 +1,7 @@
 .report-shell {
   padding: var(--space-6);
+  display: grid;
+  place-items: center;
 }
 
 .report-shell {
@@ -27,9 +29,12 @@
 }
 
 .report-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 18px;
+  width: min(980px, 100%);
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(var(--color-primary-rgb), 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.9) 100%);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.12);
+  border-radius: 24px;
   padding: var(--space-6);
   display: grid;
   gap: var(--space-4);
@@ -37,6 +42,13 @@
   position: relative;
   overflow: hidden;
   animation: cardIn 0.35s var(--ease-out);
+}
+
+:host-context(.theme-dark) .report-card {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(251, 113, 133, 0.16), transparent 55%),
+    linear-gradient(180deg, rgba(21, 22, 26, 0.96) 0%, rgba(21, 22, 26, 0.82) 100%);
+  border-color: rgba(251, 113, 133, 0.2);
 }
 
 .report-header {
@@ -107,7 +119,7 @@
 
 .report-metrics .metric-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: var(--space-3);
 }
 
@@ -115,9 +127,10 @@
   padding: var(--space-3);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: var(--color-surface-alt);
+  background: var(--color-surface);
   display: grid;
   gap: var(--space-1);
+  box-shadow: var(--shadow-sm);
 }
 
 .metric-label {
@@ -135,11 +148,12 @@
 }
 
 .report-feedback {
-  background: var(--color-surface-alt);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-4);
   gap: var(--space-2);
+  box-shadow: var(--shadow-sm);
 }
 
 .feedback-header {
@@ -185,7 +199,7 @@
 }
 
 .next-steps li::before {
-  content: '•';
+  content: '';
   color: var(--status-color);
   font-size: 1.1rem;
   line-height: 1;
@@ -228,7 +242,7 @@
 
 @media (max-width: 640px) {
   .report-card {
-    padding: var(--space-6);
+    padding: var(--space-5);
   }
 
   .report-actions {
