@@ -31,7 +31,6 @@ from app.services.session_access import (
     touch_session_heartbeat,
 )
 from app.services.session_audio import get_session_audio_record, upload_session_audio_for_user
-from app.services.session_cv import upload_session_cv_for_user
 from app.services.session_close import apply_close_session
 from app.services.session_competencies import (
     build_session_competencies_payload,
@@ -39,6 +38,7 @@ from app.services.session_competencies import (
 )
 from app.services.session_context import fetch_session_context_labels
 from app.services.session_create import create_session_record
+from app.services.session_cv import upload_session_cv_for_user
 from app.services.session_evaluation import persist_liveavatar_evaluation
 from app.services.session_events import list_session_events_ordered, persist_manual_session_event
 from app.services.session_list import apply_sessions_pagination_headers, fetch_sessions_list
