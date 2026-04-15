@@ -2,7 +2,7 @@
   <div class="lobby-header">
     <div class="lobby-title">
       <h2>Iniciar entrevista supervisada</h2>
-      <p>Configura el cargo, el escenario y revisa el briefing antes de crear la sesión supervisada.</p>
+      <p>Elige cargo y escenario. Despu&eacute;s revisa el contexto antes de crear la sesi&oacute;n.</p>
     </div>
     <div class="lobby-meta">
       <span class="lobby-chip">Modalidad: Supervisada</span>
@@ -22,21 +22,14 @@
       <span class="step-index">2</span>
       <div>
         <span class="step-title">Escenario</span>
-        <span class="step-desc">Selecciona el caso</span>
+        <span class="step-desc">Define el tono</span>
       </div>
     </div>
-    <div class="step-item" [class.is-active]="currentStep() === 3 && !form.valid" [class.is-done]="form.valid">
+    <div class="step-item" [class.is-active]="currentStep() === 3" [class.is-done]="form.valid">
       <span class="step-index">3</span>
       <div>
-        <span class="step-title">Briefing</span>
-        <span class="step-desc">Contexto de la entrevista</span>
-      </div>
-    </div>
-    <div class="step-item" [class.is-active]="currentStep() === 3 && form.valid" [class.is-done]="form.valid">
-      <span class="step-index">4</span>
-      <div>
-        <span class="step-title">Ingreso</span>
-        <span class="step-desc">Crear entrevista</span>
+        <span class="step-title">Confirmaci&oacute;n</span>
+        <span class="step-desc">Revisa y crea</span>
       </div>
     </div>
   </div>
@@ -47,7 +40,7 @@
         <span class="loading-state__spinner" aria-hidden="true"></span>
         <div>
           <div class="loading-state__title">Cargando...</div>
-          <div class="loading-state__subtitle">Estamos preparando la informacin.</div>
+          <div class="loading-state__subtitle">Estamos preparando la informaci&oacute;n.</div>
         </div>
       </div>
       <div class="loading-state__skeleton">
@@ -63,8 +56,8 @@
           <div class="section-header">
             <div>
               <span class="section-kicker">Paso 1</span>
-              <h3>Selecciona el cargo al que postulas</h3>
-              <p>Esto define el perfil de la entrevista y el contexto de la empresa.</p>
+              <h3>Elige el cargo</h3>
+              <p>Esto ajusta la entrevista y el contexto de la empresa.</p>
             </div>
           </div>
           <div class="role-toolbar">
@@ -120,10 +113,15 @@
           <div class="section-header">
             <div>
               <span class="section-kicker">Paso 2</span>
-              <h3>Selecciona el escenario de entrevista</h3>
-              <p>Elige el caso segn la descripcin del escenario.</p>
+              <h3>Elige el escenario</h3>
+              <p>Cada caso cambia el tono y el nivel de apoyo durante la entrevista.</p>
             </div>
           </div>
+          @if (selectedJobRole(); as role) {
+            <div class="selection-summary">
+              <span class="selection-pill">Cargo: {{ role.name }}</span>
+            </div>
+          }
           <div class="case-grid">
             @for (c of cases; track c.id) {
               <button
@@ -140,7 +138,7 @@
                     <div class="case-card-title">{{ c.name }}</div>
                     <div class="case-card-sub">{{ caseDescription(c) }}</div>
                     @if (!isDynamicCase(c)) {
-                      <div class="case-card-time">Duración estimada: {{ estimatedDuration(c.difficulty) }}</div>
+                      <div class="case-card-time">Duraci&oacute;n estimada: {{ estimatedDuration(c.difficulty) }}</div>
                     }
                   </div>
                   @if (!isDynamicCase(c)) {
@@ -155,12 +153,11 @@
                     </span>
                   }
                 </div>
-
               </button>
             }
           </div>
           @if (!hasRole()) {
-            <p class="helper-muted">Primero define el cargo para habilitar los escenarios.</p>
+            <p class="helper-muted">Primero elige un cargo para habilitar los escenarios.</p>
           }
         </section>
       }
@@ -170,9 +167,17 @@
           <div class="section-header">
             <div>
               <span class="section-kicker">Paso 3</span>
-              <h3>Briefing de la entrevista</h3>
-              <p>Revisa el contexto para entrar con seguridad a la sesión.</p>
+              <h3>Confirma el contexto</h3>
+              <p>Revisa el escenario antes de crear la sesi&oacute;n.</p>
             </div>
+          </div>
+          <div class="selection-summary">
+            @if (selectedJobRole(); as role) {
+              <span class="selection-pill">Cargo: {{ role.name }}</span>
+            }
+            @if (selectedCase(); as caseItem) {
+              <span class="selection-pill">Escenario: {{ caseItem.name }}</span>
+            }
           </div>
           <div class="briefing-card" [class.is-empty]="!selectedJobRole()">
             @if (selectedJobRole(); as role) {
@@ -185,12 +190,12 @@
                 }
               </div>
               <p class="briefing-text">
-                Te conectars con <strong>{{ company.name }}</strong>. El entrevistador evaluar tu experiencia,
-                tu motivacin y tu ajuste al rol de <strong>{{ role.name }}</strong>.
+                Te conectar&aacute;s con <strong>{{ company.name }}</strong>. El entrevistador evaluar&aacute; tu experiencia,
+                tu motivaci&oacute;n y tu ajuste al rol de <strong>{{ role.name }}</strong>.
               </p>
               <div class="briefing-grid">
                 <div>
-                  <span class="briefing-label">Situacin</span>
+                  <span class="briefing-label">Situaci&oacute;n</span>
                   <p>
                     @if (selectedCase(); as caseItem) {
                       {{ caseNarrative(caseItem) }}
@@ -201,13 +206,13 @@
                 </div>
                 <div>
                   <span class="briefing-label">Expectativas del entrevistador</span>
-                  <p>Se valoran respuestas claras, ejemplos concretos y una comunicacin profesional.</p>
+                  <p>Se valoran respuestas claras, ejemplos concretos y una comunicaci&oacute;n profesional.</p>
                 </div>
               </div>
               <div class="briefing-footer">
                 <span>Modalidad: Supervisada</span>
                 @if (selectedCase() && !isDynamicCase(selectedCase()!)) {
-                  <span>Duración estimada: {{ estimatedDuration(selectedCase()!.difficulty) }}</span>
+                  <span>Duraci&oacute;n estimada: {{ estimatedDuration(selectedCase()!.difficulty) }}</span>
                 }
               </div>
             } @else {
@@ -223,24 +228,23 @@
 
       <div class="lobby-actions">
         <button type="button" class="btn-secondary" (click)="goBack()" [disabled]="currentStep() === 1">
-           Volver
+          Volver
         </button>
         <div class="lobby-actions-right">
-          @if (currentStep() < 3) {
-            <button type="button" class="btn-primary btn-start" (click)="goNext()" [disabled]="!canContinue()">
-              Continuar
-            </button>
-          } @else {
+          @if (currentStep() === 3) {
             <button type="submit" [disabled]="form.invalid || submitting" class="btn-primary btn-start">
               Crear entrevista
             </button>
           }
           <div class="lobby-footnote">
-            Al iniciar, pasars por la sala de espera y luego el entrevistador se conectar.
+            @if (currentStep() < 3) {
+              La vista avanza autom&aacute;ticamente cuando seleccionas una opci&oacute;n.
+            } @else {
+              Al iniciar, pasar&aacute;s por la sala de espera y luego el entrevistador se conectar&aacute;.
+            }
           </div>
         </div>
       </div>
     </form>
   }
 </div>
-
