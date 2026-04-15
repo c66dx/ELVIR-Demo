@@ -13,6 +13,7 @@ Mapa de la carpeta `docs/` y enlaces canónicos. El README en la raíz del repos
 | **Modelo de datos** | [`modelo-datos/modelo_datos.md`](modelo-datos/modelo_datos.md), [`modelo-datos/diccionario_datos.md`](modelo-datos/diccionario_datos.md) |
 | **API** | [`api/endpoints.md`](api/endpoints.md) — contratos REST (v1.3); colección Postman en [`api/ELVIR-API.postman_collection.json`](api/ELVIR-API.postman_collection.json) |
 | **LiveAvatar** | [`liveavatar/integracion-liveavatar.md`](liveavatar/integracion-liveavatar.md) — **documento canónico** de integración (Context Dinámico) |
+| **Deploy** | [`infra/deploy-northflank.md`](infra/deploy-northflank.md) — backend FastAPI en Northflank Sandbox con Supabase + Vercel |
 | **Errores** | [`errors.md`](errors.md) — formato de errores y `X-Request-ID` |
 | **Decisiones (ADR)** | [`adr/`](adr/) |
 | **Propuesta / addendum** | [`propuesta/`](propuesta/) — contexto e hitos del proyecto |

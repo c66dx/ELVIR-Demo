@@ -3,7 +3,7 @@
  */
 export const environment = {
   production: true,
-  apiUrl: 'https://elvir-demo.onrender.com/api/v1',
+  apiUrl: 'https://p01--elvir-backend--gdvh5qbny2m8.code.run/api/v1',
   /** Producción: alineado con `PASSWORD_MIN_LENGTH` = 12 en el backend cuando `ENV=prod`. */
   passwordMinLength: 12,
   demoCredentials: {

@@ -105,6 +105,21 @@ Para evitar que Render “duerma”, puedes pingear `https://<tu-backend>/health
 
 ---
 
+## Deploy alternativo: Northflank Sandbox
+
+Si quieres mover solo el backend y evitar el sleep de Render Free, hay una guia en:
+
+- `docs/infra/deploy-northflank.md`
+
+Notas practicas:
+
+- el backend ya tiene `Dockerfile` listo en `code/backend/Dockerfile`;
+- la base de datos puede seguir en Supabase;
+- el frontend puede seguir en Vercel;
+- para completar la migracion hay que actualizar `code/frontend/src/environments/environment.prod.ts` con la nueva URL del API y redeployar Vercel.
+
+---
+
 ## Estructura del proyecto
 
 - `code/frontend/` — Angular (SPA) por roles.
