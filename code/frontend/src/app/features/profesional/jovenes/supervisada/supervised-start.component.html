@@ -1,14 +1,17 @@
-<div class="lobby-page">
-  <div class="lobby-header">
-    <div class="lobby-title">
-      <h2>Iniciar entrevista supervisada</h2>
-      <p>Elige cargo y escenario. Despu&eacute;s revisa el contexto antes de crear la sesi&oacute;n.</p>
+<div class="lobby-page profesional-lobby-shell">
+  <header class="lobby-header">
+    <div class="hero-top">
+      <div class="hero-top__copy">
+        <span class="hero-kicker">Tutor &middot; Supervisada</span>
+        <h1 class="page-title">Iniciar entrevista supervisada</h1>
+        <p class="page-subtitle">Elige cargo y escenario. Después revisa el contexto antes de crear la sesión.</p>
+      </div>
+      <div class="hero-meta">
+        <span class="lobby-chip">Modalidad: Supervisada</span>
+        <span class="lobby-chip">Entrevistador: Profesional</span>
+      </div>
     </div>
-    <div class="lobby-meta">
-      <span class="lobby-chip">Modalidad: Supervisada</span>
-      <span class="lobby-chip">Entrevistador: Profesional</span>
-    </div>
-  </div>
+  </header>
 
   <div class="lobby-steps">
     <div class="step-item" [class.is-active]="currentStep() === 1" [class.is-done]="hasRole()">
@@ -28,7 +31,7 @@
     <div class="step-item" [class.is-active]="currentStep() === 3" [class.is-done]="form.valid">
       <span class="step-index">3</span>
       <div>
-        <span class="step-title">Confirmaci&oacute;n</span>
+        <span class="step-title">Confirmación</span>
         <span class="step-desc">Revisa y crea</span>
       </div>
     </div>
@@ -40,7 +43,7 @@
         <span class="loading-state__spinner" aria-hidden="true"></span>
         <div>
           <div class="loading-state__title">Cargando...</div>
-          <div class="loading-state__subtitle">Estamos preparando la informaci&oacute;n.</div>
+          <div class="loading-state__subtitle">Estamos preparando la información.</div>
         </div>
       </div>
       <div class="loading-state__skeleton">
@@ -138,7 +141,7 @@
                     <div class="case-card-title">{{ c.name }}</div>
                     <div class="case-card-sub">{{ caseDescription(c) }}</div>
                     @if (!isDynamicCase(c)) {
-                      <div class="case-card-time">Duraci&oacute;n estimada: {{ estimatedDuration(c.difficulty) }}</div>
+                      <div class="case-card-time">Duración estimada: {{ estimatedDuration(c.difficulty) }}</div>
                     }
                   </div>
                   @if (!isDynamicCase(c)) {
@@ -168,7 +171,7 @@
             <div>
               <span class="section-kicker">Paso 3</span>
               <h3>Confirma el contexto</h3>
-              <p>Revisa el escenario antes de crear la sesi&oacute;n.</p>
+              <p>Revisa el escenario antes de crear la sesión.</p>
             </div>
           </div>
           <div class="selection-summary">
@@ -190,12 +193,12 @@
                 }
               </div>
               <p class="briefing-text">
-                Te conectar&aacute;s con <strong>{{ company.name }}</strong>. El entrevistador evaluar&aacute; tu experiencia,
-                tu motivaci&oacute;n y tu ajuste al rol de <strong>{{ role.name }}</strong>.
+                Te conectarás con <strong>{{ company.name }}</strong>. El entrevistador evaluará tu experiencia,
+                tu motivación y tu ajuste al rol de <strong>{{ role.name }}</strong>.
               </p>
               <div class="briefing-grid">
                 <div>
-                  <span class="briefing-label">Situaci&oacute;n</span>
+                  <span class="briefing-label">Situación</span>
                   <p>
                     @if (selectedCase(); as caseItem) {
                       {{ caseNarrative(caseItem) }}
@@ -206,13 +209,13 @@
                 </div>
                 <div>
                   <span class="briefing-label">Expectativas del entrevistador</span>
-                  <p>Se valoran respuestas claras, ejemplos concretos y una comunicaci&oacute;n profesional.</p>
+                  <p>Se valoran respuestas claras, ejemplos concretos y una comunicación profesional.</p>
                 </div>
               </div>
               <div class="briefing-footer">
                 <span>Modalidad: Supervisada</span>
                 @if (selectedCase() && !isDynamicCase(selectedCase()!)) {
-                  <span>Duraci&oacute;n estimada: {{ estimatedDuration(selectedCase()!.difficulty) }}</span>
+                  <span>Duración estimada: {{ estimatedDuration(selectedCase()!.difficulty) }}</span>
                 }
               </div>
             } @else {
@@ -238,9 +241,9 @@
           }
           <div class="lobby-footnote">
             @if (currentStep() < 3) {
-              La vista avanza autom&aacute;ticamente cuando seleccionas una opci&oacute;n.
+              La vista avanza automáticamente cuando seleccionas una opción.
             } @else {
-              Al iniciar, pasar&aacute;s por la sala de espera y luego el entrevistador se conectar&aacute;.
+              Al iniciar, pasarás por la sala de espera y luego el entrevistador se conectará.
             }
           </div>
         </div>

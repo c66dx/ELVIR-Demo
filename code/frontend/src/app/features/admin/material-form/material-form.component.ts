@@ -48,7 +48,8 @@ export class MaterialFormComponent {
   private notification = inject(NotificationService);
 
   readonly isAdmin = this.auth.getRole() === 'ADMIN';
-  readonly backRoute = this.isAdmin ? '/admin/dashboard' : '/profesional/dashboard';
+  readonly isTutorArea = this.auth.getRole() === 'PROFESIONAL';
+  readonly backRoute = this.isAdmin ? '/admin/material' : '/profesional/material';
   readonly types: { value: MaterialType; label: string }[] = [
     { value: 'VIDEO', label: 'Video' },
     { value: 'PDF', label: 'PDF' },
@@ -153,7 +154,7 @@ export class MaterialFormComponent {
             }
             this.notification.success('Material creado correctamente');
             const role = this.auth.getRole();
-            this.router.navigate([role === 'ADMIN' ? '/admin/dashboard' : '/profesional/dashboard']);
+            this.router.navigate([role === 'ADMIN' ? '/admin/material' : '/profesional/material']);
           },
           error: () => {
             this.submitting = false;

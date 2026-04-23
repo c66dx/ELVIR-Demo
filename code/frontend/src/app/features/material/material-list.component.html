@@ -1,20 +1,27 @@
-<div class="materials-page">
+<div
+  class="materials-page"
+  [class.profesional-lobby-shell]="isTutorArea"
+  [class.admin-area-shell]="isAdminArea"
+>
   <header class="materials-hero">
-    <div class="hero-copy">
-      <span class="hero-kicker">Tutor</span>
-      <h1>Materiales</h1>
-      <p class="page-subtitle">Administra recursos, vigencia y formatos para el plan de apoyo.</p>
-    </div>
-    <div class="hero-actions">
-      <a [routerLink]="createLink" class="btn-primary">Crear material</a>
+    <div class="hero-top">
+      <div class="hero-top__copy">
+        <span class="hero-kicker">{{ isAdminArea ? 'Admin' : 'Tutor' }} &middot; Material</span>
+        <h1 class="page-title">Materiales</h1>
+        <p class="page-subtitle">Administra recursos, vigencia y formatos para el plan de apoyo.</p>
+      </div>
+      <div class="hero-actions">
+        <a [routerLink]="createLink" class="btn-primary">Crear material</a>
+      </div>
     </div>
   </header>
 
   @if (materials$ | async; as catalog) {
     @if (catalog.items.length === 0) {
-      <div class="empty-hint">
-        <h3>Sin material registrado</h3>
-        <p>Agrega documentos, videos o enlaces para comenzar a apoyar las prácticas.</p>
+      <div class="materials-empty">
+        <h3 class="materials-empty__title">Sin material registrado</h3>
+        <p class="materials-empty__text">Agrega documentos, videos o enlaces para comenzar a apoyar las prácticas.</p>
+        <a [routerLink]="createLink" class="btn-primary">Crear material</a>
       </div>
     } @else {
       <ul class="material-list">
@@ -44,7 +51,7 @@
       </ul>
 
       <div class="pager">
-        <span>Página {{ catalog.page }} de {{ totalPages(catalog.total, catalog.page_size) }}  Total {{ catalog.total }}</span>
+        <span>Página {{ catalog.page }} de {{ totalPages(catalog.total, catalog.page_size) }} · {{ catalog.total }} materiales</span>
         <div class="pager-actions">
           <button type="button" class="pager-btn" (click)="prevPage(catalog.page)" [disabled]="catalog.page <= 1">Anterior</button>
           <button

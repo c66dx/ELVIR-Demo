@@ -1,9 +1,13 @@
-<div class="account-page">
-  <section class="account-hero">
-    <span class="hero-kicker">JOVEN</span>
-    <h1>Mi cuenta</h1>
-    <p>Administra tu perfil, correo y contraseña.</p>
-  </section>
+<div class="account-page joven-page-shell">
+  <header class="joven-page-hero">
+    <div class="hero-top">
+      <div class="hero-top__copy">
+        <span class="hero-kicker">Práctica &middot; Cuenta</span>
+        <h1 class="page-title">Mi cuenta</h1>
+        <p class="page-subtitle">Administra tu perfil, correo y contraseña.</p>
+      </div>
+    </div>
+  </header>
 
   @if (loading()) {
     <div class="account-loading">

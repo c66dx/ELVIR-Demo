@@ -1,25 +1,28 @@
+<div class="profesional-lobby-shell">
 @if (loading()) {
   <div class="loading-state">
-  <div class="loading-state__card">
-    <span class="loading-state__spinner" aria-hidden="true"></span>
-    <div>
-      <div class="loading-state__title">Cargando...</div>
-      <div class="loading-state__subtitle">Estamos preparando la información.</div>
+    <div class="loading-state__card">
+      <span class="loading-state__spinner" aria-hidden="true"></span>
+      <div>
+        <div class="loading-state__title">Cargando...</div>
+        <div class="loading-state__subtitle">Estamos preparando la información.</div>
+      </div>
+    </div>
+    <div class="loading-state__skeleton">
+      <span class="loading-state__line loading-state__line--lg"></span>
+      <span class="loading-state__line"></span>
+      <span class="loading-state__line loading-state__line--sm"></span>
     </div>
   </div>
-  <div class="loading-state__skeleton">
-    <span class="loading-state__line loading-state__line--lg"></span>
-    <span class="loading-state__line"></span>
-    <span class="loading-state__line loading-state__line--sm"></span>
-  </div>
-</div>
-
 } @else {
   @let y = youth();
   @if (y) {
     <section class="profile-hero">
       <div class="hero-top">
-        <a routerLink="/profesional/jovenes" class="back-link">Volver a Jóvenes</a>
+        <div class="hero-top__copy">
+          <span class="hero-kicker">Tutor &middot; Perfil</span>
+          <a routerLink="/profesional/jovenes" class="back-link">Volver a Jóvenes</a>
+        </div>
         <div class="header-actions">
           <button type="button" class="btn-suggest" (click)="openSuggestMaterialPanel()">Sugerir material</button>
           <a [routerLink]="['/profesional/jovenes', youthId, 'supervisada', 'nueva']" class="btn-supervisada">Iniciar entrevista supervisada</a>
@@ -36,7 +39,8 @@
             }
           </div>
           <div class="hero-text">
-            <h2 class="hero-name">{{ y.display_name }}</h2>
+            <h1 class="hero-name">{{ y.display_name }}</h1>
+            <p class="hero-summary">Resumen del joven, accesos y seguimiento de entrevistas.</p>
             <div class="hero-meta">
               <span>{{ y.email  ?? 'Sin correo' }}</span>
               <span>RUT: {{ y.rut  ??  '-' }}</span>
@@ -51,16 +55,16 @@
         @let metrics = metricsSummary();
         <div class="hero-metrics">
           <div class="hero-metric">
-            <span class="metric-value">{{ metrics?.total  ?? 0 }}</span>
             <span class="metric-label">Entrevistas</span>
+            <span class="metric-value">{{ metrics?.total  ?? 0 }}</span>
           </div>
           <div class="hero-metric">
-            <span class="metric-value">{{ metrics?.completed  ?? 0 }}</span>
             <span class="metric-label">Completadas</span>
+            <span class="metric-value">{{ metrics?.completed  ?? 0 }}</span>
           </div>
           <div class="hero-metric">
-            <span class="metric-value">{{ metrics?.completionRate  ?? 0 }}%</span>
             <span class="metric-label">Tasa de éxito</span>
+            <span class="metric-value">{{ metrics?.completionRate  ?? 0 }}%</span>
           </div>
         </div>
       </div>
@@ -229,7 +233,7 @@
         @let metrics = metricsSummary();
         @if (metrics && metrics.total > 0) {
           <section class="metrics-section">
-            <h3>Métricas de desempeño</h3>
+            <h3>Métricas de Desempeño</h3>
             <div class="metrics-grid">
               <div class="metric-card">
                 <span class="metric-value">{{ metrics.total }}</span>
@@ -258,7 +262,7 @@
             </div>
           </section>
         } @else {
-          <p>Sin datos de desempeño todavía.</p>
+          <p>Sin datos de Desempeño todavía.</p>
         }
         @let chartsData = charts();
         @if (chartsData.length > 0) {
@@ -535,3 +539,4 @@
     <p>Joven no encontrado.</p>
   }
 }
+</div>

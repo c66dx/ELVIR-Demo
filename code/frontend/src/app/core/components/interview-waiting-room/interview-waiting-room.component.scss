@@ -5,6 +5,12 @@
   padding: var(--space-6) 0;
 }
 
+.waiting-room--with-page-shell {
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: calc(100vh - 160px - var(--joven-page-pad-top) - var(--joven-page-pad-bottom));
+}
+
 .waiting-card {
   width: min(640px, 92vw);
   padding: var(--space-8);

@@ -1,7 +1,15 @@
-<div class="list-page">
-  <header class="page-header">
-    <h2>Tutores</h2>
-    <a routerLink="/admin/profesionales/nuevo" class="btn-primary">Crear tutor</a>
+<div class="list-page admin-area-shell">
+  <header class="joven-page-hero">
+    <div class="hero-top">
+      <div class="hero-top__copy">
+        <span class="hero-kicker">Admin &middot; Tutores</span>
+        <h1 class="page-title">Tutores</h1>
+        <p class="page-subtitle">Alta, estado y seguimiento de las cuentas tutor en la plataforma.</p>
+      </div>
+      <div class="hero-actions">
+        <a routerLink="/admin/profesionales/nuevo" class="btn-primary">Crear tutor</a>
+      </div>
+    </div>
   </header>
 
   @if (loading) {

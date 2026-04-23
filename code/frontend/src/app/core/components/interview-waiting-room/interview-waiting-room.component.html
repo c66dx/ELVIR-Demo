@@ -1,4 +1,5 @@
-<div class="waiting-room" [style.--wait-duration]="waitMs() + 'ms'">
+<div [class.joven-page-shell]="isJovenFlow" [class.profesional-lobby-shell]="!isJovenFlow">
+<div class="waiting-room waiting-room--with-page-shell" [style.--wait-duration]="waitMs() + 'ms'">
   <div class="waiting-card">
     <div class="context-card">
       <div class="context-top">
@@ -63,5 +64,6 @@
       </div>
     </div>
   </div>
+</div>
 </div>
 

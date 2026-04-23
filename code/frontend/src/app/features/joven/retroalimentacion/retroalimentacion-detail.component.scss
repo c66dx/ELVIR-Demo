@@ -1,22 +1,3 @@
-.detail-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-}
-
-.page-subtitle {
-  margin-top: var(--space-2);
-  color: var(--color-text-muted);
-}
-
-.page-actions {
-  display: flex;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-}
-
 .feedback-card {
   padding: var(--space-5);
   border-radius: var(--radius-lg);
@@ -26,7 +7,7 @@
 }
 
 .detail-card {
-  margin-top: var(--space-4);
+  margin-top: 0;
 }
 
 .feedback-header {
@@ -59,7 +40,7 @@
 
 .pill {
   padding: var(--space-1) var(--space-3);
-  border-radius: 999px;
+  border-radius: 10px;
   font-size: 0.72rem;
   font-weight: 700;
   color: var(--color-primary);
@@ -107,12 +88,3 @@
   color: var(--color-text-muted);
 }
 
-.empty-state {
-  padding: var(--space-5);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-card);
-  box-shadow: var(--shadow-sm);
-  display: grid;
-  gap: var(--space-3);
-}

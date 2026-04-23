@@ -1,12 +1,12 @@
 <nav class="sidebar-nav">
   <div class="sidebar-brand">
-      <div class="brand-mark">ELVIR</div>
-      <div class="brand-logos" aria-label="Instituciones asociadas">
-        <img src="assets/logo-unab-sm.png" alt="UNAB" />
-        <img src="assets/logo-teleton.png" alt="Teleton" />
-      </div>
-      <span class="brand-subtitle">Entrenador Laboral Virtual</span>
+    <div class="brand-mark">ELVIR</div>
+    <span class="brand-subtitle">Entrenador Laboral Virtual</span>
+    <div class="brand-logos" aria-label="Instituciones asociadas">
+      <img src="assets/logo-unab-sm.png" alt="UNAB" />
+      <img src="assets/logo-teleton.png" alt="Teleton" />
     </div>
+  </div>
 
   @if (showProfile) {
     <div class="sidebar-profile">
@@ -37,7 +37,7 @@
     </div>
   }
 
-  <span class="nav-section">Navegación</span>
+  <span class="nav-section">Navegaci&oacute;n</span>
   <ul class="nav-list">
     @for (item of visibleItems; track item.route) {
       <li>
@@ -86,24 +86,25 @@
   </ul>
 
   <div class="sidebar-footer">
-    <button
-      type="button"
-      class="sidebar-collapse"
-      (click)="onToggleCollapsed()"
-      [attr.aria-label]="collapsed ? 'Expandir menu' : 'Contraer menu'"
-    >
-      <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="15 18 9 12 15 6"></polyline>
-      </svg>
-    </button>
-    <button type="button" class="theme-toggle" (click)="toggleTheme()">
-      <span class="theme-toggle__icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 12.8A8.6 8.6 0 1111.2 3a6.5 6.5 0 009.8 9.8z"></path>
+    <div class="sidebar-footer__controls">
+      <button
+        type="button"
+        class="sidebar-collapse"
+        (click)="onToggleCollapsed()"
+        [attr.aria-label]="collapsed ? 'Expandir menu' : 'Contraer menu'"
+      >
+        <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
-      </span>
-      <span class="theme-toggle__label">{{ theme() === 'dark' ? 'Tema claro' : 'Tema oscuro' }}</span>
-    </button>
+      </button>
+      <button type="button" class="theme-toggle" (click)="toggleTheme()">
+        <span class="theme-toggle__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.8A8.6 8.6 0 1111.2 3a6.5 6.5 0 009.8 9.8z"></path>
+          </svg>
+        </span>
+        <span class="theme-toggle__label">{{ theme() === 'dark' ? 'Tema claro' : 'Tema oscuro' }}</span>
+      </button>
+    </div>
   </div>
 </nav>
-

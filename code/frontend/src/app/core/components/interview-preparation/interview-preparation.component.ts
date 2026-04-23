@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
@@ -24,6 +24,11 @@ export class InterviewPreparationComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private sessionsApi = inject(SessionApiService);
+
+  /** Rutas `/joven/.../preparacion` (shell joven); tutor usa `profesional-lobby-shell`. */
+  get isJovenFlow(): boolean {
+    return this.route.snapshot.data?.['target'] !== 'profesional';
+  }
 
   sessionId = '';
   companyName = 'Empresa colaboradora';

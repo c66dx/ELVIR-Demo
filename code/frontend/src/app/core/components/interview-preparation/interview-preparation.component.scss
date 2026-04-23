@@ -5,6 +5,13 @@
   padding: var(--space-6) 0;
 }
 
+/* Dentro de joven-page-shell / profesional-lobby-shell el padding vertical lo aporta el shell */
+.prep-room--with-page-shell {
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: calc(100vh - 160px - var(--joven-page-pad-top) - var(--joven-page-pad-bottom));
+}
+
 .prep-card {
   width: min(760px, 94vw);
   background: var(--color-surface);

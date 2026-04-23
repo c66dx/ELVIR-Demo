@@ -1,10 +1,11 @@
 @if (data$ | async; as data) {
-  <section class="notif-hero">
-    <span class="hero-kicker">JOVEN</span>
-    <div class="hero-row">
-      <div class="hero-copy">
-        <h1>Avisos</h1>
-        <p class="notif-hero__lede">
+  <div class="joven-page-shell">
+  <header class="joven-page-hero">
+    <div class="hero-top">
+      <div class="hero-top__copy">
+        <span class="hero-kicker">Práctica &middot; Avisos</span>
+        <h1 class="page-title">Avisos</h1>
+        <p class="page-subtitle">
           Novedades sobre material, entrevistas y mensajes. Las que no has abierto llevan una franja al costado.
         </p>
       </div>
@@ -18,12 +19,12 @@
       <span class="notif-pill">{{ data.unread }} sin leer</span>
       <span class="notif-pill notif-pill--muted">{{ data.total }} en total</span>
     </div>
-  </section>
+  </header>
 
   @if (data.items.length === 0) {
-    <div class="notif-empty">
-      <p class="notif-empty__title">Todo tranquilo por aquí</p>
-      <p class="notif-empty__text">Cuando haya novedades, aparecerán en esta bandeja.</p>
+    <div class="joven-page-empty">
+      <p class="joven-page-empty__title">Todo tranquilo por aquí</p>
+      <p class="joven-page-empty__text">Cuando haya novedades, aparecerán en esta bandeja.</p>
     </div>
   } @else {
     <div class="notif-feed" role="feed" [attr.aria-label]="'Avisos, página ' + data.page">
@@ -131,7 +132,9 @@
       </div>
     </div>
   }
+  </div>
 } @else {
+  <div class="joven-page-shell">
   <div class="loading-state">
     <div class="loading-state__card">
       <span class="loading-state__spinner" aria-hidden="true"></span>
@@ -145,5 +148,6 @@
       <span class="loading-state__line"></span>
       <span class="loading-state__line loading-state__line--sm"></span>
     </div>
+  </div>
   </div>
 }

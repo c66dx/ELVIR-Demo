@@ -1,9 +1,15 @@
-<div class="material-hero page-header">
-  <h2>Material para practicar</h2>
-  <p class="material-hero__lede">
-    Recursos elegidos para ti y catálogo para explorar. Cada bloque tiene un estilo distinto para que no se sienta todo igual.
-  </p>
-</div>
+<div class="joven-page-shell">
+<header class="joven-page-hero">
+  <div class="hero-top">
+    <div class="hero-top__copy">
+      <span class="hero-kicker">Práctica &middot; Material</span>
+      <h1 class="page-title">Material para practicar</h1>
+      <p class="page-subtitle">
+        Recursos elegidos para ti y catálogo para explorar. Cada bloque tiene un estilo distinto para que no se sienta todo igual.
+      </p>
+    </div>
+  </div>
+</header>
 
 <section class="material-zone material-zone--spotlight">
   <div class="material-zone__head">
@@ -13,7 +19,9 @@
 
   @if (suggested$ | async; as suggested) {
     @if (suggested.items.length === 0) {
-      <p class="material-empty">Aún no hay sugerencias. Tu tutor puede recomendarte material desde tu perfil.</p>
+      <div class="joven-page-empty">
+        <p class="joven-page-empty__text">Aún no hay sugerencias. Tu tutor puede recomendarte material desde tu perfil.</p>
+      </div>
     } @else {
       <ul class="material-picks" role="list">
         @for (s of suggested.items; track s.id) {
@@ -122,3 +130,4 @@
   }
 </section>
 
+</div>

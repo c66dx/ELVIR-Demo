@@ -1,20 +1,11 @@
 .list-page {
+  display: grid;
+  gap: var(--space-6);
   width: 100%;
 }
 
 :host ::ng-deep .content-inner {
   max-width: 100%;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-6);
-
-  h2 {
-    margin: 0;
-  }
 }
 
 .btn-primary {

@@ -1,8 +1,9 @@
-<div class="prep-room">
+<div [class.joven-page-shell]="isJovenFlow" [class.profesional-lobby-shell]="!isJovenFlow">
+  <div class="prep-room prep-room--with-page-shell">
   <div class="prep-card">
     <div class="prep-header">
       <div>
-        <span class="prep-kicker">Preparacin</span>
+        <span class="prep-kicker">Preparación</span>
         <h1 class="prep-title">Antes de comenzar la entrevista</h1>
         <p class="prep-subtitle">Revisa el contexto y los recordatorios clave para una entrevista efectiva.</p>
       </div>
@@ -18,7 +19,7 @@
       <div class="context-block">
         <span class="context-label">Cargo</span>
         <p class="context-value">{{ jobRoleName }}</p>
-        <p class="context-meta">Caso: {{ caseName || 'Entrevista estndar' }}</p>
+        <p class="context-meta">Caso: {{ caseName || 'Entrevista estándar' }}</p>
       </div>
     </div>
 
@@ -30,7 +31,7 @@
     <div class="prep-upload">
       <div>
         <span class="context-label">CV</span>
-        <p class="prep-upload__hint">Adjunta tu CV en PDF (mx. 10 MB). Puedes reemplazarlo cuando quieras.</p>
+        <p class="prep-upload__hint">Adjunta tu CV en PDF (máx. 10 MB). Puedes reemplazarlo cuando quieras.</p>
       </div>
       <div class="prep-upload__controls">
         <input #cvInput type="file" accept="application/pdf" (change)="onCvSelected($event)" hidden />
@@ -71,6 +72,7 @@
     <div class="prep-footer">
       <button type="button" class="btn-primary" (click)="startInterview()">Estoy listo/a</button>
     </div>
+  </div>
   </div>
 </div>
 

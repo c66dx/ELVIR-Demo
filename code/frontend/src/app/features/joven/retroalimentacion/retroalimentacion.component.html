@@ -1,16 +1,21 @@
-<section class="retro-hero">
-  <span class="hero-kicker">JOVEN</span>
-  <h1>Lo que dice tu tutor</h1>
-  <p class="retro-hero__lede">
-    Cada entrevista puede incluir un mensaje y consejos. Aquí se leen como cartas cortas, sin tablas ni formularios.
-  </p>
-</section>
+<div class="joven-page-shell">
+<header class="joven-page-hero">
+  <div class="hero-top">
+    <div class="hero-top__copy">
+      <span class="hero-kicker">Práctica &middot; Tutor</span>
+      <h1 class="page-title">Lo que dice tu tutor</h1>
+      <p class="page-subtitle">
+        Cada entrevista puede incluir un mensaje y consejos. Aquí se leen como cartas cortas, sin tablas ni formularios.
+      </p>
+    </div>
+  </div>
+</header>
 
 @if (feedback$ | async; as data) {
   @if (data.items.length === 0) {
-    <div class="retro-empty">
-      <p class="retro-empty__title">Todavía no hay mensajes</p>
-      <p class="retro-empty__text">
+    <div class="joven-page-empty">
+      <p class="joven-page-empty__title">Todavía no hay mensajes</p>
+      <p class="joven-page-empty__text">
         Cuando tu tutor deje comentarios después de una entrevista, aparecerán aquí con este formato.
       </p>
     </div>
@@ -110,3 +115,5 @@
     </div>
   </div>
 }
+
+</div>

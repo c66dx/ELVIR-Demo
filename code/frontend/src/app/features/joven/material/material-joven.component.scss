@@ -1,17 +1,9 @@
 /* Material: zona “spotlight” + estantería compacta — distinto de retro y notifs */
 
-.material-hero__lede {
-  margin: var(--space-2) 0 0;
-  max-width: 40rem;
-  font-size: 0.95rem;
-  color: var(--color-text-muted);
-  line-height: 1.55;
-}
-
 .material-zone {
   margin-bottom: var(--space-8);
   padding: var(--space-5) var(--space-5) var(--space-4);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
 }
 
@@ -39,11 +31,6 @@
   margin: 0;
   font-size: 0.88rem;
   color: var(--color-text-muted);
-}
-
-.material-empty {
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
 }
 
 /* Sugeridos: tarjetas “pick” horizontales */

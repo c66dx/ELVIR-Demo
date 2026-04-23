@@ -1,19 +1,22 @@
-<header class="historial-hero">
-  <div>
-    <span class="hero-kicker">Joven</span>
-    <h1>Mis prácticas</h1>
-    <p class="historial__lede">
-      Tu recorrido en una sola vista: fechas agrupadas para que no tengas que leer el mismo bloque una y otra vez.
-      Toca una línea para volver a esa práctica.
-    </p>
+<div class="joven-page-shell">
+<header class="joven-page-hero">
+  <div class="hero-top">
+    <div class="hero-top__copy">
+      <span class="hero-kicker">Práctica &middot; Historial</span>
+      <h1 class="page-title">Mis prácticas</h1>
+      <p class="page-subtitle">
+        Tu recorrido en una sola vista: fechas agrupadas para que no tengas que leer el mismo bloque una y otra vez.
+        Toca una línea para volver a esa práctica.
+      </p>
+    </div>
   </div>
 </header>
 
 @if (data$ | async; as data) {
   @if (data.items.length === 0) {
-    <div class="historial-empty">
-      <p class="historial-empty__title">¡Aquí empezará tu recorrido!</p>
-      <p class="historial-empty__text">
+    <div class="joven-page-empty">
+      <p class="joven-page-empty__title">¡Aquí empezará tu recorrido!</p>
+      <p class="joven-page-empty__text">
         Cada simulación que hagas se irá sumando en una línea del tiempo: verás el avance sin sensación de lista interminable.
       </p>
       <a routerLink="/joven/simulacion/nueva" class="btn-primary">Empezar una práctica</a>
@@ -68,7 +71,7 @@
     </div>
 
     <div class="pager">
-      <span>Pgina {{ data.page }} de {{ totalPages(data.total) }}  {{ data.total }} prácticas</span>
+      <span>Página {{ data.page }} de {{ totalPages(data.total) }} · {{ data.total }} prácticas</span>
       <div class="pager-actions">
         <button type="button" class="pager-btn" (click)="prevPage()" [disabled]="data.page <= 1">Anterior</button>
         <button type="button" class="pager-btn" (click)="nextPage(data.total)" [disabled]="data.page >= totalPages(data.total)">
@@ -94,3 +97,4 @@
   </div>
 }
 
+</div>

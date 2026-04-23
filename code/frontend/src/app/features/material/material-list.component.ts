@@ -17,7 +17,11 @@ export class MaterialListComponent {
  private auth = inject(AuthService); 
  private page$ = new BehaviorSubject(1); 
  readonly pageSize = 10; 
- readonly formatDate = formatDate; 
+ readonly formatDate = formatDate;
+
+ /** Lista compartida: shell tutor (`profesional-lobby-shell`) o admin (`admin-area-shell`). */
+ readonly isTutorArea = this.auth.getRole() === 'PROFESIONAL';
+ readonly isAdminArea = this.auth.getRole() === 'ADMIN'; 
  materials$ = this.page$.pipe(   switchMap((page) => this.materials.getSupportMaterialPaged({ page, page_size: this.pageSize }))   ); 
  get createLink(): string { 
  return this.auth.getRole() === 'ADMIN' ? '/admin/material/nuevo' : '/profesional/material/nuevo'; 

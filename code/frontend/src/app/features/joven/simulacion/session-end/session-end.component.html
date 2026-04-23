@@ -1,4 +1,5 @@
 @if (status) {
+  <div [class.joven-page-shell]="isJoven" [class.profesional-lobby-shell]="isProfesional">
   <div class="report-shell" [class.report-shell--success]="variant === 'success'" [class.report-shell--warning]="variant === 'warning'" [class.report-shell--error]="variant === 'error'">
     <div class="report-card">
       <header class="report-header">
@@ -66,14 +67,22 @@
           <h3>Retroalimentación</h3>
           <span class="feedback-badge">Pendiente</span>
         </div>
-        <p>
-          El tutor revisar esta entrevista y dejar comentarios cuando estén disponibles.
-          Puedes revisarlos luego en <strong>Mis prácticas</strong>.
-        </p>
+        @if (isJoven) {
+          <p>
+            El tutor revisará esta entrevista y dejará comentarios cuando estén disponibles.
+            Puedes revisarlos luego en <strong>Lo que dice tu tutor</strong> o en <strong>Mis prácticas</strong>.
+          </p>
+        } @else if (isProfesional) {
+          <p>
+            Cuando corresponda, registra resumen y retroalimentación para el joven desde su perfil o el detalle de la sesión.
+          </p>
+        } @else {
+          <p>La retroalimentación quedará registrada según el flujo de cada rol.</p>
+        }
       </section>
 
       <section class="report-section report-next">
-        <h3>Prximos pasos</h3>
+        <h3>Próximos pasos</h3>
         <ul class="next-steps">
           @if (status === 'COMPLETADA' && isJoven) {
             <li>Revisa material de apoyo y refuerza tu preparación.</li>
@@ -101,6 +110,7 @@
         <button type="button" class="btn-secondary" (click)="onVolver()">&larr; Volver a entrevista</button>
       </div>
     </div>
+  </div>
   </div>
 }
 

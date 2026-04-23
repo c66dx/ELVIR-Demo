@@ -21,6 +21,10 @@ export class InterviewWaitingRoomComponent implements OnInit, OnDestroy {
  private route = inject(ActivatedRoute); 
  private router = inject(Router); 
  private sessionsApi = inject(SessionApiService); 
+
+ /** `/joven/.../espera` vs tutor: mismo padding vertical vía shell distinto. */
+ readonly isJovenFlow = this.route.snapshot.data?.['target'] !== 'profesional';
+
  sessionId = ''; 
  companyName = signal('Empresa colaboradora'); 
  companyDescription = signal(''); 
