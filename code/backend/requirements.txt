@@ -13,7 +13,7 @@ slowapi>=0.1.9
 boto3>=1.34.0
 
 # PostgreSQL (producción / desarrollo con BD real)
-psycopg2-binary>=2.9.0
+psycopg2-binary>=2.9.12
 
 email-validator>=2.2.0
 
