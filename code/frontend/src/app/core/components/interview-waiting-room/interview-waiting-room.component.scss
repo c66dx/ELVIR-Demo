@@ -339,8 +339,18 @@
 }
 
 @media (max-width: 640px) {
+  .waiting-room,
+  .waiting-room--with-page-shell {
+    min-height: auto;
+    place-items: start stretch;
+    padding: 0;
+  }
+
   .waiting-card {
+    width: 100%;
+    border-radius: 18px;
     padding: var(--space-6);
+    box-shadow: var(--shadow-md);
   }
 
   .context-card {
@@ -359,6 +369,16 @@
 
   .timer-info {
     text-align: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .waiting-card {
+    padding: var(--space-4);
+  }
+
+  .context-company-name {
+    font-size: 1.25rem;
   }
 }
 

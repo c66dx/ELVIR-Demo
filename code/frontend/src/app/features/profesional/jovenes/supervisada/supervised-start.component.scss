@@ -523,8 +523,13 @@
 }
 
 @media (max-width: 640px) {
+  .lobby-page {
+    gap: var(--space-4);
+  }
+
   .lobby-header {
     padding: var(--space-4);
+    border-radius: 18px;
   }
 
   .hero-top {
@@ -532,8 +537,66 @@
     align-items: stretch;
   }
 
+  .lobby-steps {
+    grid-template-columns: 1fr;
+    padding: var(--space-2);
+  }
+
+  .step-item {
+    padding: 0.55rem 0.65rem;
+  }
+
+  .role-search {
+    align-items: stretch;
+  }
+
+  .role-search input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .role-count {
+    width: 100%;
+  }
+
+  .role-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .role-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-chip {
+    flex: 0 0 auto;
+  }
+
   .lobby-section {
     padding: var(--space-4);
+  }
+
+  .role-scroll {
+    max-height: min(52vh, 420px);
+    padding-inline: 0;
+    padding-right: 0;
+  }
+
+  .role-grid,
+  .case-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .role-card,
+  .case-card {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .case-card-header {
+    flex-direction: column;
   }
 
   .lobby-actions {

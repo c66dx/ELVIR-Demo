@@ -1,6 +1,7 @@
 .app-shell {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
 }
@@ -57,3 +58,37 @@
   width: 100%;
 }
 
+@media (max-width: 760px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .sidebar,
+  .sidebar--collapsed {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(16, 20, 24, 0.08);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  .app-main {
+    flex: 1 1 auto;
+  }
+
+  .content {
+    padding: var(--space-3);
+    scrollbar-gutter: auto;
+  }
+
+  .content-inner {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .content {
+    padding: var(--space-2);
+  }
+}

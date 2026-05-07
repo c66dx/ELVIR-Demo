@@ -10,10 +10,10 @@ export interface NavItem {
 
 export const JOVEN_NAV: NavItem[] = [
   { label: 'Entrevista', route: '/joven/simulacion/nueva', roles: ['JOVEN'], exact: true, icon: 'play' },
-  { label: 'Mis prácticas', route: '/joven/historial', roles: ['JOVEN'], exact: true, icon: 'history' },
-  { label: 'Retroalimentación', route: '/joven/retroalimentacion', roles: ['JOVEN'], exact: false, icon: 'message' },
+  { label: 'Prácticas', route: '/joven/historial', roles: ['JOVEN'], exact: true, icon: 'history' },
+  { label: 'Tutor', route: '/joven/retroalimentacion', roles: ['JOVEN'], exact: false, icon: 'message' },
   { label: 'Material', route: '/joven/material', roles: ['JOVEN'], exact: true, icon: 'material' },
-  { label: 'Notificaciones', route: '/joven/notificaciones', roles: ['JOVEN'], exact: true, icon: 'bell' },
+  { label: 'Avisos', route: '/joven/notificaciones', roles: ['JOVEN'], exact: true, icon: 'bell' },
 ];
 
 export const PROFESIONAL_NAV: NavItem[] = [

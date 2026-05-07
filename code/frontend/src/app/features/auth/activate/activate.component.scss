@@ -1,5 +1,6 @@
 .activate-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -248,4 +249,40 @@
 
 .activate-partners .partner-logo--teleton {
   height: 30px;
+}
+
+@media (max-width: 480px) {
+  .activate-page {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: var(--space-4);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .activate-card {
+    max-width: 100%;
+    padding: var(--space-6) var(--space-4);
+    border-radius: 18px;
+  }
+
+  .activate-brand {
+    margin-bottom: var(--space-5);
+  }
+
+  .activate-brand h1 {
+    font-size: 1.65rem;
+  }
+
+  .activate-loading {
+    padding: var(--space-5) 0;
+  }
+
+  .btn-submit {
+    min-height: var(--touch-target-min);
+  }
+
+  .activate-partners .partner-group {
+    gap: var(--space-3);
+  }
 }

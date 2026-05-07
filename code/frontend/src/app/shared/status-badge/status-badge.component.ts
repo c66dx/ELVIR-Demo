@@ -6,6 +6,7 @@ import type { SessionStatus } from '@core/models/types.model';
  @Component({ 
  selector: 'app-status-badge',   standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,   template: `@if (status(); as s) {<span class="status-badge status-badge--{{ s }}">{{ label() }}</span>} @else {<span>-</span>}`,   styles: [`   .status-badge { 
  display: inline-block; 
+ white-space: nowrap;
  padding: 0.2rem 0.65rem; 
  font-size: 0.72rem; 
  font-weight: 700; 

@@ -198,8 +198,18 @@
 }
 
 @media (max-width: 720px) {
+  .prep-room,
+  .prep-room--with-page-shell {
+    min-height: auto;
+    place-items: start stretch;
+    padding: 0;
+  }
+
   .prep-card {
+    width: 100%;
+    border-radius: 18px;
     padding: var(--space-6);
+    box-shadow: var(--shadow-md);
   }
 
   .prep-context,
@@ -209,5 +219,16 @@
 
   .prep-footer {
     justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .prep-card {
+    padding: var(--space-4);
+  }
+
+  .prep-footer .btn-primary,
+  .prep-footer .btn-secondary {
+    width: 100%;
   }
 }

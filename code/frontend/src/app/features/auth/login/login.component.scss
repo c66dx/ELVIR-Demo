@@ -4,6 +4,7 @@
   --login-teleton-red-deep: var(--color-primary-hover);
   --login-teleton-gold: var(--color-accent);
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -625,13 +626,64 @@
 }
 
 @media (max-width: 480px) {
+  .login-page {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: var(--space-4);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .login-brand {
+    margin-bottom: var(--space-5);
+  }
+
+  .login-brand__teleton {
+    padding: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .login-title {
+    font-size: 1.65rem;
+  }
+
   .role-cards {
     grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .role-card {
+    padding: var(--space-4);
+  }
+
+  .role-card-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: var(--space-2);
+  }
+
+  .role-admin-btn {
+    width: 100%;
+    border-radius: 16px;
   }
 
   .login-card {
     max-width: 100%;
-    padding: var(--space-6) var(--space-6);
+    padding: var(--space-6) var(--space-4);
+    border-radius: 18px;
+  }
+
+  .theme-mini {
+    top: var(--space-3);
+    right: var(--space-3);
+  }
+
+  .demo-content {
+    padding-inline: var(--space-3);
+    overflow-wrap: anywhere;
+  }
+
+  .login-partners {
+    margin-top: var(--space-5);
   }
 }
-

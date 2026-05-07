@@ -543,11 +543,125 @@
 }
 
 @media (max-width: 700px) {
+  .session-view {
+    gap: var(--space-4);
+  }
+
   .session-info {
     grid-template-columns: 1fr;
+    gap: var(--space-1);
   }
 
   .session-hero {
-    padding: var(--space-5);
+    align-items: stretch;
+    padding: var(--space-4);
+    border-radius: 18px;
+  }
+
+  .hero-title {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .hero-title h1 {
+    font-size: 1.35rem;
+  }
+
+  .hero-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary {
+    width: 100%;
+  }
+
+  .hero-chip {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .session-info-card,
+  .transcript-panel,
+  .side-panel {
+    border-radius: 16px;
+  }
+
+  .session-info-card,
+  .transcript-panel {
+    padding: var(--space-4);
+  }
+
+  .session-profile {
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .session-info dt {
+    margin-top: var(--space-2);
+  }
+
+  .session-info dt:first-child {
+    margin-top: 0;
+  }
+
+  .session-info dd {
+    overflow-wrap: anywhere;
+  }
+
+  .panel-header {
+    flex-direction: column;
+  }
+
+  .transcript-meta {
+    align-items: flex-start;
+  }
+
+  .transcript-list {
+    max-height: 420px;
+    padding-right: 0;
+  }
+
+  .transcript-item-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .side-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .side-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .side-tab {
+    flex: 0 0 auto;
+  }
+
+  .side-content {
+    padding: var(--space-4);
+  }
+
+  .summary-card-head,
+  .event-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .summary-actions {
+    flex-direction: column;
+  }
+
+  .summary-actions .btn-primary,
+  .summary-actions .btn-secondary {
+    width: 100%;
   }
 }

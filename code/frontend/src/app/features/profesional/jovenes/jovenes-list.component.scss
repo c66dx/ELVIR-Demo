@@ -430,8 +430,13 @@
 }
 
 @media (max-width: 640px) {
+  .youths-page {
+    gap: var(--space-4);
+  }
+
   .youths-hero {
     padding: var(--space-4);
+    border-radius: 18px;
   }
 
   .hero-top {
@@ -441,11 +446,56 @@
 
   .hero-actions {
     width: 100%;
-    justify-content: flex-start;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary {
+    width: 100%;
+  }
+
+  .filters-panel {
+    padding: var(--space-3);
+    border-radius: 16px;
+  }
+
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filters-panel .btn-sm {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .table-wrap {
+    border-radius: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 920px;
   }
 
   .pager {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .pager-actions {
+    width: 100%;
+  }
+
+  .pager-btn {
+    flex: 1;
+    min-height: var(--touch-target-min);
   }
 }

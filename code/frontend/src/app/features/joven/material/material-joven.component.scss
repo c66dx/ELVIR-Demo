@@ -291,8 +291,17 @@
 }
 
 @media (max-width: 720px) {
+  .material-zone {
+    margin-bottom: var(--space-5);
+    padding: var(--space-4);
+    border-radius: 16px;
+  }
+
   .material-pick {
     grid-template-columns: 1fr;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: 14px;
   }
 
   .material-pick__icon {
@@ -300,8 +309,27 @@
     height: 3rem;
   }
 
+  .material-pick__row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .material-pick__title {
+    overflow-wrap: anywhere;
+  }
+
   .material-pick__btn {
     justify-self: start;
+    width: 100%;
+  }
+
+  .material-shelf__row {
+    align-items: flex-start;
+    padding: var(--space-3);
+  }
+
+  .material-shelf__title {
+    white-space: normal;
   }
 
   .material-shelf__row .material-shelf__open {
@@ -311,6 +339,27 @@
 
   .pager {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .pager-actions {
+    width: 100%;
+  }
+
+  .pager-btn {
+    flex: 1;
+    min-height: var(--touch-target-min);
+  }
+}
+
+@media (max-width: 420px) {
+  .material-zone {
+    padding: var(--space-3);
+  }
+
+  .material-shelf__icon {
+    width: 2rem;
+    height: 2rem;
   }
 }

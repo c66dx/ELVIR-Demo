@@ -88,3 +88,26 @@
   color: var(--color-text-muted);
 }
 
+@media (max-width: 640px) {
+  .feedback-card {
+    padding: var(--space-4);
+    border-radius: 16px;
+  }
+
+  .feedback-header {
+    gap: var(--space-3);
+  }
+
+  .feedback-meta {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .feedback-tags {
+    width: 100%;
+  }
+
+  .feedback-split {
+    grid-template-columns: 1fr;
+  }
+}

@@ -318,6 +318,10 @@
   color: var(--color-text-muted);
 }
 
+.session-meta span:empty {
+  display: none;
+}
+
 .session-chips {
   display: flex;
   flex-wrap: wrap;
@@ -402,8 +406,13 @@
 }
 
 @media (max-width: 640px) {
+  .dashboard {
+    gap: var(--space-4);
+  }
+
   .dashboard-hero {
     padding: var(--space-4);
+    border-radius: 18px;
   }
 
   .hero-top {
@@ -413,6 +422,59 @@
 
   .hero-actions {
     width: 100%;
-    justify-content: flex-start;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary {
+    width: 100%;
+  }
+
+  .summary-card {
+    align-items: flex-start;
+    padding: var(--space-3) var(--space-4);
+    border-radius: 16px;
+  }
+
+  .summary-value {
+    font-size: 1.55rem;
+  }
+
+  .summary-pill {
+    align-self: flex-start;
+  }
+
+  .dashboard-section {
+    gap: var(--space-3);
+  }
+
+  .session-card {
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: 16px;
+  }
+
+  .session-card-main {
+    gap: var(--space-3);
+  }
+
+  .session-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .session-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .session-actions .btn-primary,
+  .session-secondary {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 }

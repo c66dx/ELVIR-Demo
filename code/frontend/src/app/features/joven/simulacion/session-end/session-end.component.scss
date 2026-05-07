@@ -192,19 +192,20 @@
 }
 
 .next-steps li {
-  display: flex;
-  gap: 0.65rem;
-  align-items: flex-start;
+  position: relative;
+  padding-left: 1.15rem;
   line-height: 1.4;
 }
 
 .next-steps li::before {
   content: '';
-  color: var(--status-color);
-  font-size: 1.1rem;
-  line-height: 1;
-  flex-shrink: 0;
-  margin-top: 2px;
+  position: absolute;
+  top: 0.55rem;
+  left: 0;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--status-color);
 }
 
 .report-alert {
@@ -241,12 +242,32 @@
 }
 
 @media (max-width: 640px) {
+  .report-shell {
+    padding: var(--space-3);
+  }
+
   .report-card {
-    padding: var(--space-5);
+    padding: var(--space-4);
+    border-radius: 18px;
+  }
+
+  .report-header,
+  .feedback-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .report-actions {
-    justify-content: center;
+    justify-content: stretch;
+  }
+
+  .report-actions .btn-primary,
+  .report-actions .btn-secondary {
+    width: 100%;
+  }
+
+  .next-steps {
+    gap: var(--space-3);
   }
 
   .report-metrics .metric-grid {
