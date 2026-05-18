@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnDestroy, OnInit, signal, ViewChild, ElementRef, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Room, RoomEvent, RemoteTrack } from 'livekit-client';
+import { Room, RoomEvent, RemoteTrack, TrackEvent } from 'livekit-client';
 import { AuthService } from '@core/services/auth.service';
 import { SessionEndService } from '@core/services/session-end.service';
 import { SimulacionRuntimeService } from './simulacion-runtime.service';
@@ -119,6 +119,8 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  elapsedTime = signal('0:00'); 
  private room: Room | null = null; 
  private avatarIsSpeaking = false; 
+ private attachedAudioTrack: RemoteTrack | null = null;
+ private attachedVideoTrack: RemoteTrack | null = null;
  /** Verdadero si el navegador bloque el audio (politica de autoplay) y el usuario debe hacer clic. */   audioBlocked = signal(false); 
  /** Muestra una guía inicial para activar audio (solo al inicio). */   audioHintVisible = signal(false); 
  audioReady = signal(false); 
@@ -249,29 +251,18 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  this.room = new Room(); 
  this.room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => { 
  if (track.kind === 'video') { 
- videoEl.srcObject = new MediaStream([track.mediaStreamTrack]); 
+ this.attachRemoteVideo(track, videoEl);
  } 
  if (track.kind === 'audio') { 
- if (audioEl.srcObject) return; 
- if (track.mediaStreamTrack.muted) track.mediaStreamTrack.enabled = true; 
- const stream = new MediaStream([track.mediaStreamTrack]); 
- audioEl.srcObject = stream; 
- this.audioReady.set(true); 
- this.applyAudioVolume(); 
- // Intentar autoplay; si el navegador lo bloquea, mostramos el botón de activación.   this.audioBlocked.set(true); 
- audioEl.play().then(() => { 
- this.audioBlocked.set(false); 
- this.audioHintVisible.set(false); 
- }).catch(() => { 
- this.audioBlocked.set(true); 
- }); 
- setTimeout(() => { 
- if (audioEl.paused) { 
- this.audioBlocked.set(true); 
- } 
- }, 1500); 
+ this.attachRemoteAudio(track, audioEl);
  } 
  }); 
+ this.room.on(RoomEvent.AudioPlaybackStatusChanged, () => {
+ if (!this.audioReady()) return;
+ const canPlayback = this.room?.canPlaybackAudio ?? false;
+ this.audioBlocked.set(!canPlayback);
+ this.audioHintVisible.set(!canPlayback);
+ });
  this.room.on(RoomEvent.DataReceived, (payload: Uint8Array) => { 
  try { 
  const data = JSON.parse(new TextDecoder().decode(payload)); 
@@ -301,6 +292,7 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  }); 
  await this.room.connect(url, token); 
  await this.room.localParticipant.setMicrophoneEnabled(true); 
+ void this.tryStartRemoteAudio();
  this.sendCommandToAvatar('avatar.start_listening'); 
  this.turnIndicator.set('La entrevista comenzará en unos segundos...'); 
  } catch (err: unknown) {
@@ -315,16 +307,55 @@ export class SimulacionDetailComponent implements OnInit, OnDestroy {
  this.useLiveKit.set(false);
  }
  }
- onActivarAudio(): void { 
- const audioEl = this.avatarAudioRef?.nativeElement; 
- if (audioEl?.srcObject) { 
- this.muted.set(false); 
- this.applyAudioVolume(); 
- audioEl.play().then(() => this.audioBlocked.set(false)).catch(() => { 
- this.audioBlocked.set(true); 
- }); 
- this.audioHintVisible.set(false); 
- } 
+ private attachRemoteVideo(track: RemoteTrack, videoEl: HTMLVideoElement): void {
+ this.attachedVideoTrack?.detach(videoEl);
+ this.attachedVideoTrack = track;
+ track.attach(videoEl);
+ void videoEl.play().catch(() => undefined);
+ }
+ private attachRemoteAudio(track: RemoteTrack, audioEl: HTMLAudioElement): void {
+ this.attachedAudioTrack?.detach(audioEl);
+ this.attachedAudioTrack = track;
+ audioEl.autoplay = true;
+ audioEl.muted = false;
+ track.on(TrackEvent.AudioPlaybackStarted, () => {
+ this.audioBlocked.set(false);
+ this.audioHintVisible.set(false);
+ });
+ track.on(TrackEvent.AudioPlaybackFailed, () => {
+ this.audioBlocked.set(true);
+ this.audioHintVisible.set(true);
+ });
+ track.attach(audioEl);
+ this.audioReady.set(true);
+ this.audioBlocked.set(true);
+ this.audioHintVisible.set(true);
+ this.applyAudioVolume();
+ void this.tryStartRemoteAudio();
+ }
+ private async tryStartRemoteAudio(): Promise<void> {
+ const audioEl = this.avatarAudioRef?.nativeElement;
+ if (!audioEl) return;
+ this.applyAudioVolume();
+ let playbackStarted = false;
+ try {
+ await this.room?.startAudio();
+ playbackStarted = this.room?.canPlaybackAudio ?? true;
+ } catch {
+ playbackStarted = false;
+ }
+ try {
+ await audioEl.play();
+ playbackStarted = true;
+ } catch {
+ // El navegador puede exigir gesto del usuario; mantenemos visible el boton.
+ }
+ this.audioBlocked.set(!playbackStarted);
+ this.audioHintVisible.set(!playbackStarted);
+ }
+ onActivarAudio(): void {
+ this.muted.set(false);
+ void this.tryStartRemoteAudio();
  } 
  onVolumeChange(event: Event): void { 
  const target = event.target as HTMLInputElement | null; 
@@ -457,6 +488,12 @@ onPageHide(): void {
  this.stopTimer(); 
  this.stopHeartbeat(); 
  this.stopAudioRecording(false); 
+ const audioEl = this.avatarAudioRef?.nativeElement;
+ const videoEl = this.avatarVideoRef?.nativeElement;
+ if (audioEl && this.attachedAudioTrack) this.attachedAudioTrack.detach(audioEl);
+ if (videoEl && this.attachedVideoTrack) this.attachedVideoTrack.detach(videoEl);
+ this.attachedAudioTrack = null;
+ this.attachedVideoTrack = null;
  if (this.room) { 
  this.room.disconnect(); 
  this.room = null; 
@@ -748,7 +785,3 @@ onPageHide(): void {
  return 'webm'; 
  }
 }
-
-
-
-

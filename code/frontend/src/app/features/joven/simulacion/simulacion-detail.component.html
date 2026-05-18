@@ -212,7 +212,7 @@
               </div>
             </div>
 
-            @if (useLiveKit() && audioHintVisible()) {
+            @if (useLiveKit() && audioHintVisible() && audioBlocked()) {
               <div class="audio-hint">Activa el audio para escuchar la entrevista.</div>
             }
 
@@ -220,7 +220,7 @@
               @if (useLiveKit()) {
                 <div class="embed-wrap livekit-wrap">
                   <video #avatarVideo autoplay playsinline class="avatar-video"></video>
-                  <audio #avatarAudio autoplay playsinline muted></audio>
+                  <audio #avatarAudio autoplay playsinline [muted]="muted()"></audio>
                   @if (audioBlocked()) {
                     <button type="button" class="audio-unlock-btn" (click)="onActivarAudio()">
                       Haz clic para activar el audio
@@ -297,4 +297,3 @@
     }
   </div>
 </div>
-
