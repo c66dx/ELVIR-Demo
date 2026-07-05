@@ -66,6 +66,8 @@ class Settings(BaseSettings):
     LIVEAVATAR_CONTEXT_ID: str = ""
     LIVEAVATAR_API_BASE: str = "https://api.liveavatar.com/v1"
     LIVEAVATAR_WEBHOOK_SECRET: str = ""
+    # Idioma TTS del avatar en LiveAvatar (es | en). Default es para producción Teletón.
+    LIVEAVATAR_LANGUAGE: str = "es"
 
     # Prompt dinámico (endpoint externo)
     PROMPT_PROVIDER: str = "local"  # local | endpoint | script
@@ -140,6 +142,7 @@ class Settings(BaseSettings):
         self.LIVEAVATAR_AVATAR_ID = (self.LIVEAVATAR_AVATAR_ID or "").strip()
         self.LIVEAVATAR_VOICE_ID = (self.LIVEAVATAR_VOICE_ID or "").strip()
         self.LIVEAVATAR_API_BASE = (self.LIVEAVATAR_API_BASE or "").strip() or "https://api.liveavatar.com/v1"
+        self.LIVEAVATAR_LANGUAGE = (self.LIVEAVATAR_LANGUAGE or "es").strip().lower() or "es"
 
         if self.is_production and self.SECRET_KEY == "elvir-dev-secret-change-in-production":
             raise ValueError("SECRET_KEY por defecto no permitido en producción")

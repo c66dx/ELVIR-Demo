@@ -208,7 +208,7 @@ def start_liveavatar_session(
                     "mode": "FULL",
                     "avatar_id": avatar_id,
                     "avatar_persona": {
-                        "language": "es",
+                        "language": settings.LIVEAVATAR_LANGUAGE,
                         "voice_id": voice_id,
                         "context_id": context_id,
                     },
