@@ -1,7 +1,7 @@
-ruff==0.6.8
-black==24.8.0
-mypy==1.11.2
-pre-commit==3.8.0
-types-python-jose==3.3.4.20240106
-pytest==8.3.4
-pytest-cov==6.0.0
+ruff==0.15.15
+black==26.5.1
+mypy==2.1.0
+pre-commit==4.6.0
+types-python-jose==3.5.0.20260408
+pytest==9.0.3
+pytest-cov==7.1.0
